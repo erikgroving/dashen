@@ -6,6 +6,6 @@ Heuristic::Heuristic() {
 
 }
 
-bool Heuristic::compare( /* const State &s1, const State &s2 */) {
+bool Heuristic::operator()( /* const State &s1, const State &s2 */) {
     return /* ( heuristic(s1) - heuristic(s2) ) >= 0 */  false;
 }

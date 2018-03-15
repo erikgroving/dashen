@@ -3,7 +3,7 @@
 using SearchEngine::SearchClient;
 using SearchEngine::Strategy;
 
-SearchClient::SearchClient() {
+SearchClient::SearchClient(/* const State &initialState */ ) /* : initialState_(initialState) */ {
 
 }
 

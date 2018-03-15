@@ -7,12 +7,23 @@
 
 namespace SearchEngine {
 
+/**
+ *  \brief A search client is in charge of supervising the search algorithm.
+ */
 class SearchClient {
 
 public:
-    SearchClient(/* State initialState */);
+    /**
+     * \brief Creates the search client with the given initial state.
+     */
+    SearchClient(/*  const State &initialState */);
     
-    void search(Strategy &strategy);
+    /**
+     * Conduct a whole search with the given search strategy.
+     * \return a planning from the initial state to the goal state if one exists, 
+     *         otherwise an empty vector of State.
+     */
+    void /* std::vector<State> */ search(Strategy &strategy);
     
 private:
     // State initialState_;
