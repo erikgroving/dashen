@@ -1,3 +1,4 @@
+#include <string>
 #include "typedefs.h"
 
 namespace SearchClient {
@@ -8,7 +9,11 @@ namespace SearchClient {
             const Action action;
 
         public:
-            Command (Direction, Direction, Action);
-
+            Command (Direction d1);
+            Command (Direction d1, Direction d2, Action action);
+            std::string actionToString(Action a);
+            std::string dirToString(Direction a);
+            std::string toString();
+            std::string toActionString();         
     };
 }
