@@ -4,15 +4,17 @@
 #include <iostream>
 #include <vector>
 #include "typedefs.h"
-
 namespace SearchEngine {
     class State {
         private:
             std::vector<Box> boxes;                  
             std::vector<Agent> agents;
             std::vector<Goal> goals;
-            static std::vector < std::vector<StaticTile> > tiles;
-            std::vector < std::vector<NonStaticTile> > nsTiles;
+
+            static std::vector< std::vector<Goal> > goals;
+            static std::vector< std::vector<bool> > walls;
+
+
         public:
             bool isGoalState();
     };

@@ -39,20 +39,4 @@ typedef struct Goal {
 
 } Goal;
 
-typedef struct StaticTile {
-    Goal g;
-    bool wall;
-
-    StaticTile (Goal g, bool wall) : g(g), wall(wall) {}
-
-} StaticTile; 
-
-typedef struct NonStaticTile {
-    Agent a;
-    Box b;
-    bool free;
-
-    NonStaticTile(Agent a, Box b, bool free) : a(a), b(b), free(free) {}
-
-} NonStaticTile;
 #endif 
