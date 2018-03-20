@@ -1,3 +1,4 @@
+#include <string>
 #include "typedefs.h"
 
 #include <vector>
@@ -12,7 +13,7 @@ namespace SearchClient {
         public:
             Command (Direction, Direction, Action);
 
-            enum Action {
+            enum Operation {
                 /* No opeartion */
                 NoOperation,
 
@@ -52,9 +53,15 @@ namespace SearchClient {
                 Pull_SE
             };
 
-            static Command toCommand(Action action);
+            static Command toCommand(Operation action);
 
-            static std::vector<Action> possibleActions;
+            static std::vector<Operation> possibleActions;
+            Command (Direction d1);
+            Command (Direction d1, Direction d2, Action action);
+            std::string actionToString(Action a);
+            std::string dirToString(Direction a);
+            std::string toString();
+            std::string toActionString();         
     };
 }
 
