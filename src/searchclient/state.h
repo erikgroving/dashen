@@ -24,15 +24,12 @@ namespace SearchEngine {
 
             State makeChild();
 
-            std::vector<State> getExpandedNodes();
-            State makeChild();
+            std::vector<State> getExpandedNodes();            
+            std::vector<State> getExpandedNodes(int agentIndex);
+
             bool isFree(int x, int y);
             bool boxAt(int x, int y, int *boxIndex = 0);
 
-
-        public:
-            bool isGoalState();
-            std::vector<State> getExpandedNodes(int agentIndex);
     };
 };
 
