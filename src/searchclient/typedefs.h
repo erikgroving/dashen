@@ -1,3 +1,6 @@
+#ifndef TYPEDEFS_H
+#define TYPEDEFS_H
+
 enum class Color { BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
 
 typedef struct Coord {
@@ -52,3 +55,4 @@ typedef struct NonStaticTile {
     NonStaticTile(Agent a, Box b, bool free) : a(a), b(b), free(free) {}
 
 } NonStaticTile;
+#endif 
