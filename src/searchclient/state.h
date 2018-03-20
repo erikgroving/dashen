@@ -12,7 +12,10 @@ namespace SearchEngine {
             std::vector<Box> boxes;                  
             std::vector<Agent> agents;
             std::vector<Goal> goals;
+            static std::vector < std::vector<StaticTile> > tiles;
+            std::vector < std::vector<NonStaticTile> > nsTiles;
         public:
+            bool isGoalState();
     };
 };
 
