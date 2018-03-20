@@ -7,10 +7,13 @@ namespace SearchClient {
     class Client {
         private:
             std::vector<Command> jointAction;
-            
+            int actionsRecv;  
         public:
             Client();
 
+            SearchEngine::State initState();
+
+            void setAction(int, Command);
 
             void send();                 
     };
