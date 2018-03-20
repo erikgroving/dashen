@@ -39,14 +39,6 @@ namespace SearchEngine {
 
             State makeChild();
 
-<<<<<<< HEAD
-            std::vector<State> getExpandedNodes();            
-            std::vector<State> getExpandedNodes(int agentIndex);
-
-            bool isFree(int x, int y);
-            bool boxAt(int x, int y, int *boxIndex = 0);
-
-=======
             std::vector<State> getExpandedNodes();
             std::vector<State> extractPlan();
 
@@ -60,7 +52,6 @@ namespace SearchEngine {
         public:
             bool isGoalState();
             std::vector<State> getExpandedNodes(int agentIndex);
->>>>>>> f59798c79979c78ed9e189f3211c78b5dd7451b0
     };
 };
 
