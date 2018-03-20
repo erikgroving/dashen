@@ -25,7 +25,7 @@ public:
      * \return a planning from the initial state to the goal state if one exists, 
      *         otherwise an empty vector of State.
      */
-    std::vector<State> search(Strategy &strategy);
+    std::vector<State*> search(Strategy &strategy, int agentIndex);
     
 private:
     State initialState_;

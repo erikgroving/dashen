@@ -4,11 +4,12 @@
 
 using SearchClient::Client;
 using SearchEngine::State;
+using SearchEngine::Command;
 
 Client::Client() {
     jointAction = std::vector<Command>();
     actionsRecv = 0;
-    jointAction.resize(State().getNumAgents(), Command(E));
+    jointAction.resize(State().getNumAgents(), Command());
 }
 
 void Client::setAction(int agentId, Command command) {

@@ -1,4 +1,5 @@
 #include "command.h"
+#include <iostream>
 
 using SearchEngine::Command;
 
@@ -56,37 +57,47 @@ Command::Command(Action type, Direction dir1): action(type), d1(dir1), d2(NONE) 
 Command::Command(Action type, Direction dir1, Direction dir2) : 
     action(type), d1(dir1), d2(dir2) {}
 
-std::string Command::actionToString(Action a) {
+std::string Command::actionToString(Action a) const {
     return  a == MOVE ? "Move" : 
-            a == PUSH ? "Push" : "Pull";
+            a == PUSH ? "Push" : 
+            a == PULL ? "Pull" : "NONE";
 }
 
-std::string Command::dirToString(Direction d) {
+std::string Command::dirToString(Direction d) const {
     return  d == N ? "N" :
             d == E ? "E" :
-            d == S ? "S" : "W";
+            d == S ? "S" : 
+            d == W  ? "W" : "-";
 }
 
-std::string Command::toString() {
+std::string Command::toString() const {
     if (action == MOVE) {
         return actionToString(action) + "(" + dirToString(d1) + ")";
     }
-        return actionToString(action) + "(" + dirToString(d1) + "," + dirToString(d2) + ")";
+    return actionToString(action) + "(" + dirToString(d1) + "," + dirToString(d2) + ")";
 }
 
-std::string Command::toActionString() {
+std::string Command::toActionString() const {
     return "[" + toString() + "]";
 }
 
-int Command::directionToInt(Direction dir){
+int Command::colToInt(Direction dir) {
     switch(dir){
         case N:
-        case W:
             return -1;
         case S:
+            return 1;
+        default:
+            return 0;
+    }
+}
+int Command::rowToInt(Direction dir) {
+    switch(dir){
+        case W:
+            return -1;
         case E:
             return 1;
-        case NONE:
+        default:
             return 0;
     }
 }

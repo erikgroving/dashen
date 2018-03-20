@@ -6,6 +6,8 @@
 #include <string>
 #include <algorithm>
 #include "state.h"
+#include <iostream>
+#include <queue>
 
 namespace SearchEngine
 {
@@ -23,12 +25,12 @@ class Strategy
     /**
      * \return true if leaf has been already explored by the given strategy
      */
-    bool isExplored( const State &leaf ) const;
+    bool isExplored( State *leaf ) const;
 
     /**
      * Add leaf to the set of already explored states
      */
-    void addToExplored( const State &leaf );
+    void addToExplored( State *leaf );
     
     /**
      * \return number of leaves that have been already explored
@@ -38,12 +40,12 @@ class Strategy
     /**
      * \return The next leaf to analyse according to the strategy
      */
-    virtual State getAndRemoveLeaf() = 0;
+    virtual State* getAndRemoveLeaf() = 0;
 
     /**
      * \return true if leaf is already part of the frontier
      */
-    virtual bool inFrontier( const State &leaf ) const = 0;
+    virtual bool inFrontier( State *leaf ) const = 0;
     
     /**
      * \return true if the frontier is empty
@@ -53,7 +55,7 @@ class Strategy
     /**
      * Add leaf to the frontier
      */
-    virtual void addToFrontier( const State &leaf ) = 0;
+    virtual void addToFrontier( State *leaf ) = 0;
 
     /**
      * \return The current size of the frontier
@@ -66,12 +68,13 @@ class Strategy
     virtual std::string name() const = 0;
 
   private:
-     std::map<int, State> explored_;
+     std::vector<State*> explored_;
 };
 
 class StrategyBFS: public Strategy {
 
-    std::string name() {
+public:
+    std::string name() const {
       return "Strategy BFS";
     }  
 
@@ -79,32 +82,48 @@ class StrategyBFS: public Strategy {
       return queue.size();
     }
 
-    void addToFrontier(const State &state){
-      queue.push_back(state);
+    void addToFrontier(State *state){
+      std::cout << "===================" << std::endl;
+      std::cout << "Add to frontier" << std::endl;
+      queue.emplace_back(state);
+
+      State *check = *(queue.end() - 1);
+      if(check == check->getParent())
+        std::cout << ":(" << std::endl;
+      std::cout << "===================" << std::endl;
     }
 
     bool frontierIsEmpty() const {
       return queue.size() == 0;
     }
 
-    bool inFrontier(const State &state) const {
-      auto ite = std::find(queue.begin(), queue.end(), [this](State &s1, State &s2){
-        return s1 == s2;
-      });
+    bool inFrontier(State *state) const {
+      auto ite = std::find(queue.begin(), queue.end(), state);
 
       if(ite == queue.end())
         return false;
+
+      std::cout << "(In frontier)";
       return true;
     }
 
-    State getAndRemoveLeaf() {
-      State result = queue.front();
+    State* getAndRemoveLeaf() {
+      std::cout << "===================" << std::endl;
+      std::cout << "Get and remove leaf" << std::endl;
+
+      State *result = queue.at(0);
       queue.erase(queue.begin());
+      if(result == result->getParent())
+        std::cout << ":( :(" << std::endl;
+
+      std::cout << "===================" << std::endl;
+      
+
       return result;
     }
 
     private:
-      std::vector<State> queue; // TODO: Hash map to speed up the proess
+      std::vector<State*> queue; // TODO: Hash map to speed up the proess
 };
 };
 

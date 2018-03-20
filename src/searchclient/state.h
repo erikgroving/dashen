@@ -3,56 +3,86 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <utility>
 #include "typedefs.h"
 #include "command.h"
 
 namespace SearchEngine {
-    class State {
-        public:
-            std::vector<Box> boxes;                  
-            std::vector<Agent> agents;
-            //std::vector<Goal> goals;
 
-            Command action;
-            State *parent;
-            static std::vector< std::vector<Goal> > goals;
-            static std::vector< std::vector<bool> > walls;
+class State {
+public:
 
-            static int numAgents;
+    /* Constructors */
+    State();
+    ~State() {
+        for(State *child: children)
+            delete child;
+    }
+    State(const State &src);
+    State* makeChild();
 
-            bool operator==(State &compared) {
-                for(int i = 0; i < agents.size(); i++)
-                    if(compared.agents[i].loc != agents[i].loc)
-                        return false;
+    /* Operators */
+    bool operator==(const State &compared) const;
 
-                for(int i = 0; i < boxes.size(); i++)
-                    if(compared.boxes[i].loc != boxes[i].loc)
-                        return false;
+    /* Static public objects */
+    static std::vector<Goal> goals;
+    static std::vector< std::vector<bool> > walls;
+    static int numAgents;
+
+    /* Predicates */
+    bool isFree(int x, int y) const;
+    bool isGoalState();
+    bool boxAt(int x, int y, int *boxIndex = 0) const ;
+    bool goalAt(int x, int y, int *goalIndex = 0) const;
+    bool agentAt(int x, int y, int *agentIndex = 0) const;
 
 
-                return true;
-            }
+    /* Planning */
+    std::vector<State*> getExpandedNodes(int agentIndex);
+    std::vector<State*> extractPlan();
 
-        public:
-            bool isGoalState();
-            static int getNumAgents() { return numAgents; };
+    /* Getters */
+    State* getParent() { return parent; }
+    std::vector<Box>& getBoxes() { return boxes; }
+    std::vector<Agent>& getAgents()  { return agents; }
+    Command& getAction() { return action; }
 
-            State makeChild();
+    /* Setters */
+    void setParent(State &parentState) {
+        if(&parentState == this)
+            std::cout << "?????" << std::endl;
 
-            std::vector<State> getExpandedNodes();
-            std::vector<State> extractPlan();
+        parent = &parentState;
+    }
 
-            State makeChild();
-            bool isFree(int x, int y);
-            bool boxAt(int x, int y, int *boxIndex = 0);
+    void setBoxes(std::vector<Box> value) {
+        boxes = value;
+    }
 
-            State(State *parentState = 0);
-            State(const State &src);
+    void setAgents(std::vector<Agent> value) {
+        agents = value;
+    }
 
-        public:
-            bool isGoalState();
-            std::vector<State> getExpandedNodes(int agentIndex);
-    };
+    void setAction(Command command) {
+         action = command;
+    }
+
+    void addChildState(State *child) {
+        children.push_back(child);
+    }
+    int idx;
+
+private:
+
+    std::vector<Box> boxes;
+    std::vector<Agent> agents;
+
+    Command action;
+    State *parent;
+    std::vector<State*> children;
+};
+
 };
 
 #endif

@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -std=c++14
+CFLAGS= -std=c++14 -g
 SOURCE= src/*.cpp
 SEARCHCLIENTSOURCE = src/searchclient/*.cpp
 TEST= test/*.cpp

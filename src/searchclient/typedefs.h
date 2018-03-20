@@ -6,11 +6,11 @@ enum Direction { N, E, S, W, NONE};
 enum Action { MOVE, PUSH, PULL, NOOP };
 
 typedef struct Coord {
-    char x;
-    char y;
+    int x;
+    int y;
 
-    Coord(char x, char y) : x(x), y(y){}
-    bool operator!=(const Coord &c) {
+    Coord(int xCoord, int yCoord) : x(xCoord), y(yCoord){}
+    bool operator!=(const Coord &c) const {
         return c.x != x || c.y != y;
     }
 } Coord;

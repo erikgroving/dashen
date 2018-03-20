@@ -1,4 +1,5 @@
 #include "strategy.h"
+#include <iostream>
 
 using SearchEngine::Strategy;
 
@@ -6,22 +7,24 @@ Strategy::Strategy() {
 
 }
 
-void Strategy::addToExplored( const State &leaf ) {
-    explored_.insert( std::pair<int, State>(leaf.hash(), leaf));
+void Strategy::addToExplored( State *leaf ) {
+    std::cout << "===================" << std::endl;
+    std::cout << "Add to explored" << std::endl;
+    explored_.emplace_back( leaf );
+    std::cout << "===================" << std::endl;
 }
 
 std::size_t Strategy::countExplored() const {
     return  explored_.size();
 }
 
-bool Strategy::frontierIsEmpty() const {
-    return frontier_.isEmpty();
+bool Strategy::isExplored(State *leaf) const {
+    auto iterator = std::find(explored_.begin(), explored_.end(), leaf);
+    
+    if(iterator != explored_.end()) {
+        std::cout << "(Is explored)";
+        return true;
+    }
+    return false;
 }
 
-bool Strategy::isExplored(const State &leaf) const {
-    return exploredStates_.contains(leaf);
-}
-
-bool Strategy::inFrontier( const State &leaf ) const {
-    return frontier_.contains(leaf)  true;
-}

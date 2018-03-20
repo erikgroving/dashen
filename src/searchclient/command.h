@@ -1,3 +1,6 @@
+#ifndef SEARCHENGINE_COMMAND_H
+#define SEARCHENGINE_COMMAND_H
+
 #include <string>
 #include "typedefs.h"
 
@@ -10,8 +13,8 @@ namespace SearchEngine {
             Action action;
 
             Command(Action type = NOOP);
-            Command::Command(Action type, Direction dir1);
-            Command(Action , Direction, Direction);
+            Command(Action type, Direction dir1);
+            Command(Action type, Direction dir1, Direction dir2);
             Command(const Command &src);
 
             enum Operation {
@@ -57,14 +60,15 @@ namespace SearchEngine {
             static Command toCommand(Operation action);
 
             static std::vector<Command> possibleActions;
-            Command (Direction d1);
-            Command (Direction d1, Direction d2, Action action);
-            std::string actionToString(Action a);
-            std::string dirToString(Direction a);
-            std::string toString();
-            std::string toActionString();       
-            static int directionToInt(Direction dir);
-  
+            std::string actionToString(Action a) const;
+            std::string dirToString(Direction a) const ;
+            std::string toString() const;
+            std::string toActionString() const;       
+            static int colToInt(Direction dir);
+            static int rowToInt(Direction dir);
+
+
     };
 }
 
+#endif
