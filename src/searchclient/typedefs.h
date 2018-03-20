@@ -1,5 +1,4 @@
 enum class Color { BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
-//enum class Tile { WALL, BOX, AGENT, GOAL, NORMAL };
 
 typedef struct Coord {
     char x;
