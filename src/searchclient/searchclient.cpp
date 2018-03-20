@@ -27,12 +27,11 @@ std::vector<State> SearchClient::search(Strategy &strategy) {
         
         strategy.addToExplored(leaf);
         
-        /*
         for(State state: leaf.getExpandedNodes()) {
-            if(!strategy.isExplored(state) && !strategy.inFrontier(n)) {
+            if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {
                 strategy.addToFrontier(state);
             }
-        } */
+        } 
 
         iterations++;
     } 

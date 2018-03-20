@@ -3,6 +3,7 @@
 using SearchEngine::State;
 using SearchEngine::Command;
 
+State::State(State *parentState): parent(parentState) {}
 
 std::vector<State> State::getExpandedNodes(int agentIndex) {
     std::vector<State> result;
@@ -18,7 +19,7 @@ std::vector<State> State::getExpandedNodes(int agentIndex) {
             if( isFree(newAgentRow, newAgentCol) ) {
 
                 State childNode = makeChild();
-
+                childNode.action = cmd;
                 childNode.agents[agentIndex].loc.x = newAgentRow;
                 childNode.agents[agentIndex].loc.y = newAgentCol;
 
@@ -33,7 +34,7 @@ std::vector<State> State::getExpandedNodes(int agentIndex) {
 
                 if( isFree(newBoxRow, newBoxCol) ) {
                     State childNode = makeChild();
-
+                    childNode.action = cmd;
                     childNode.agents[agentIndex].loc.x = newAgentRow;
                     childNode.agents[agentIndex].loc.y = newAgentCol;
 
@@ -52,7 +53,7 @@ std::vector<State> State::getExpandedNodes(int agentIndex) {
 
                 if(boxAt(boxRow, boxCol, &boxIndex)) {
                     State childNode = makeChild();
-                    
+                    childNode.action = cmd;
                     childNode.agents[agentIndex].loc.x = newAgentRow;
                     childNode.agents[agentIndex].loc.y = newAgentCol;
 
@@ -70,12 +71,25 @@ std::vector<State> State::getExpandedNodes(int agentIndex) {
     return result;
 }
 
+std::vector<State> State::extractPlan() {
+    std::vector<State> result;
+    result.push_back(this);
+
+    State *parentState = parent;
+    while(parentState != 0) {
+        result.insert(result.begin(), *parentState);
+        parentState = (*parentState).parent;
+    }
+
+    return result;
+}
+
+State::State(const State &src): agents(src.agents), boxes(src.boxes) {}
 State State::makeChild() {
-    State child;
+    State child(this);
 
     child.agents = agents;
     child.boxes = boxes;
-    child.goals = goals;
 
     return child;
 }

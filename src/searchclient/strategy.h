@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <map>
 #include <string>
-
+#include <algorithm>
 #include "state.h"
 
 namespace SearchEngine
@@ -67,6 +67,44 @@ class Strategy
 
   private:
      std::map<int, State> explored_;
+};
+
+class StrategyBFS: public Strategy {
+
+    std::string name() {
+      return "Strategy BFS";
+    }  
+
+    std::size_t countFrontier() const {
+      return queue.size();
+    }
+
+    void addToFrontier(const State &state){
+      queue.push_back(state);
+    }
+
+    bool frontierIsEmpty() const {
+      return queue.size() == 0;
+    }
+
+    bool inFrontier(const State &state) const {
+      auto ite = std::find(queue.begin(), queue.end(), [this](State &s1, State &s2){
+        return s1 == s2;
+      });
+
+      if(ite == queue.end())
+        return false;
+      return true;
+    }
+
+    State getAndRemoveLeaf() {
+      State result = queue.front();
+      queue.erase(queue.begin());
+      return result;
+    }
+
+    private:
+      std::vector<State> queue; // TODO: Hash map to speed up the proess
 };
 };
 

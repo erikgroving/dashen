@@ -10,6 +10,9 @@ typedef struct Coord {
     char y;
 
     Coord(char x, char y) : x(x), y(y){}
+    bool operator!=(const Coord &c) {
+        return c.x != x || c.y != y;
+    }
 } Coord;
 
 typedef struct Box {
