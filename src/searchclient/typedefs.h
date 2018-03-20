@@ -2,8 +2,8 @@
 #define TYPEDEFS_H
 
 enum Color { BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
-enum Direction { N, E, S, W};
-enum Action { MOVE, PUSH, PULL };
+enum Direction { N, E, S, W, NONE};
+enum Action { MOVE, PUSH, PULL, NOOP };
 
 typedef struct Coord {
     char x;
