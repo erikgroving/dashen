@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include "typedefs.h"
+#include "command.h"
+
 namespace SearchEngine {
     class State {
         private:
@@ -14,9 +16,10 @@ namespace SearchEngine {
             static std::vector< std::vector<Goal> > goals;
             static std::vector< std::vector<bool> > walls;
 
-
+            State makeChild();
         public:
             bool isGoalState();
+            std::vector<State> getExpandedNodes();
     };
 };
 

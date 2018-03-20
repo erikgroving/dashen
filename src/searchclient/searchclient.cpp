@@ -2,30 +2,33 @@
 
 using SearchEngine::SearchClient;
 using SearchEngine::Strategy;
+using SearchEngine::State;
 
-SearchClient::SearchClient(/* const State &initialState */ ) /* : initialState_(initialState) */ {
-
+SearchClient::SearchClient(const State &initialState): initialState_(initialState) {
+    
 }
 
-void /* std::vector<State> */ SearchClient::search(Strategy &strategy) {
+std::vector<State> SearchClient::search(Strategy &strategy) {
     
     std::cerr << "The search is conducted with the Strategy " << strategy.name() << std::endl;
 
     int iterations = 0;
-    strategy.addToFrontier(/* initialState_ */);
+    strategy.addToFrontier(initialState_);
+
     while(true) {
 
         if(strategy.frontierIsEmpty())
-            return /* std::vector<State>() */;
+            return std::vector<State>();
 
-        /* State leaf = */ strategy.getAndRemoveLeaf();
-        /*
+        State leaf = strategy.getAndRemoveLeaf();
+        
         if(leaf.isGoalState())
             return leaf.extractPlan();
-        */
-        strategy.addToExplored(/* leaf */);
         
-        /* for(State state: leaf.getExpandedNodes()) {
+        strategy.addToExplored(leaf);
+        
+        /*
+        for(State state: leaf.getExpandedNodes()) {
             if(!strategy.isExplored(state) && !strategy.inFrontier(n)) {
                 strategy.addToFrontier(state);
             }

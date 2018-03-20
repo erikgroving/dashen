@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+#include "state.h"
+
 namespace SearchEngine
 {
 
@@ -21,12 +23,12 @@ class Strategy
     /**
      * \return true if leaf has been already explored by the given strategy
      */
-    bool isExplored(/* State leaf */) const;
+    bool isExplored( const State &leaf ) const;
 
     /**
      * Add leaf to the set of already explored states
      */
-    void addToExplored(/* State leaf */);
+    void addToExplored( const State &leaf );
     
     /**
      * \return number of leaves that have been already explored
@@ -36,12 +38,12 @@ class Strategy
     /**
      * \return The next leaf to analyse according to the strategy
      */
-    virtual void /* State */ getAndRemoveLeaf() = 0;
+    virtual State getAndRemoveLeaf() = 0;
 
     /**
      * \return true if leaf is already part of the frontier
      */
-    virtual bool inFrontier(/* State leaf */) const = 0;
+    virtual bool inFrontier( const State &leaf ) const = 0;
     
     /**
      * \return true if the frontier is empty
@@ -51,7 +53,7 @@ class Strategy
     /**
      * Add leaf to the frontier
      */
-    virtual void addToFrontier(/* State leaf */) = 0;
+    virtual void addToFrontier( const State &leaf ) = 0;
 
     /**
      * \return The current size of the frontier
@@ -64,7 +66,7 @@ class Strategy
     virtual std::string name() const = 0;
 
   private:
-    // std::map<int, State> explored_;
+     std::map<int, State> explored_;
 };
 };
 

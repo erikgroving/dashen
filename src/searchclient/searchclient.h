@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <iostream>
+
 #include "strategy.h"
+#include "state.h"
 
 namespace SearchEngine {
 
@@ -16,17 +18,17 @@ public:
     /**
      * \brief Creates the search client with the given initial state.
      */
-    SearchClient(/*  const State &initialState */);
+    SearchClient( const State &initialState );
     
     /**
      * Conduct a whole search with the given search strategy.
      * \return a planning from the initial state to the goal state if one exists, 
      *         otherwise an empty vector of State.
      */
-    void /* std::vector<State> */ search(Strategy &strategy);
+    std::vector<State> search(Strategy &strategy);
     
 private:
-    // State initialState_;
+    State initialState_;
 };
 
 };
