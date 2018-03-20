@@ -3,15 +3,16 @@
 
 #include <vector>
 
-namespace SearchClient {
-    class Command {
-        private:
-            const Direction d1;
-            const Direction d2;
-            const Action action;
+namespace SearchEngine {
+    struct Command {
+            Direction d1;
+            Direction d2;
+            Action action;
 
-        public:
-            Command (Direction, Direction, Action);
+            Command(Action type = NOOP);
+            Command::Command(Action type, Direction dir1);
+            Command(Action , Direction, Direction);
+            Command(const Command &src);
 
             enum Operation {
                 /* No opeartion */
@@ -55,13 +56,15 @@ namespace SearchClient {
 
             static Command toCommand(Operation action);
 
-            static std::vector<Operation> possibleActions;
+            static std::vector<Command> possibleActions;
             Command (Direction d1);
             Command (Direction d1, Direction d2, Action action);
             std::string actionToString(Action a);
             std::string dirToString(Direction a);
             std::string toString();
-            std::string toActionString();         
+            std::string toActionString();       
+            static int directionToInt(Direction dir);
+  
     };
 }
 
