@@ -9,14 +9,16 @@ namespace SearchEngine {
         private:
             std::vector<Box> boxes;                  
             std::vector<Agent> agents;
-            std::vector<Goal> goals;
+            //std::vector<Goal> goals;
 
             static std::vector< std::vector<Goal> > goals;
             static std::vector< std::vector<bool> > walls;
 
+            static int numAgents;
 
         public:
             bool isGoalState();
+            static int getNumAgents() { return numAgents; };
     };
 };
 
