@@ -52,6 +52,8 @@ public:
     Command& getAction() { return action; }
     const Command& getAction() const { return action; }
 
+    unsigned long getPathCost() const { return pathCost; }
+
     /* Setters */
     void setParent(State &parentState) {
         /*
@@ -68,12 +70,15 @@ public:
 
 private:
 
+    State *parent;
+    std::vector<State*> children;
+    unsigned long pathCost;
+
     std::vector<Box> boxes;
     std::vector<Agent> agents;
 
     Command action;
-    State *parent;
-    std::vector<State*> children;
+
 };
 
 };

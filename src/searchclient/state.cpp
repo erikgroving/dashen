@@ -9,7 +9,8 @@ std::vector<std::vector<bool>> State::walls = std::vector< std::vector<bool> >()
 std::vector<Goal> State::goals = std::vector< Goal >();
 int State::numAgents = 0;
 
-State::State(): parent(0), children(),  agents(), boxes(), action() {
+State::State(): parent(0), children(), pathCost(0),
+    agents(), boxes(), action() {
 
 }
 

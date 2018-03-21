@@ -11,6 +11,7 @@ void Strategy::addToExplored( State *leaf ) {
     std::cout << "===================" << std::endl;
     std::cout << "Add to explored" << std::endl;
     explored_.emplace_back( leaf );
+    exploredMap_.insert({leaf, 0});
     std::cout << "===================" << std::endl;
 }
 

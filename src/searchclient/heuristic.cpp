@@ -6,6 +6,6 @@ Heuristic::Heuristic() {
 
 }
 
-bool Heuristic::operator()( /* const State &s1, const State &s2 */) {
-    return /* ( heuristic(s1) - heuristic(s2) ) >= 0 */  false;
+bool Heuristic::operator()(const SearchEngine::State *s1, const SearchEngine::State *s2) {
+    return ( heuristic(s1) - heuristic(s2) ) >= 0;
 }

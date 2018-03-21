@@ -3,6 +3,8 @@
 
 #include <string>
 #include <queue>
+#include "state.h"
+
 namespace SearchEngine {
 
 /**
@@ -25,12 +27,12 @@ public:
      * 
      * \return true if s2 has a greater heuristic value than s1
      */
-    bool operator()(/* const State &s1, const State &s2 */);
+    bool operator()(const State *s1, const State *s2);
 
     /**
      * \return The heuristic value of state 
      */
-    virtual int heuristic(/* const State state */) = 0;
+    virtual unsigned long heuristic(const State *state) = 0;
 
     /**
      *  \return String representation of the Heuristic object

@@ -8,6 +8,7 @@
 #include "state.h"
 #include <iostream>
 #include <queue>
+#include <unordered_map>
 
 namespace SearchEngine
 {
@@ -69,62 +70,9 @@ class Strategy
 
   private:
      std::vector<State*> explored_;
+     std::unordered_map<State*, int> exploredMap_;
 };
 
-class StrategyBFS: public Strategy {
-
-public:
-    std::string name() const {
-      return "Strategy BFS";
-    }  
-
-    std::size_t countFrontier() const {
-      return queue.size();
-    }
-
-    void addToFrontier(State *state){
-      std::cout << "===================" << std::endl;
-      std::cout << "Add to frontier" << std::endl;
-      queue.emplace_back(state);
-
-      State *check = *(queue.end() - 1);
-      if(check == check->getParent())
-        std::cout << ":(" << std::endl;
-      std::cout << "===================" << std::endl;
-    }
-
-    bool frontierIsEmpty() const {
-      return queue.size() == 0;
-    }
-
-    bool inFrontier(State *state) const {
-      auto ite = std::find(queue.begin(), queue.end(), state);
-
-      if(ite == queue.end())
-        return false;
-
-      std::cout << "(In frontier)";
-      return true;
-    }
-
-    State* getAndRemoveLeaf() {
-      std::cout << "===================" << std::endl;
-      std::cout << "Get and remove leaf" << std::endl;
-
-      State *result = queue.at(0);
-      queue.erase(queue.begin());
-      if(result == result->getParent())
-        std::cout << ":( :(" << std::endl;
-
-      std::cout << "===================" << std::endl;
-      
-
-      return result;
-    }
-
-    private:
-      std::vector<State*> queue; // TODO: Hash map to speed up the proess
-};
-};
+}
 
 #endif
