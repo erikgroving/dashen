@@ -3,15 +3,14 @@
 
 using SearchEngine::State;
 using SearchEngine::Command;
+using namespace SearchEngine::Predicate;
 
-static int id = 0;
 std::vector<std::vector<bool>> State::walls = std::vector< std::vector<bool> >();
 std::vector<Goal> State::goals = std::vector< Goal >();
 int State::numAgents = 0;
 
 State::State(): parent(0), children(),  agents(), boxes(), action() {
-    std::cout << "State with no parent";
-    idx = id++;
+
 }
 
 std::vector<State*> State::getExpandedNodes(int agentIndex) {
@@ -21,13 +20,16 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
     for(const Command &cmd: Command::possibleActions) {
         // std::cout << cmd.toString() << std::endl;
-         int newAgentRow = agt.loc.x + Command::rowToInt(cmd.d1);
-         int newAgentCol = agt.loc.y + Command::colToInt(cmd.d1);
+        int newAgentRow = agt.loc.x + Command::rowToInt(cmd.d1);
+        int newAgentCol = agt.loc.y + Command::colToInt(cmd.d1);
         
+        if(!inBound(this, newAgentRow, newAgentCol))
+            continue;
+
         if(cmd.action == Action::MOVE) {
             std::cout << "Agent could move to (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
-            if( isFree(newAgentRow, newAgentCol) ) {
+            if( isFree(this, newAgentRow, newAgentCol) ) {
 
                 State *childNode = makeChild();
                 childNode->setAction(cmd);
@@ -46,11 +48,11 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
             std::cout << "Agent could push box at (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
             int boxIndex;
-            if( boxAt(newAgentRow, newAgentCol, &boxIndex) ) {
+            if( boxAt(this, newAgentRow, newAgentCol, &boxIndex) ) {
                 int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2);
                 int newBoxCol = newAgentCol + Command::colToInt(cmd.d2);
 
-                if( isFree(newBoxRow, newBoxCol) ) {
+                if( isFree(this, newBoxRow, newBoxCol) ) {
                     State *childNode = makeChild();
 
                     childNode->setAction(cmd);
@@ -72,11 +74,11 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
         }
         else if( cmd.action == Action::PULL ) {
             int boxIndex;
-            if( isFree(newAgentRow, newAgentCol)) {
+            if( isFree(this, newAgentRow, newAgentCol)) {
                 int boxRow = agt.loc.x + Command::rowToInt(cmd.d2);
                 int boxCol = agt.loc.y + Command::colToInt(cmd.d2);
 
-                if(boxAt(boxRow, boxCol, &boxIndex)) {
+                if(boxAt(this, boxRow, boxCol, &boxIndex)) {
                     State *childNode = makeChild();
                     childNode->setAction(cmd);
                     childNode->getAgents()[agentIndex].loc.x = newAgentRow;
@@ -119,13 +121,8 @@ std::vector<State*> State::extractPlan() {
     return result;
 }
 
-State::State(const State &src): agents(src.agents), boxes(src.boxes), action(src.action) {
-    std::cout << "Copy from " << src.idx << std::endl;
-    setParent(*src.parent);
+State::State(const State &src): agents(src.agents), boxes(src.boxes), action(src.action), parent(src.parent) {
 
-    if(this == parent)
-        std::cout << "I am my own parent --" << std::endl;
-    idx = id++;
 }
 
 bool State::operator==(const SearchEngine::State &compared) const {
@@ -142,27 +139,6 @@ bool State::operator==(const SearchEngine::State &compared) const {
     return true;
 }
 
-bool State::isGoalState() {
-    for(const Box &box: boxes) {
-
-        auto goals = State::goals;
-        auto ite = std::find_if(goals.begin(), goals.end(), [box](const Goal &goal) {
-            if(goal.letter != box.letter)
-                return false;
-
-            if(box.loc.x != goal.loc.x || box.loc.y != goal.loc.y)
-                return false;
-
-            return true;
-        });
-
-
-        if(ite == goals.end())
-            return false;
-    }
-    return true;
-}
-
 State *State::makeChild() {
     State *child = new State();
 
@@ -175,52 +151,3 @@ State *State::makeChild() {
     return child;
 }
 
-bool State::isFree(int x, int y) const{
-    if(x >= State::walls.size() || y >= State::walls[x].size() )
-        return false;
-
-    return !agentAt(x, y) && !boxAt(x, y) && !walls[x][y];
-}
-
-bool State::boxAt(int x, int y, int *boxIndex) const{
-    for(int i = 0; i < boxes.size(); i++ ){
-        if ((boxes[i].loc.x == x ) && (boxes[i].loc.y == y )) {
-            if(boxIndex > 0)
-                *boxIndex = i;
-            return true;
-        }
-    }
-
-    if(boxIndex > 0)
-        *boxIndex = -1;
-    return false;
-}
-
- bool State::goalAt(int x, int y, int *goalIndex) const {
-     for(int i = 0; i < State::goals.size(); i++ ){
-         if ((State::goals[i].loc.x == x ) && (State::goals[i].loc.y == y )) {
-             if(goalIndex > 0)
-                *goalIndex = i;
-             return true;
-         }  
-     }
-
-     if(goalIndex > 0)
-        *goalIndex = -1;
-     return false;
- }
-
-
-bool State::agentAt(int x, int y, int *agentIndex) const {
-    for(int i = 0; i < agents.size(); i++ ){
-         if ((agents[i].loc.x == x ) && (agents[i].loc.y == y )) {
-             if(agentIndex > 0)
-                *agentIndex = i;
-             return true;
-         }  
-     }
-
-     if(agentIndex > 0)
-        *agentIndex = -1;
-     return false;
-}

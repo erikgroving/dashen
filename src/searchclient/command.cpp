@@ -45,13 +45,6 @@ std::vector<Command> Command::possibleActions = std::vector<Command>{
 
 Command::Command(const Command &src): d1(src.d1), d2(src.d2), action(src.action) {}
 
-Command Command::toCommand(Command::Operation action) {
-    switch(action) {
-        default:
-            return Command();
-    }
-}
-
 Command::Command(Action type): action(type), d1(NONE), d2(NONE) {}
 Command::Command(Action type, Direction dir1): action(type), d1(dir1), d2(NONE) {}
 Command::Command(Action type, Direction dir1, Direction dir2) : 

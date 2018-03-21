@@ -23,7 +23,15 @@ typedef struct Box {
     Box(Color color, char letter, Coord loc) :  color(color),
                                                 letter(letter),
                                                 loc(loc) {}
-    
+    bool operator==(const Box &compared) const {
+        if(compared.letter != letter)
+            return false;
+
+        if(compared.color != color)
+            return false;
+
+        return compared.loc != loc;
+    }
 } Box;
 
 typedef struct Agent {

@@ -7,6 +7,7 @@
 #include <utility>
 #include "typedefs.h"
 #include "command.h"
+#include "predicate.h"
 
 namespace SearchEngine {
 
@@ -31,11 +32,7 @@ public:
     static int numAgents;
 
     /* Predicates */
-    bool isFree(int x, int y) const;
-    bool isGoalState();
-    bool boxAt(int x, int y, int *boxIndex = 0) const ;
-    bool goalAt(int x, int y, int *goalIndex = 0) const;
-    bool agentAt(int x, int y, int *agentIndex = 0) const;
+
 
 
     /* Planning */
@@ -43,35 +40,31 @@ public:
     std::vector<State*> extractPlan();
 
     /* Getters */
-    State* getParent() { return parent; }
+    State* getParent() const { return parent; }
+    const State* getParent() { return parent; }
+
     std::vector<Box>& getBoxes() { return boxes; }
-    std::vector<Agent>& getAgents()  { return agents; }
+    const std::vector<Box>& getBoxes() const { return boxes; }
+
+    std::vector<Agent>& getAgents() { return agents; }
+    const std::vector<Agent>& getAgents() const { return agents; }
+
     Command& getAction() { return action; }
+    const Command& getAction() const { return action; }
 
     /* Setters */
     void setParent(State &parentState) {
+        /*
         if(&parentState == this)
             std::cout << "?????" << std::endl;
-
+        */
         parent = &parentState;
     }
 
-    void setBoxes(std::vector<Box> value) {
-        boxes = value;
-    }
-
-    void setAgents(std::vector<Agent> value) {
-        agents = value;
-    }
-
-    void setAction(Command command) {
-         action = command;
-    }
-
-    void addChildState(State *child) {
-        children.push_back(child);
-    }
-    int idx;
+    void setBoxes(std::vector<Box> value) { boxes = value; }
+    void setAgents(std::vector<Agent> value) { agents = value;}
+    void setAction(Command command) { action = command; }
+    void addChildState(State *child) { children.push_back(child); }
 
 private:
 

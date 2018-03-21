@@ -6,6 +6,7 @@
 
 #include "strategy.h"
 #include "state.h"
+#include "predicate.h"
 
 namespace SearchEngine {
 

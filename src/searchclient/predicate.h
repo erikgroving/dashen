@@ -1,0 +1,66 @@
+#ifndef PREDICATE_H
+#define PREDICATE_H
+
+#include "state.h"
+#include <algorithm>
+
+namespace SearchEngine {
+
+class State;
+// Namespace SearchEngine::Predicate
+namespace Predicate
+{
+    /**
+     * Check if the tile at coordinates (x, y) is free.
+     * A tile is free if neither an agent, a box nor a wall is on it.
+     * \return true if tile at (x,y) is free in state input.
+     */
+    bool isFree(const SearchEngine::State *input, int x, int y);
+
+    /**
+     * Check if input is a goal state. A state is the goal state if all the boxes are placed on their respective goal.
+     * \return true if all the boxes are on their respective goals in state input.
+     */
+    bool isGoalState(const SearchEngine::State *input);
+
+    /**
+     * Check if there is a box on tile (x, y).
+     * boxIndex's purpose is to contain the box index that can be used to retrieve
+     * the box found on (x, y). For instance:
+     *
+     *     State state;
+     *     // ...
+     *     int boxIndex;
+     *     if( Predicate::boxAt(state, x, y, &boxIndex) ) {
+     *       Box myBox = state.getBoxes()[boxIndex];
+     *       std::cout << "Found box with color " << myBox.color << std::endl;
+     *     }
+     * \return true if there is a box on tile (x, y) in state input.
+     */
+    bool boxAt(const SearchEngine::State *input, int x, int y, int *boxIndex = 0) ;
+
+    /**
+     * goalIndex serves like boxIndex in Predicate::boxAt.
+     * \return true if there is a goal on tile (x, y) in state input.
+     */
+    bool goalAt(const SearchEngine::State *input, int x, int y, int *goalIndex = 0);
+
+    /**
+     * agentIndex serves like boxIndex in Predicate::boxAt.
+     * \return true if there is an agent on tile (x, y) in state input.
+     */
+    bool agentAt(const SearchEngine::State *input, int x, int y, int *agentIndex = 0);
+
+    bool boxOnGoal(const SearchEngine::State *input, const Box &box);
+
+    /**
+     * \return true if (x, y) is a valid coordinate for state input.
+     */
+    bool inBound(const SearchEngine::State *input, int x, int y);
+};
+
+
+}
+
+
+#endif // PREDICATE_H

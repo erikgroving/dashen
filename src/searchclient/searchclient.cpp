@@ -5,19 +5,20 @@
 using SearchEngine::SearchClient;
 using SearchEngine::Strategy;
 using SearchEngine::State;
+using namespace SearchEngine::Predicate;
 
 
-void printMap(SearchEngine::State &state, int height, int width) {
+void printMap(const State *state, int height, int width) {
     for(int i = 0; i < height; i++) {
         for(int j = 0; j < width; j++) {
             int index;
-            if(SearchEngine::State::walls[i][j])
+            if(State::walls[i][j])
                 std::cout << "+"; 
-            else if(state.boxAt(j, i, &index))
-                std::cout << state.getBoxes()[index].letter;
-            else if(state.agentAt(j, i, &index))
-                std::cout << state.getAgents()[index].num;
-            else if(state.goalAt(j, i, &index))
+            else if(agentAt(state, j, i, &index))
+                std::cout << state->getAgents()[index].num;
+            else if(boxAt(state, j, i, &index))
+                std::cout << state->getBoxes()[index].letter;
+            else if(goalAt(state, j, i, &index))
                 std::cout << SearchEngine::State::goals[index].letter;
             else
                 std::cout << " ";
@@ -50,9 +51,9 @@ std::vector<State*> SearchClient::search(Strategy &strategy, int agentIndex) {
             std::cout << " - Parent action: " << leaf->getParent()->getAction().toString();
         std::cout << std::endl;
 
-        printMap(*leaf, State::walls.size(), State::walls[0].size());
+        printMap(leaf, State::walls.size(), State::walls[0].size());
         
-        if(leaf->isGoalState()) {
+        if(isGoalState(leaf)) {
             return leaf->extractPlan();
         }
         
@@ -64,6 +65,7 @@ std::vector<State*> SearchClient::search(Strategy &strategy, int agentIndex) {
         std::cout << "getExpendedNodes" << std::endl;
         auto vector  = leaf->getExpandedNodes(agentIndex);
         std::cout << "===================" << std::endl;
+
         for(State *state: vector) {
             std::cout << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString();
             if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {

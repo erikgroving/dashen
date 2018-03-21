@@ -9,13 +9,13 @@ using SearchEngine::Command;
 Client::Client() {
     jointAction = std::vector<Command>();
     actionsRecv = 0;
-    jointAction.resize(State().getNumAgents(), Command());
+    jointAction.resize(State::numAgents, Command());
 }
 
 void Client::setAction(int agentId, Command command) {
     jointAction[agentId] = command;
     actionsRecv++;
-    if (actionsRecv == State().getNumAgents()) {
+    if (actionsRecv == State::numAgents) {
         send();
         actionsRecv = 0;
     }
@@ -56,13 +56,17 @@ State Client::initState() {
                 Color color = RED;
                 int num = 0; // TODO convert s[i] to integer
                 Agent agent = Agent(color, num, currCoord);
-                state.agents.push_back(agent);
+                state.getAgents().push_back(agent);
             }
 
 
         }
-        state.walls.push_back(lineWall);
-        state.goals.push_back(lineGoal);
+        State::walls.push_back(lineWall);
+
+        // For later ?
+        // State::goals.push_back(lineGoal);
+        for(const Goal &goal: lineGoal)
+            State::goals.push_back(goal);
         row++;
     }    
 }

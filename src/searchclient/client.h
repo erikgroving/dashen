@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "command.h"
 #include "state.h"
 #include "typedefs.h"
