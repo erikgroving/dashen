@@ -1,5 +1,5 @@
-#ifndef STRATEGYBFS_H
-#define STRATEGYBFS_H
+#ifndef STRATEGY_STRATEGYBFS_H
+#define STRATEGY_STRATEGYBFS_H
 
 #include "../searchclient/strategy.h"
 

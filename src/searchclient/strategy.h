@@ -5,14 +5,16 @@
 #include <map>
 #include <string>
 #include <algorithm>
-#include "state.h"
 #include <iostream>
 #include <queue>
 #include <unordered_map>
 
+#include "state.h"
+
 namespace SearchEngine
 {
 
+class State;
 /**
  * Abstract class representing a given search strategy. All the methods about the explored
  * states are provided and one only needs to override the methods conserning the frontier.

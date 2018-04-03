@@ -1,8 +1,10 @@
 #include "state.h"
 #include <iostream>
+#include "predicate.h"
 
 using SearchEngine::State;
 using SearchEngine::Command;
+
 using namespace SearchEngine::Predicate;
 
 std::vector<std::vector<bool>> State::walls = std::vector< std::vector<bool> >();
@@ -17,7 +19,7 @@ State::State(): parent(0), children(), pathCost(0),
 std::vector<State*> State::getExpandedNodes(int agentIndex) {
     std::vector<State*> result;
     
-    Agent &agt = agents[agentIndex];
+    AgentDescription &agt = agents[agentIndex];
 
     for(const Command &cmd: Command::possibleActions) {
         // std::cerr << cmd.toString() << std::endl;

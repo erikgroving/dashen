@@ -1,7 +1,7 @@
 #include "client.h"
 #include "state.h"
 #include "typedefs.h"
-
+#include "agent.h"
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -12,6 +12,7 @@
 using SearchClient::Client;
 using SearchEngine::State;
 using SearchEngine::Command;
+using SearchEngine::Agent;
 
 
 Client::Client() {
@@ -49,6 +50,7 @@ State Client::initState() {
         size_t colonPosition = s.find(':');
         if(colonPosition != std::string::npos) {
             std::string sColor(s, 0, colonPosition);
+<<<<<<< 4ad3e366ddb6dc4d7ebaaeae7bde0ce4dd99f2b3
             std::string sElements(s, colonPosition + 1);
             std::string token;
 
@@ -60,6 +62,17 @@ State Client::initState() {
             while (std::getline(iss, token, ',')) {
                 char id = token[0];
                 mapping.insert(std::make_pair(id, currColor));
+=======
+            //std::string sElements = s.substring(s, colonPosition);
+
+            std::regex nonlevelRegex("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$");
+            std::smatch stringMatch;
+            std::regex_match(s, stringMatch, nonlevelRegex);
+
+            //std::string lineColor = stringMatch[0];
+            for (unsigned i=0; i<stringMatch.size(); ++i) {
+                std::cerr << stringMatch[i] << std::endl;
+>>>>>>> Fix things
             }
         }
 
@@ -89,6 +102,7 @@ State Client::initState() {
                 }
                 
                 // set agent(s)' position
+<<<<<<< 4ad3e366ddb6dc4d7ebaaeae7bde0ce4dd99f2b3
                 if (s[i]>= '0' && s[i]<='9') {
                     Color color = BLUE;
                     if (mapping.find(s[i]) != mapping.end()) {
@@ -96,6 +110,12 @@ State Client::initState() {
                     }
                     int num = s[i] - '0'; 
                     Agent agent = Agent(color, num, currCoord);
+=======
+                if (s[i]>= 'A' && s[i]<='Z') {
+                    Color color = RED;
+                    int num = 0; // TODO convert s[i] to integer
+                    AgentDescription agent{color, num, currCoord};
+>>>>>>> Fix things
                     state.getAgents().push_back(agent);
                     numAgents++;
                 }

@@ -1,5 +1,5 @@
-#ifndef GREEDYHEURISTIC_H
-#define GREEDYHEURISTIC_H
+#ifndef HEURISTICS_GREEDYHEURISTIC_H
+#define HEURISTICS_GREEDYHEURISTIC_H
 
 #include "../searchclient/heuristic.h"
 

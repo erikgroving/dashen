@@ -1,5 +1,5 @@
-#ifndef STRATEGYASTAR_H
-#define STRATEGYASTAR_H
+#ifndef STRATEGY_STRATEGYASTAR_H
+#define STRATEGY_STRATEGYASTAR_H
 
 #include "../searchclient/strategy.h"
 #include "../searchclient/heuristic.h"

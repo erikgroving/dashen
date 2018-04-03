@@ -5,9 +5,9 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+
 #include "typedefs.h"
 #include "command.h"
-#include "predicate.h"
 
 namespace SearchEngine {
 
@@ -46,8 +46,8 @@ public:
     std::vector<Box>& getBoxes() { return boxes; }
     const std::vector<Box>& getBoxes() const { return boxes; }
 
-    std::vector<Agent>& getAgents() { return agents; }
-    const std::vector<Agent>& getAgents() const { return agents; }
+    std::vector<AgentDescription>& getAgents() { return agents; }
+    const std::vector<AgentDescription>& getAgents() const { return agents; }
 
     Command& getAction() { return action; }
     const Command& getAction() const { return action; }
@@ -65,7 +65,7 @@ public:
     }
 
     void setBoxes(std::vector<Box> value) { boxes = value; }
-    void setAgents(std::vector<Agent> value) { agents = value;}
+    void setAgents(std::vector<AgentDescription> value) { agents = value;}
     void setAction(Command command) { action = command; }
     void addChildState(State *child) { children.push_back(child); }
 
@@ -76,12 +76,12 @@ private:
     unsigned long pathCost;
 
     std::vector<Box> boxes;
-    std::vector<Agent> agents;
+    std::vector<AgentDescription> agents;
 
     Command action;
 
 };
 
-};
+}
 
 #endif

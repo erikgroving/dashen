@@ -46,4 +46,11 @@ typedef struct Goal {
 
 } Goal;
 
+struct AgentDescription
+{
+    Color color;
+    char num;
+    Coord loc;
+};
+
 #endif 

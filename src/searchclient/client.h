@@ -1,3 +1,6 @@
+#ifndef SEARCHENGINE_CLIENT_H
+#define SEARCHENGINE_CLIENT_H
+
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -23,3 +26,5 @@ namespace SearchClient {
             void send();                 
     };
 }
+
+#endif

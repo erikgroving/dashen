@@ -1,5 +1,5 @@
-#ifndef STRATEGYGREEDY_H
-#define STRATEGYGREEDY_H
+#ifndef STRATEGY_STRATEGYGREEDY_H
+#define STRATEGY_STRATEGYGREEDY_H
 
 #include "../searchclient/strategy.h"
 #include "../searchclient/heuristic.h"

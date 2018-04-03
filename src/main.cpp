@@ -14,6 +14,7 @@ int main() {
     SearchClient::Client searchClient;
     SearchEngine::State dummyState2 = searchClient.initState();
 
+/*
     SearchEngine::State dummyState;
 
     SearchEngine::State::walls = {
@@ -42,4 +43,6 @@ int main() {
     for(SearchEngine::State *state: plan) {
         std::cout << state->getAction().toString() << std::endl;
     }
+
+    */
 }
