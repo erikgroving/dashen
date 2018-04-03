@@ -1,7 +1,7 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-enum Color { BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
+enum Color { NOCOLOR, BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
 enum Direction { N, E, S, W, NONE};
 enum Action { MOVE, PUSH, PULL, NOOP };
 
@@ -20,6 +20,9 @@ typedef struct Box {
     char letter;
     Coord loc;
 
+    Box(): color(NOCOLOR), letter(0), loc({-1,-1}) {
+        
+    }
     Box(Color color, char letter, Coord loc) :  color(color),
                                                 letter(letter),
                                                 loc(loc) {}
@@ -34,15 +37,6 @@ typedef struct Box {
     }
 } Box;
 
-typedef struct Agent {
-    Color color;
-    char num;
-    Coord loc;
-
-    Agent (Color color, char num, Coord loc) :  color(color),
-                                                num(num),
-                                                loc(loc) {}
-} Agent;
 
 typedef struct Goal {
     char letter;

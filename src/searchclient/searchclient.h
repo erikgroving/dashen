@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <functional>
 
 #include "strategy.h"
 #include "state.h"
@@ -27,9 +28,13 @@ public:
      *         otherwise an empty vector of State.
      */
     std::vector<State*> search(Strategy &strategy, int agentIndex);
+    void setGoalStatePredicate(std::function< bool(SearchEngine::State*) > &newPredicate) {
+        goalStatePredicate = newPredicate;
+    }
     
 private:
     State initialState_;
+    std::function< bool(SearchEngine::State*) > goalStatePredicate;
 };
 
 };

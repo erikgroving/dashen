@@ -53,7 +53,7 @@ std::vector<State*> SearchClient::search(Strategy &strategy, int agentIndex) {
 
         printMap(leaf, State::walls.size(), State::walls[0].size());
         
-        if(isGoalState(leaf)) {
+        if(goalStatePredicate(leaf)) {
             return leaf->extractPlan();
         }
         
