@@ -29,8 +29,8 @@ void Client::setAction(int agentId, Command command) {
         actionsRecv = 0;
     }
 }
-                
-            
+
+
 State Client::initState() {
     State state = State();
     std::string s;
@@ -50,7 +50,6 @@ State Client::initState() {
         size_t colonPosition = s.find(':');
         if(colonPosition != std::string::npos) {
             std::string sColor(s, 0, colonPosition);
-<<<<<<< 4ad3e366ddb6dc4d7ebaaeae7bde0ce4dd99f2b3
             std::string sElements(s, colonPosition + 1);
             std::string token;
 
@@ -62,17 +61,6 @@ State Client::initState() {
             while (std::getline(iss, token, ',')) {
                 char id = token[0];
                 mapping.insert(std::make_pair(id, currColor));
-=======
-            //std::string sElements = s.substring(s, colonPosition);
-
-            std::regex nonlevelRegex("^[a-z]+:\\s*[0-9A-Z](\\s*,\\s*[0-9A-Z])*\\s*$");
-            std::smatch stringMatch;
-            std::regex_match(s, stringMatch, nonlevelRegex);
-
-            //std::string lineColor = stringMatch[0];
-            for (unsigned i=0; i<stringMatch.size(); ++i) {
-                std::cerr << stringMatch[i] << std::endl;
->>>>>>> Fix things
             }
         }
 
@@ -84,7 +72,7 @@ State Client::initState() {
 
             for(int i=0; i<s.length(); i++) {
                 Coord currCoord = Coord(row, i);
-                
+
                 // set wall
                 if(s[i] == '+') {
                     lineWall.push_back(true);
@@ -100,22 +88,15 @@ State Client::initState() {
                     Goal goal = Goal(0, currCoord);
                     lineGoal.push_back(goal);
                 }
-                
+
                 // set agent(s)' position
-<<<<<<< 4ad3e366ddb6dc4d7ebaaeae7bde0ce4dd99f2b3
                 if (s[i]>= '0' && s[i]<='9') {
                     Color color = BLUE;
                     if (mapping.find(s[i]) != mapping.end()) {
                         color = mapping[s[i]];
                     }
-                    int num = s[i] - '0'; 
-                    Agent agent = Agent(color, num, currCoord);
-=======
-                if (s[i]>= 'A' && s[i]<='Z') {
-                    Color color = RED;
-                    int num = 0; // TODO convert s[i] to integer
+                    int num = s[i] - '0';
                     AgentDescription agent{color, num, currCoord};
->>>>>>> Fix things
                     state.getAgents().push_back(agent);
                     numAgents++;
                 }
@@ -158,7 +139,7 @@ Color stringToColor(std::string c) {
     std::transform(c.begin(), c.end(), c.begin(), toupper);
 
     Color ret = (c == "BLUE")       ? BLUE      :
-                (c == "RED")        ? RED       : 
+                (c == "RED")        ? RED       :
                 (c == "GREEN")      ? GREEN     :
                 (c == "CYAN")       ? CYAN      :
                 (c == "MAGENTA")    ? MAGENTA   :
