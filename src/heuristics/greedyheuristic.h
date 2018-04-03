@@ -1,7 +1,7 @@
 #ifndef GREEDYHEURISTIC_H
 #define GREEDYHEURISTIC_H
 
-#include "src/searchclient/heuristic.h"
+#include "../searchclient/heuristic.h"
 
 namespace Heuristic {
 

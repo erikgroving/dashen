@@ -2,12 +2,18 @@
 #include <vector>
 
 #include "./searchclient/state.h"
+#include "./searchclient/client.h"
 #include "./searchclient/searchclient.h"
 #include "./searchclient/typedefs.h"
 #include "./searchclient/command.h"
 #include "./strategies/strategybfs.h"
 
+
 int main() {
+
+    SearchClient::Client searchClient;
+    searchClient.initState();
+    exit(1);
 
     SearchEngine::State dummyState;
 

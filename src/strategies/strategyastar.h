@@ -1,9 +1,9 @@
 #ifndef STRATEGYASTAR_H
 #define STRATEGYASTAR_H
 
-#include "src/searchclient/strategy.h"
-#include "src/searchclient/heuristic.h"
-#include "src/heuristics/astartheuristic.h"
+#include "../searchclient/strategy.h"
+#include "../searchclient/heuristic.h"
+#include "../heuristics/astartheuristic.h"
 
 #include <queue>
 

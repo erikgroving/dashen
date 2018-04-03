@@ -1,7 +1,7 @@
 #ifndef STRATEGYDFS_H
 #define STRATEGYDFS_H
 
-#include "src/searchclient/strategy.h"
+#include "../searchclient/strategy.h"
 
 namespace Strategy {
 
@@ -25,4 +25,4 @@ public:
 };
 
 }
-#endif // STRATEGYBFS_H
+#endif // STRATEGYDFS_H

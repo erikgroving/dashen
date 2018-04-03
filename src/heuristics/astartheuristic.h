@@ -1,8 +1,8 @@
 #ifndef HEURISTICS_ASTAR
 #define HEURISTICS_ASTAR
 
-#include "src/searchclient/heuristic.h"
-#include "src/searchclient/state.h"
+#include "../searchclient/heuristic.h"
+#include "../searchclient/state.h"
 
 namespace Heuristic {
 

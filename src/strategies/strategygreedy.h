@@ -1,9 +1,9 @@
 #ifndef STRATEGYGREEDY_H
 #define STRATEGYGREEDY_H
 
-#include "src/searchclient/strategy.h"
-#include "src/searchclient/heuristic.h"
-#include "src/heuristics/greedyheuristic.h"
+#include "../searchclient/strategy.h"
+#include "../searchclient/heuristic.h"
+#include "../heuristics/greedyheuristic.h"
 
 #include <queue>
 #include <unordered_map>

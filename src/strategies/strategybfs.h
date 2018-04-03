@@ -1,7 +1,7 @@
 #ifndef STRATEGYBFS_H
 #define STRATEGYBFS_H
 
-#include "src/searchclient/strategy.h"
+#include "../searchclient/strategy.h"
 
 namespace Strategy {
 
