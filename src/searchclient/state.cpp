@@ -146,7 +146,8 @@ State *State::makeChild() {
     child->setParent(*this);
     child->setAgents(agents);
     child->setBoxes(boxes);
-
+    child->setPathCost(getPathCost() + 1);
+    
     addChildState(child);
 
     return child;

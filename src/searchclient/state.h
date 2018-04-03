@@ -53,7 +53,8 @@ public:
     const Command& getAction() const { return action; }
 
     unsigned long getPathCost() const { return pathCost; }
-
+    void setPathCost(unsigned long value) { pathCost = value; }
+    
     /* Setters */
     void setParent(State &parentState) {
         /*
