@@ -12,8 +12,7 @@
 int main() {
 
     SearchClient::Client searchClient;
-    searchClient.initState();
-    exit(1);
+    SearchEngine::State dummyState2 = searchClient.initState();
 
     SearchEngine::State dummyState;
 
@@ -32,11 +31,12 @@ int main() {
 
     dummyState.setBoxes({ Box(YELLOW, 'A', Coord(2,1))});
 
-    SearchEngine::SearchClient client(dummyState);
+    //SearchEngine::SearchClient client(dummyState);
+    SearchEngine::SearchClient client(dummyState2);
     Strategy::StrategyBFS strat;
     std::vector<SearchEngine::State*> plan = client.search(strat, 0);
 
-    std::cout << "Computed plan (Size = " << plan.size() << ")" << std::endl;
+    std::cerr << "Computed plan (Size = " << plan.size() << ")" << std::endl;
     for(SearchEngine::State *state: plan) {
         std::cout << state->getAction().toString() << std::endl;
     }

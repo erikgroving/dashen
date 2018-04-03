@@ -5,6 +5,9 @@
 #include "state.h"
 #include "typedefs.h"
 
+
+Color stringToColor(std::string);
+
 namespace SearchClient {
     class Client {
         private:

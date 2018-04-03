@@ -9,6 +9,6 @@ using SearchClient::Command;
 TEST(CommandTests, CommandTest1) {
     Direction d1 = E;
     EXPECT_EQ(d1, E);
-    Command command(E);
+    Command command(MOVE, E);
     EXPECT_EQ(command.toString(), "Move(E)");
 }
