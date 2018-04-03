@@ -1,18 +1,8 @@
 #include "client.h"
-#include "state.h"
-#include "typedefs.h"
-#include "agent.h"
-#include <iostream>
-#include <stdio.h>
-#include <string>
-#include <regex>
-#include <unordered_map>
-#include <utility>
 
 using SearchClient::Client;
 using SearchEngine::State;
 using SearchEngine::Command;
-using SearchEngine::Agent;
 
 
 Client::Client() {
@@ -32,7 +22,7 @@ void Client::setAction(int agentId, Command command) {
 
 
 State Client::initState() {
-    State state = State();
+    State state;
     std::string s;
     bool inLevel = false;
     int plusCount = 0;

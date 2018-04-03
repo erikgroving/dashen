@@ -46,11 +46,11 @@ typedef struct Goal {
 
 } Goal;
 
-struct AgentDescription
+typedef struct AgentDescription
 {
     Color color;
     char num;
     Coord loc;
-};
+} AgentDescription;
 
 #endif 

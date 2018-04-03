@@ -14,7 +14,7 @@ class Agent {
 public:
     Agent (Color color, char num, Coord loc) :
         color(color), num(num), loc(loc),
-        goalsToAchieve(), movableBoxes(), 
+        movableBoxes(), goalsToAchieve(),
         private_initialState() {}
 
     void updateGoalsList(const SearchEngine::State &initialState);
@@ -27,7 +27,7 @@ public:
     /**
      * Return the highest priority goal
      */
-    Goal& chooseGoal();
+    Goal chooseGoal();
     
     /**
      * Given a goal, return a sequence of action to accomplish it.

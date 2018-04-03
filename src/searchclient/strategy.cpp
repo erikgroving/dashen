@@ -7,7 +7,7 @@ Strategy::Strategy() {
 
 }
 
-void Strategy::addToExplored( State *leaf ) {
+void Strategy::addToExplored(SearchEngine::State *leaf ) {
     std::cerr << "===================" << std::endl;
     std::cerr << "Add to explored" << std::endl;
     explored_.emplace_back( leaf );

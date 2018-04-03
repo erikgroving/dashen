@@ -28,16 +28,16 @@ void printMap(const State *state, int height, int width) {
     }
 }
 
-SearchClient::SearchClient(const State *initialState): initialState_(initialState) {
+SearchClient::SearchClient(State *initialState): initialState_(initialState) {
     
 }
 
-std::vector<State*> SearchClient::search(const SearchEngine::Strategy &strategy, int agentIndex) {
+std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int agentIndex) {
     
     std::cerr << "The search is conducted with the Strategy " << strategy.name() << std::endl;
 
     int iterations = 0;
-    strategy.addToFrontier(&initialState_);
+    strategy.addToFrontier(initialState_);
 
     while(true) {
         

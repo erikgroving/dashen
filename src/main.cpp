@@ -1,19 +1,29 @@
 #include <iostream>
 #include <vector>
 
-#include "./searchclient/state.h"
-#include "./searchclient/client.h"
-#include "./searchclient/searchclient.h"
-#include "./searchclient/typedefs.h"
-#include "./searchclient/command.h"
-#include "./strategies/strategybfs.h"
+#include "searchclient/state.h"
+#include "searchclient/client.h"
+#include "searchclient/searchclient.h"
+#include "searchclient/typedefs.h"
+#include "searchclient/command.h"
+#include "strategies/strategybfs.h"
 
 
 int main() {
 
     SearchClient::Client searchClient;
     SearchEngine::State dummyState2 = searchClient.initState();
+    Strategy::StrategyBFS strat;
 
+    SearchEngine::SearchClient sc(&dummyState2);
+    auto plan = sc.search(strat, 0);
+
+    std::cerr << "Computed plan (Size = " << plan.size() << ")" << std::endl;
+    for(auto *state: plan) {
+        std::cout << state->getAction().toString() << std::endl;
+    }
+
+    return 0;
 /*
     SearchEngine::State dummyState;
 

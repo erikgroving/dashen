@@ -20,14 +20,14 @@ public:
     /**
      * \brief Creates the search client with the given initial state.
      */
-    SearchClient( const SearchEngine::State *initialState );
+    SearchClient(SearchEngine::State *initialState );
     
     /**
      * Conduct a whole search with the given search strategy.
      * \return a planning from the initial state to the goal state if one exists, 
      *         otherwise an empty vector of State.
      */
-    std::vector<SearchEngine::State*> search(const Strategy &strategy, int agentIndex);
+    std::vector<SearchEngine::State*> search(Strategy &strategy, int agentIndex);
     void setGoalStatePredicate(const std::function< bool(SearchEngine::State*) > &newPredicate) {
         goalStatePredicate = newPredicate;
     }

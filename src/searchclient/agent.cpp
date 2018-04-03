@@ -4,6 +4,8 @@ using SearchEngine::Agent;
 using SearchEngine::SearchClient;
 using namespace SearchEngine::Predicate;
 
+SearchEngine::State *Agent::sharedState;
+
 void Agent::updateBoxesList(const SearchEngine::State &initialState) {
     movableBoxes.clear();
 
@@ -23,14 +25,14 @@ void Agent::updateGoalsList(const SearchEngine::State &initialState) {
     }
 }
 
-Goal& Agent::chooseGoal() {
+Goal Agent::chooseGoal() {
     Goal result = goalsToAchieve.back();
     goalsToAchieve.pop_back();
     return result;
 }
 
 std::vector<SearchEngine::State*> Agent::search(const Goal &goal) {
-    private_initialState = sharedState;
+    private_initialState = Agent::sharedState;
     
     Box toMove;
     for(const Box &box: movableBoxes) {
@@ -46,7 +48,8 @@ std::vector<SearchEngine::State*> Agent::search(const Goal &goal) {
         return boxOnGoal(currentState, toMove);
     });    
 
-    return searcher.search(::Strategy::StrategyDFS(),(int)num);
+    ::Strategy::StrategyDFS strat;
+    return searcher.search(strat,(int)num);
 }
 
 void Agent::setSharedState(SearchEngine::State *sharedState) {

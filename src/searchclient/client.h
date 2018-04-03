@@ -4,6 +4,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <stdio.h>
+#include <regex>
+#include <unordered_map>
+#include <utility>
+
 #include "command.h"
 #include "state.h"
 #include "typedefs.h"

@@ -14,7 +14,6 @@
 namespace SearchEngine
 {
 
-class State;
 /**
  * Abstract class representing a given search strategy. All the methods about the explored
  * states are provided and one only needs to override the methods conserning the frontier.
@@ -24,7 +23,6 @@ class Strategy
 
   public:
     Strategy();
-
     /**
      * \return true if leaf has been already explored by the given strategy
      */
@@ -33,7 +31,7 @@ class Strategy
     /**
      * Add leaf to the set of already explored states
      */
-    void addToExplored( State *leaf );
+    void addToExplored(State *leaf );
     
     /**
      * \return number of leaves that have been already explored
