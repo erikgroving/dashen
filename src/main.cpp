@@ -31,8 +31,10 @@ int main() {
 
     dummyState.setBoxes({ Box(YELLOW, 'A', Coord(2,1))});
 
+    std::cerr << "Pre-copy\n";
     //SearchEngine::SearchClient client(dummyState);
     SearchEngine::SearchClient client(dummyState2);
+    std::cerr << "Post-copy\n";
     Strategy::StrategyBFS strat;
     std::vector<SearchEngine::State*> plan = client.search(strat, 0);
 

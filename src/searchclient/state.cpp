@@ -20,7 +20,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
     Agent &agt = agents[agentIndex];
 
     for(const Command &cmd: Command::possibleActions) {
-        // std::cout << cmd.toString() << std::endl;
+        // std::cerr << cmd.toString() << std::endl;
         int newAgentRow = agt.loc.x + Command::rowToInt(cmd.d1);
         int newAgentCol = agt.loc.y + Command::colToInt(cmd.d1);
         
@@ -28,7 +28,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
             continue;
 
         if(cmd.action == Action::MOVE) {
-            std::cout << "Agent could move to (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
+            std::cerr << "Agent could move to (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
             if( isFree(this, newAgentRow, newAgentCol) ) {
 
@@ -38,15 +38,15 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 childNode->getAgents()[agentIndex].loc.y = newAgentCol;
 
                 result.push_back(childNode);
-                std::cout << "YES";
+                std::cerr << "YES";
             }
             else
-                std::cout << "NO";
-            std::cout << std::endl; 
+                std::cerr << "NO";
+            std::cerr << std::endl; 
         }
         else if( cmd.action == Action::PUSH ) {
 
-            std::cout << "Agent could push box at (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
+            std::cerr << "Agent could push box at (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
             int boxIndex;
             if( boxAt(this, newAgentRow, newAgentCol, &boxIndex) ) {
@@ -66,12 +66,12 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                     result.push_back(childNode);
                 }
                 else 
-                    std::cout << "(NO cause the box cannot be pushed)";
+                    std::cerr << "(NO cause the box cannot be pushed)";
             }
             else
-                std::cout << "(NO cause it does not exist)";
+                std::cerr << "(NO cause it does not exist)";
 
-            std::cout << std::endl;
+            std::cerr << std::endl;
         }
         else if( cmd.action == Action::PULL ) {
             int boxIndex;
@@ -100,25 +100,25 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
 std::vector<State*> State::extractPlan() {
 
-    std::cout << "Extracting plan" << std::endl;
+    std::cerr << "Extracting plan" << std::endl;
 
     std::vector<State*> result;
     result.push_back(this);
 
-    std::cout << "Look at parents" << std::endl;
+    std::cerr << "Look at parents" << std::endl;
 
     State *parentState = parent;
 
     if(parent == this)
-        std::cout << "I am my own parent" << std::endl;
+        std::cerr << "I am my own parent" << std::endl;
 
     while(parentState != NULL) {
-        // std::cout << parentState;
+        // std::cerr << parentState;
         result.insert(result.begin(), parentState);
         parentState = parentState->parent;
     }
 
-    std::cout << "Done";
+    std::cerr << "Done";
     return result;
 }
 

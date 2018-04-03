@@ -36,6 +36,7 @@ State Client::initState() {
     bool inLevel = false;
     int plusCount = 0;
     int row = 0;
+    int numAgents = 0;
 
 
     std::unordered_map<char, Color> mapping;
@@ -96,6 +97,7 @@ State Client::initState() {
                     int num = s[i] - '0'; 
                     Agent agent = Agent(color, num, currCoord);
                     state.getAgents().push_back(agent);
+                    numAgents++;
                 }
 
                 // set box
@@ -117,6 +119,7 @@ State Client::initState() {
             row++;
         }
     }
+    return state;
 }
 
 void Client::send() {
