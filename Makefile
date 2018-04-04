@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -std=c++14 -g
+CFLAGS= -std=c++14 -g -Wall
 SOURCE= src/*.cpp src/searchclient/*.cpp src/strategies/*.cpp 
 TEST= test/*.cpp
 TEST_DIR= test
