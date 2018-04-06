@@ -8,7 +8,7 @@ GTEST_DIR = googletest
 .PHONY: all clean test
 
 main: $(SOURCE)
-	$(CC) $(CFLAGS) $(SOURCE) -o $@ 
+	$(CC) $(CFLAGS) $(SOURCE) -o environment/client/$@
 
 gtest: $(GTEST_DIR)/src/gtest-all.cc
 	g++ -isystem $(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $^
