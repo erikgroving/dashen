@@ -67,6 +67,9 @@ std::string Command::toString() const {
     if (action == MOVE) {
         return actionToString(action) + "(" + dirToString(d1) + ")";
     }
+    else if (action == NOOP) {
+        return "NoOp";
+    }
     return actionToString(action) + "(" + dirToString(d1) + "," + dirToString(d2) + ")";
 }
 

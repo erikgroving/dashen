@@ -19,7 +19,7 @@ void printMap(const State *state, int height, int width) {
             else if(boxAt(state, j, i, &index))
                 std::cerr << state->getBoxes()[index].letter;
             else if(goalAt(state, j, i, &index))
-                std::cerr << SearchEngine::State::goals[index].letter;
+                std::cerr << SearchEngine::State::goals[index].letter + 'a' - 'A';
             else
                 std::cerr << " ";
         }
@@ -46,12 +46,12 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
 
         State *leaf = strategy.getAndRemoveLeaf();
         
-        std::cerr << "Get leaf " << iterations + 1 << "(" << leaf->getAction().toString() << ")";
+//        std::cerr << "Get leaf " << iterations + 1 << "(" << leaf->getAction().toString() << ")";
         if(leaf->getParent())
-            std::cerr << " - Parent action: " << leaf->getParent()->getAction().toString();
-        std::cerr << std::endl;
+//            std::cerr << " - Parent action: " << leaf->getParent()->getAction().toString();
+//        std::cerr << std::endl;
 
-        printMap(leaf, State::walls.size(), State::walls[0].size());
+        //printMap(leaf, State::walls.size(), State::walls[0].size());
         
         if(goalStatePredicate(leaf)) {
             return leaf->extractPlan();
@@ -59,20 +59,20 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
         
         strategy.addToExplored(leaf);
         
-        std::cerr << "Expanded actions:" << std::endl;
+  /*      std::cerr << "Expanded actions:" << std::endl;
         
         std::cerr << "===================" << std::endl;
-        std::cerr << "getExpendedNodes" << std::endl;
+        std::cerr << "getExpendedNodes" << std::endl;*/
         auto vector  = leaf->getExpandedNodes(agentIndex);
-        std::cerr << "===================" << std::endl;
+        /*std::cerr << "===================" << std::endl;*/
 
         for(State *state: vector) {
-            std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString();
+//            std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString();
             if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {
-                std::cerr << "(Valid)";
+//                std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
-            std::cerr << std::endl;
+//            std::cerr << std::endl;
         } 
 
         iterations++;

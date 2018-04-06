@@ -13,18 +13,7 @@ int main() {
 
     SearchClient::Client searchClient;
     SearchEngine::State dummyState2 = searchClient.initState();
-    Strategy::StrategyBFS strat;
-
-    SearchEngine::SearchClient sc(&dummyState2);
-    auto plan = sc.search(strat, 0);
-
-    std::cerr << "Computed plan (Size = " << plan.size() << ")" << std::endl;
-    for(auto *state: plan) {
-        std::cout << state->getAction().toString() << std::endl;
-    }
-
-    return 0;
-/*
+    /*
     SearchEngine::State dummyState;
 
     SearchEngine::State::walls = {
@@ -41,18 +30,17 @@ int main() {
     dummyState.setAgents({ Agent(YELLOW, '0', Coord(3,2)) });
 
     dummyState.setBoxes({ Box(YELLOW, 'A', Coord(2,1))});
-
-    std::cerr << "Pre-copy\n";
+    */
+    std::cerr << "AGENT 0: " << dummyState2.getAgents()[0].loc.x << " " << dummyState2.getAgents()[0].loc.y << std::endl;
     //SearchEngine::SearchClient client(dummyState);
     SearchEngine::SearchClient client(dummyState2);
-    std::cerr << "Post-copy\n";
     Strategy::StrategyBFS strat;
     std::vector<SearchEngine::State*> plan = client.search(strat, 0);
 
     std::cerr << "Computed plan (Size = " << plan.size() << ")" << std::endl;
     for(SearchEngine::State *state: plan) {
-        std::cout << state->getAction().toString() << std::endl;
+        std::cerr << state->getAction().toActionString() << std::endl;
+        std::cout << state->getAction().toActionString() << std::endl;
     }
-
-    */
+    std::cerr << "Complete!\n";
 }

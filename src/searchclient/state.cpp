@@ -30,7 +30,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
             continue;
 
         if(cmd.action == Action::MOVE) {
-            std::cerr << "Agent could move to (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
+            //std::cerr << "Agent could move to (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
             if( isFree(this, newAgentRow, newAgentCol) ) {
 
@@ -40,15 +40,15 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 childNode->getAgents()[agentIndex].loc.y = newAgentCol;
 
                 result.push_back(childNode);
-                std::cerr << "YES";
+                //std::cerr << "YES";
             }
-            else
-                std::cerr << "NO";
-            std::cerr << std::endl; 
+            //else
+                //std::cerr << "NO";
+            //std::cerr << std::endl; 
         }
         else if( cmd.action == Action::PUSH ) {
 
-            std::cerr << "Agent could push box at (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
+            //std::cerr << "Agent could push box at (" << newAgentRow << "," << newAgentCol << ") (Command " << cmd.toString() << ") ?";
 
             int boxIndex;
             if( boxAt(this, newAgentRow, newAgentCol, &boxIndex) ) {
@@ -67,13 +67,13 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
                     result.push_back(childNode);
                 }
-                else 
-                    std::cerr << "(NO cause the box cannot be pushed)";
+                //else 
+                    //std::cerr << "(NO cause the box cannot be pushed)";
             }
-            else
-                std::cerr << "(NO cause it does not exist)";
+            //else
+                //std::cerr << "(NO cause it does not exist)";
 
-            std::cerr << std::endl;
+            //std::cerr << std::endl;
         }
         else if( cmd.action == Action::PULL ) {
             int boxIndex;
@@ -102,17 +102,17 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
 std::vector<State*> State::extractPlan() {
 
-    std::cerr << "Extracting plan" << std::endl;
+    //std::cerr << "Extracting plan" << std::endl;
 
     std::vector<State*> result;
     result.push_back(this);
 
-    std::cerr << "Look at parents" << std::endl;
+    //std::cerr << "Look at parents" << std::endl;
 
     State *parentState = parent;
 
     if(parent == this)
-        std::cerr << "I am my own parent" << std::endl;
+        //std::cerr << "I am my own parent" << std::endl;
 
     while(parentState != NULL) {
         // std::cerr << parentState;
@@ -120,7 +120,7 @@ std::vector<State*> State::extractPlan() {
         parentState = parentState->parent;
     }
 
-    std::cerr << "Done";
+    //std::cerr << "Done";
     return result;
 }
 

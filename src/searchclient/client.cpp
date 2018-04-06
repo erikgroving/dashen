@@ -29,6 +29,9 @@ State Client::initState() {
     int row = 0;
     int numAgents = 0;
 
+    std::vector<Agent> agents = std::vector<Agent>();
+    std::vector<Box> boxes = std::vector<Box>();
+    std::vector<Goal> goals = std::vector<Goal>();
 
     std::unordered_map<char, Color> mapping;
 
@@ -38,14 +41,15 @@ State Client::initState() {
         }
         // if line contains ":"
         size_t colonPosition = s.find(':');
-        if(colonPosition != std::string::npos) {
+        if (colonPosition != std::string::npos) {
+            std::string::iterator end_pos = std::remove(s.begin(), s.end(), ' ');
+            s.erase(end_pos, s.end());
+            colonPosition = s.find(':');
             std::string sColor(s, 0, colonPosition);
             std::string sElements(s, colonPosition + 1);
             std::string token;
 
             Color currColor = stringToColor(sColor);
-            std::string::iterator end_pos = std::remove(sElements.begin(), sElements.end(), ' ');
-            sElements.erase(end_pos, sElements.end());
             std::istringstream iss(sElements);
 
             while (std::getline(iss, token, ',')) {
@@ -58,7 +62,6 @@ State Client::initState() {
 
             // else line is part of level
             std::vector<bool> lineWall = std::vector<bool>();
-            std::vector<Goal> lineGoal = std::vector<Goal>();
 
             for(int i=0; i<s.length(); i++) {
                 Coord currCoord = Coord(row, i);
@@ -72,11 +75,8 @@ State Client::initState() {
 
                 // set Goal
                 if (s[i]>= 'a' && s[i]<='z') {
-                    Goal goal = Goal(s[i], currCoord);
-                    lineGoal.push_back(goal);
-                } else {
-                    Goal goal = Goal(0, currCoord);
-                    lineGoal.push_back(goal);
+                    Goal goal = Goal(s[i] + 'A' - 'a', currCoord);
+                    goals.push_back(goal);
                 }
 
                 // set agent(s)' position
@@ -98,18 +98,18 @@ State Client::initState() {
                         color = mapping[s[i]];
                     }
                     Box box = Box(color, s[i], currCoord);
-                    state.getBoxes().push_back(box);
+                    boxes.push_back(box);
                 }
 
             }
             State::walls.push_back(lineWall);
-
-            // State::goals.push_back(lineGoal);
-            for(const Goal &goal: lineGoal)
-                State::goals.push_back(goal);
             row++;
         }
     }
+    State::numAgents = numAgents;
+    State::goals = goals;
+    state.setAgents(agents);
+    state.setBoxes(boxes);
     return state;
 }
 
