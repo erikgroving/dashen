@@ -19,14 +19,9 @@ public:
         SearchEngine::Strategy(), queue(heuristic) {}
 public:
     std::string name() const { return "A*"; }
-    bool inFrontier(SearchEngine::State *leaf) const {
-        return frontierMap.find(leaf) != frontierMap.end();
-    }
-    bool frontierIsEmpty() const { return frontierMap.empty(); }
-    std::size_t countFrontier() const { return frontierMap.size(); }
 
-    SearchEngine::State *getAndRemoveLeaf();
-    void addToFrontier(SearchEngine::State *leaf);
+    SearchEngine::State *getNextLeafStrategy();
+    void addToFrontierStrategy(SearchEngine::State *leaf);
 
 private:
     std::priority_queue<

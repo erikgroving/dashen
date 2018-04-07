@@ -5,11 +5,7 @@ using SearchEngine::State;
 using SearchEngine::Command;
 
 
-Client::Client() {
-    jointAction = std::vector<Command>();
-    actionsRecv = 0;
-    jointAction.resize(State::numAgents, Command());
-}
+Client::Client(): jointAction(), actionsRecv(0), agents() { }
 
 void Client::setAction(int agentId, Command command) {
     jointAction[agentId] = command;
@@ -24,22 +20,20 @@ void Client::setAction(int agentId, Command command) {
 State Client::initState() {
     State state;
     std::string s;
-    bool inLevel = false;
-    int plusCount = 0;
-    int row = 0;
-    int numAgents = 0;
+    
+    int row = 0, numAgents = 0;
 
-    std::vector<Agent> agents = std::vector<Agent>();
+    std::vector<AgentDescription> agentsDescription = std::vector<AgentDescription>();
     std::vector<Box> boxes = std::vector<Box>();
     std::vector<Goal> goals = std::vector<Goal>();
 
     std::unordered_map<char, Color> mapping;
 
     while(std::getline(std::cin, s)) {
-        if (s == "") {
-            break;
-        }
-        // if line contains ":"
+        // We have finished reading the state
+        if (s == "") break;
+
+        // If line contains ":", we are describing colors for the boxes and agents
         size_t colonPosition = s.find(':');
         if (colonPosition != std::string::npos) {
             std::string::iterator end_pos = std::remove(s.begin(), s.end(), ' ');
@@ -63,20 +57,16 @@ State Client::initState() {
             // else line is part of level
             std::vector<bool> lineWall = std::vector<bool>();
 
-            for(int i=0; i<s.length(); i++) {
-                Coord currCoord = Coord(row, i);
+            for(size_t i = 0; i < s.length(); i++) {
+                Coord currCoord = Coord(i, row);
 
                 // set wall
-                if(s[i] == '+') {
-                    lineWall.push_back(true);
-                } else {
-                    lineWall.push_back(false);
-                }
+                lineWall.push_back(s[i] == '+');
 
                 // set Goal
                 if (s[i]>= 'a' && s[i]<='z') {
-                    Goal goal = Goal(s[i] + 'A' - 'a', currCoord);
-                    goals.push_back(goal);
+                    std::cerr << "Added goal" << std::endl;
+                    goals.push_back( Goal( toupper(s[i]), currCoord) );
                 }
 
                 // set agent(s)' position
@@ -86,8 +76,9 @@ State Client::initState() {
                         color = mapping[s[i]];
                     }
                     int num = s[i] - '0';
-                    AgentDescription agent{color, num, currCoord};
-                    state.getAgents().push_back(agent);
+                    agentsDescription.push_back( {color, num, currCoord} );
+
+                    agents.push_back( SearchEngine::Agent(color, num, currCoord) );
                     numAgents++;
                 }
 
@@ -108,7 +99,7 @@ State Client::initState() {
     }
     State::numAgents = numAgents;
     State::goals = goals;
-    state.setAgents(agents);
+    state.setAgents(agentsDescription);
     state.setBoxes(boxes);
     return state;
 }
@@ -137,4 +128,12 @@ Color stringToColor(std::string c) {
                 (c == "PINK")       ? PINK      :   YELLOW;
 
     return ret;
+}
+
+const std::vector<SearchEngine::Agent>& Client::extractAgents() const {
+    return agents;
+}
+
+std::vector<SearchEngine::Agent>& Client::extractAgents() {
+    return agents;
 }

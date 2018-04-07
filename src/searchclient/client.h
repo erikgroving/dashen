@@ -13,24 +13,31 @@
 #include "command.h"
 #include "state.h"
 #include "typedefs.h"
-
+#include "agent.h"
 
 Color stringToColor(std::string);
 
 namespace SearchClient {
-    class Client {
-        private:
-            std::vector<SearchEngine::Command> jointAction;
-            int actionsRecv;  
-        public:
-            Client();
 
-            SearchEngine::State initState();
+class Client {
+    public:
+        Client();
 
-            void setAction(int, SearchEngine::Command);
+        SearchEngine::State initState();
 
-            void send();                 
-    };
+        std::vector<SearchEngine::Agent>& extractAgents();
+        const std::vector<SearchEngine::Agent>& extractAgents() const;
+
+        void setAction(int, SearchEngine::Command);
+
+        void send();                 
+    
+    private:
+        std::vector<SearchEngine::Command> jointAction;
+        std::vector<SearchEngine::Agent> agents;
+        int actionsRecv;  
+};
+
 }
 
 #endif

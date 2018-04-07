@@ -20,15 +20,8 @@ public:
         SearchEngine::Strategy(), queue(heuristic) {}
 public:
     std::string name() const { return "Greedy"; }
-    bool frontierIsEmpty() const { return queue.empty(); }
-    std::size_t countFrontier() const { return queue.size(); }
-
-    bool inFrontier(SearchEngine::State *leaf) const {
-        return frontierMap.find(leaf) != frontierMap.end();
-    }
-
-    void addToFrontier(SearchEngine::State *leaf);
-    SearchEngine::State *getAndRemoveLeaf();
+    void addToFrontierStrategy(SearchEngine::State *leaf);
+    SearchEngine::State *getNextLeafStrategy();
 
 
 private:

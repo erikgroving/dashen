@@ -4,7 +4,7 @@ using SearchEngine::State;
 using Strategy::StrategyAStar;
 
 template<typename AStar>
-SearchEngine::State *StrategyAStar<AStar>::getAndRemoveLeaf()
+SearchEngine::State *StrategyAStar<AStar>::getNextLeafStrategy()
 {
     State *result = queue.top();
     queue.pop();
@@ -13,7 +13,7 @@ SearchEngine::State *StrategyAStar<AStar>::getAndRemoveLeaf()
 }
 
 template<typename AStar>
-void StrategyAStar<AStar>::addToFrontier(SearchEngine::State *leaf)
+void StrategyAStar<AStar>::addToFrontierStrategy(SearchEngine::State *leaf)
 {
     queue.emplace(leaf);
     frontierMap.insert({leaf, 0});

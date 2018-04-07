@@ -56,12 +56,12 @@ public:
     void setPathCost(unsigned long value) { pathCost = value; }
     
     /* Setters */
-    void setParent(State &parentState) {
+    void setParent(State* const &parentState) {
         /*
         if(&parentState == this)
             std::cout << "?????" << std::endl;
         */
-        parent = &parentState;
+        parent = parentState;
     }
 
     void setBoxes(std::vector<Box> value) { boxes = value; }
@@ -83,5 +83,4 @@ private:
 };
 
 }
-
 #endif

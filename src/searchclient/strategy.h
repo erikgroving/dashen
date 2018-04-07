@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include "state.h"
+#include "state_equal_to.h"
 
 namespace SearchEngine
 {
@@ -28,6 +29,12 @@ class Strategy
      */
     bool isExplored( State *leaf ) const;
 
+
+    /**
+     * \return true if leaf is already part of the frontier
+     */
+    virtual bool inFrontier( State *leaf ) const;
+
     /**
      * Add leaf to the set of already explored states
      */
@@ -41,27 +48,24 @@ class Strategy
     /**
      * \return The next leaf to analyse according to the strategy
      */
-    virtual State* getAndRemoveLeaf() = 0;
+    virtual State* getAndRemoveLeaf();
 
-    /**
-     * \return true if leaf is already part of the frontier
-     */
-    virtual bool inFrontier( State *leaf ) const = 0;
-    
+    virtual State* getNextLeafStrategy() = 0;
     /**
      * \return true if the frontier is empty
      */
-    virtual bool frontierIsEmpty() const = 0;
+    virtual bool frontierIsEmpty() const;
     
     /**
      * Add leaf to the frontier
      */
-    virtual void addToFrontier( State *leaf ) = 0;
+    virtual void addToFrontier( State *leaf );
+    virtual void addToFrontierStrategy( State *leaf ) = 0;
 
     /**
      * \return The current size of the frontier
      */
-    virtual std::size_t countFrontier() const = 0;
+    virtual std::size_t countFrontier() const;
 
     /**
      * \return String representation of the Strategy.
@@ -69,8 +73,8 @@ class Strategy
     virtual std::string name() const = 0;
 
   private:
-     std::vector<State*> explored_;
-     std::unordered_map<State*, int> exploredMap_;
+     std::unordered_map<State*, int, std::hash<State*>, StateCompare > exploredMap_;
+     std::unordered_map<State*, int, std::hash<State*>, StateCompare > frontierMap_;
 };
 
 }

@@ -2,14 +2,12 @@
 
 using Strategy::StrategyDFS;
 
-void StrategyDFS::addToFrontier(SearchEngine::State *state) {
+void StrategyDFS::addToFrontierStrategy(SearchEngine::State *state) {
       queue.emplace_back(state);
-      frontierMap.insert({state, 0});
 }
 
-SearchEngine::State *StrategyDFS::getAndRemoveLeaf() {
+SearchEngine::State *StrategyDFS::getNextLeafStrategy() {
     SearchEngine::State *result = queue.back();
     queue.pop_back();
-    frontierMap.erase( frontierMap.find(result) );
     return result;
 }

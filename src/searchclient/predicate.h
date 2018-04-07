@@ -50,6 +50,8 @@ namespace Predicate
      */
     bool agentAt(const State *input, int x, int y, int *agentIndex = 0);
 
+    bool wallAt(const State *input, int x, int y);
+    
     bool boxOnGoal(const State *input, const Box &box);
 
     /**

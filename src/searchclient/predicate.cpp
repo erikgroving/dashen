@@ -17,12 +17,12 @@ bool SearchEngine::Predicate::isFree(const State *input, int x, int y) {
     return inBound(input, x, y)  &&
            !agentAt(input, x, y) &&
            !boxAt(input, x, y)   &&
-           !input->walls[x][y];
+           !wallAt(input, x, y);
 }
 
 bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIndex){
 
-    for(int i = 0; i < input->getBoxes().size(); i++ ){
+    for(size_t i = 0; i < input->getBoxes().size(); i++ ){
 
         if ( input->getBoxes()[i].loc.x == x &&
              input->getBoxes()[i].loc.y == y ) {
@@ -36,7 +36,7 @@ bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIn
 }
 
 bool SearchEngine::Predicate::goalAt(const State *input, int x, int y, int *goalIndex) {
-     for(int i = 0; i < input->goals.size(); i++ ){
+     for(size_t i = 0; i < input->goals.size(); i++ ){
          if (input->goals[i].loc.x == x &&
              input->goals[i].loc.y == y ) {
 
@@ -50,7 +50,7 @@ bool SearchEngine::Predicate::goalAt(const State *input, int x, int y, int *goal
 
 
 bool SearchEngine::Predicate::agentAt(const State *input, int x, int y, int *agentIndex) {
-    for(int i = 0; i < input->getAgents().size(); i++ ){
+    for(size_t i = 0; i < input->getAgents().size(); i++ ){
          if (input->getAgents()[i].loc.x == x &&
              input->getAgents()[i].loc.y == y ) {
 
@@ -61,18 +61,20 @@ bool SearchEngine::Predicate::agentAt(const State *input, int x, int y, int *age
      return false;
 }
 
+bool SearchEngine::Predicate::wallAt(const State *input, int x, int y) {
+    return inBound(input, x, y) && State::walls[y][x]; // if (x, y) is a coordinate representing (col, row), an inversion is necessary.
+}
 bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
     for(const Goal &goal: input->goals) {
-        if(goal.letter != box.letter)
-            return false;
-
-        if(box.loc.x != goal.loc.x || box.loc.y != goal.loc.y)
-            return false;
+        
+        if(goal.letter != box.letter) continue;    
+        if(box.loc.x != goal.loc.x || box.loc.y != goal.loc.y) continue;
 
         return true;
     }
+    return false;
 }
 
 bool SearchEngine::Predicate::inBound(const State *input, int x, int y) {
-    return x < input->walls.size() && y < input->walls[x].size();
+    return y < input->walls.size() && x < input->walls[y].size(); // if (x, y) is a coordinate representing (col, row), an inversion is necessary.
 }

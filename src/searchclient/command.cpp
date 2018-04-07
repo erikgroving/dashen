@@ -79,9 +79,9 @@ std::string Command::toActionString() const {
 
 int Command::colToInt(Direction dir) {
     switch(dir){
-        case N:
+        case W:
             return -1;
-        case S:
+        case E:
             return 1;
         default:
             return 0;
@@ -89,9 +89,9 @@ int Command::colToInt(Direction dir) {
 }
 int Command::rowToInt(Direction dir) {
     switch(dir){
-        case W:
+        case N:
             return -1;
-        case E:
+        case S:
             return 1;
         default:
             return 0;

@@ -8,18 +8,18 @@ using SearchEngine::State;
 using namespace SearchEngine::Predicate;
 
 
-void printMap(const State *state, int height, int width) {
-    for(int i = 0; i < height; i++) {
-        for(int j = 0; j < width; j++) {
+void printMap(const State *state) {
+    for(int i = 0; inBound(state, 0, i); i++) {
+        for(int j = 0; inBound(state, j, i); j++) {
             int index;
-            if(State::walls[i][j])
+            if(wallAt(state, j, i))
                 std::cerr << "+"; 
             else if(agentAt(state, j, i, &index))
-                std::cerr << state->getAgents()[index].num;
+                std::cerr << "0" /* state->getAgents()[index].num */ ;
             else if(boxAt(state, j, i, &index))
                 std::cerr << state->getBoxes()[index].letter;
             else if(goalAt(state, j, i, &index))
-                std::cerr << SearchEngine::State::goals[index].letter + 'a' - 'A';
+                std::cerr << "a" /* SearchEngine::State::goals[index].letter */;
             else
                 std::cerr << " ";
         }
@@ -28,8 +28,20 @@ void printMap(const State *state, int height, int width) {
     }
 }
 
-SearchClient::SearchClient(State *initialState): initialState_(initialState) {
-    
+SearchClient::SearchClient(State *initialState, bool printInitialState): initialState_(initialState) {
+    if(printInitialState) {
+        std::cerr << "Initial state:" << std::endl;
+
+        std::cerr << "Boxes: " << initialState->getBoxes().size() << std::endl;
+        std::cerr << "Goals: " << initialState->goals.size() << std::endl;
+        std::cerr << "Agents: " << initialState->getAgents().size() << std::endl;
+        for(AgentDescription &agent: initialState->getAgents())
+            std::cerr << agent.num << "(" << agent.loc.x << ", " << agent.loc.y << ")" << std::endl;
+        printMap(initialState);
+    }
+
+    goalStatePredicate = Predicate::isGoalState;
+        
 }
 
 std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int agentIndex) {
@@ -46,13 +58,11 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
 
         State *leaf = strategy.getAndRemoveLeaf();
         
-//        std::cerr << "Get leaf " << iterations + 1 << "(" << leaf->getAction().toString() << ")";
-        if(leaf->getParent())
-//            std::cerr << " - Parent action: " << leaf->getParent()->getAction().toString();
-//        std::cerr << std::endl;
-
-        //printMap(leaf, State::walls.size(), State::walls[0].size());
-        
+        if(iterations % 1000 == 0) {
+            std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
+            printMap(leaf);
+        }
+                            
         if(goalStatePredicate(leaf)) {
             return leaf->extractPlan();
         }
@@ -67,12 +77,12 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
         /*std::cerr << "===================" << std::endl;*/
 
         for(State *state: vector) {
-//            std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString();
+            // std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
             if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {
-//                std::cerr << "(Valid)";
+                // std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
-//            std::cerr << std::endl;
+            // std::cerr << std::endl;
         } 
 
         iterations++;

@@ -26,6 +26,8 @@ typedef struct Box {
     Box(Color color, char letter, Coord loc) :  color(color),
                                                 letter(letter),
                                                 loc(loc) {}
+
+    Box(const Box &src): color(src.color), letter(src.letter), loc(src.loc) {}
     bool operator==(const Box &compared) const {
         if(compared.letter != letter)
             return false;

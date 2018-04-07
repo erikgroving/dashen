@@ -20,7 +20,7 @@ public:
     /**
      * \brief Creates the search client with the given initial state.
      */
-    SearchClient(SearchEngine::State *initialState );
+    SearchClient(SearchEngine::State *initialState, bool printInitialState = false);
     
     /**
      * Conduct a whole search with the given search strategy.
