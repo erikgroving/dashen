@@ -24,6 +24,8 @@ class Strategy
 
   public:
     Strategy();
+    virtual ~Strategy();
+    
     /**
      * \return true if leaf has been already explored by the given strategy
      */
@@ -73,8 +75,8 @@ class Strategy
     virtual std::string name() const = 0;
 
   private:
-     std::unordered_map<State*, int, std::hash<State*>, StateCompare > exploredMap_;
-     std::unordered_map<State*, int, std::hash<State*>, StateCompare > frontierMap_;
+     std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
+     std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
 };
 
 }

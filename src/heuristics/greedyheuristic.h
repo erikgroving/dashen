@@ -1,7 +1,7 @@
 #ifndef HEURISTICS_GREEDYHEURISTIC_H
 #define HEURISTICS_GREEDYHEURISTIC_H
 
-#include "../searchclient/heuristic.h"
+#include "../searchengine/searchengine"
 
 namespace Heuristic {
 
@@ -10,7 +10,7 @@ class GreedyHeuristic: public SearchEngine::Heuristic
 
 public:
     virtual unsigned long f(const SearchEngine::State *state) const = 0;
-    unsigned long heuristic(const SearchEngine::State *state) const {
+    virtual unsigned long heuristic(const SearchEngine::State *state) const {
         return f(state);
     }
 };

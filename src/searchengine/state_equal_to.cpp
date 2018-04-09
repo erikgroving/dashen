@@ -4,7 +4,11 @@ bool StateCompare::operator()(SearchEngine::State* const& source, SearchEngine::
 
    // std::cerr << "(Custom Explored)";
     if(compared == nullptr) return false;
-    if(source == compared) return true;
+    if(source == compared) {
+        if(debug_)
+            std::cerr << "Equal because the adresses are the same" << std::endl;
+        return true;
+    }
 
     for(const AgentDescription &ad: source->getAgents())
         if(!SearchEngine::Predicate::agentAt(compared, ad.loc.x, ad.loc.y)) {
@@ -17,6 +21,9 @@ bool StateCompare::operator()(SearchEngine::State* const& source, SearchEngine::
             // std::cerr << "Refused because a box is not the same" << std::endl;
             return false;
         }
+
+    if(debug_)
+        std::cerr << "Equal because all the attributes match" << std::endl;
 
     return true;
 }   

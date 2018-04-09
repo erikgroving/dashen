@@ -3,9 +3,8 @@
 
 using SearchEngine::Strategy;
 
-Strategy::Strategy() {
-
-}
+Strategy::Strategy(): exploredMap_(), frontierMap_() { }
+Strategy::~Strategy() { }
 
 void Strategy::addToExplored( State *leaf ) {
     exploredMap_.insert({leaf, 0});
@@ -16,11 +15,13 @@ std::size_t Strategy::countExplored() const {
 }
 
 bool Strategy::isExplored(State *leaf) const {
-    return exploredMap_.find(leaf) != exploredMap_.end();
+    auto ite = exploredMap_.find(leaf); 
+    return ite != exploredMap_.end();
 }
 
 bool Strategy::inFrontier(State *leaf) const {
-    return frontierMap_.find(leaf) != frontierMap_.end();
+    auto ite = frontierMap_.find(leaf); 
+    return ite != exploredMap_.end();
 }
 
 std::size_t Strategy::countFrontier() const {
@@ -39,6 +40,6 @@ void Strategy::addToFrontier(State *leaf) {
 SearchEngine::State* Strategy::getAndRemoveLeaf() {
     State *nextState = getNextLeafStrategy();
     if(nextState)
-        frontierMap_.erase( frontierMap_.find(nextState) );
+        frontierMap_.erase( nextState );
     return nextState;
 }

@@ -10,32 +10,100 @@
 #include <unordered_map>
 #include <utility>
 
-#include "command.h"
-#include "state.h"
-#include "typedefs.h"
+#include "../searchengine/searchengine"
 #include "agent.h"
+#include "jointaction.h"
 
 Color stringToColor(std::string);
 
+
 namespace SearchClient {
+
+class Agent;
 
 class Client {
     public:
-        Client();
+        /* Only a default constructor is required. The client class is the main one of the program
+         * and is responsible for all the other elements.
+         */
+        Client(SearchEngine::Strategy *strategy);
 
+    public:
+        /**
+         * Describes the type of problem that is required to solve.
+         * SingleAgent describes a problem with a single agent, MultiAgent describes a problem with
+         * several agents. None describes a problem with no agent.
+         * 
+         * Note: the type_ attributes (notably retrievable through getProblemType()) is dynamically
+         * determined during state initialization.
+         */
+        enum ProblemType {
+            None,
+            SingleAgent,
+            MultiAgent
+        };
+
+
+        /**
+         * Read the standard input and construct the initial state from the data received.
+         * Note: the agents are dynamically created in this method.
+         */
         SearchEngine::State initState();
 
-        std::vector<SearchEngine::Agent>& extractAgents();
-        const std::vector<SearchEngine::Agent>& extractAgents() const;
+        /**
+         * Extract the "Agent" units that are the intelligent objects capable
+         * of searching in various ways.
+         * 
+         * A const and not-const version of the method are available.
+         */
+        std::vector<SearchClient::Agent>& extractAgents() { return agents; }
+        const std::vector<SearchClient::Agent>& extractAgents() const { return agents; }
 
-        void setAction(int, SearchEngine::Command);
+        /**
+         * Sets the next action of the agent at agentIndex to be command.
+         */
+        void setAction(size_t agentIndex, const SearchEngine::Command &command);
 
-        void send();                 
+        /**
+         * Returns the ProblemType of the received problem instance.
+         * Cf. ProblemType definition.
+         */
+        ProblemType getProblemType() const { return type_; }
+        const std::vector<JointAction>& getCurrentActionPlan() const { return actionPlan_; }
     
+        /**
+         * Writes a whole plan to the standard output
+         */
+        bool send(const std::vector<JointAction> &plan, size_t *failingStep = 0);                 
+
+        /**
+         * Writes a single step to the standard output.
+         * Note: a step is described by a joint action of all the agents at the same time.
+         */
+        bool sendStep(const JointAction &jointAction);
+    
+
     private:
-        std::vector<SearchEngine::Command> jointAction;
-        std::vector<SearchEngine::Agent> agents;
+        /**
+         * Saves onGoingJointAction in actionPlan_. resetJointAction can be safely called right after.
+         */
+        void saveJointAction();
+        /**
+         * Resets onGoingJointAction so that new actions can be stored.
+         */
+        void resetJointAction();
+
+    private:
+
+        ProblemType type_;
+        
+        JointAction onGoingJointAction;
+        std::vector<JointAction> actionPlan_;
+
+        std::vector<SearchClient::Agent> agents;
         int actionsRecv;  
+
+        SearchEngine::Strategy *searchStrategy_;
 };
 
 }

@@ -32,7 +32,7 @@ public:
     /**
      * \return The heuristic value of state 
      */
-    virtual unsigned long heuristic(const State *state) = 0;
+    virtual unsigned long heuristic(const State *state) const = 0;
 
     /**
      *  \return String representation of the Heuristic object

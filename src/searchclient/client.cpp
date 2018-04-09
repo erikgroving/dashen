@@ -1,19 +1,42 @@
 #include "client.h"
 
 using SearchClient::Client;
+using SearchClient::Agent;
+using SearchClient::JointAction;
+
 using SearchEngine::State;
 using SearchEngine::Command;
 
+Client::Client(SearchEngine::Strategy *strategy): 
+    type_(None), onGoingJointAction(), actionPlan_(), 
+    agents(), actionsRecv(0), searchStrategy_(strategy)  {
 
-Client::Client(): jointAction(), actionsRecv(0), agents() { }
-
-void Client::setAction(int agentId, Command command) {
-    jointAction[agentId] = command;
-    actionsRecv++;
-    if (actionsRecv == State::numAgents) {
-        send();
-        actionsRecv = 0;
+    if(strategy == nullptr) {
+        std::cerr << "Error: no strategy has been provided to the client." << std::endl;
+        std::cerr << "No solving will be executed" << std::endl;
     }
+}
+
+void Client::setAction(size_t agentId, const Command &command) {
+    
+    // Check bound to prevent any out-of-bounds exception
+    if( agentId >= agents.size() ) {
+        std::cerr << "Wrong agentId " << agentId << "was passed when setting up action" << std::endl;
+        return;
+    }
+
+    if( getProblemType() == SingleAgent ) {
+        onGoingJointAction[agentId] = command;
+        saveJointAction();
+        resetJointAction();
+    }
+    else if( getProblemType() == MultiAgent ) {
+        std::cerr << "MultiAgent not supported yet" << std::endl;
+    }
+    else {
+        std::cerr << "Cannot set a move in a invalid problem" << std::endl;
+    }
+    actionsRecv++;
 }
 
 
@@ -78,7 +101,7 @@ State Client::initState() {
                     int num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
 
-                    agents.push_back( SearchEngine::Agent(color, num, currCoord) );
+                    agents.push_back( Agent(color, num, currCoord, searchStrategy_, this) );
                     numAgents++;
                 }
 
@@ -97,23 +120,69 @@ State Client::initState() {
             row++;
         }
     }
+
     State::numAgents = numAgents;
     State::goals = goals;
     state.setAgents(agentsDescription);
     state.setBoxes(boxes);
+
+    resetJointAction();
+    switch(State::numAgents) {
+        case 0: break;
+        case 1: 
+            type_ = SingleAgent; 
+            break;
+        default: 
+            type_ = MultiAgent;
+            break;
+    }
+    
     return state;
 }
 
-void Client::send() {
-    std::string message = "[";
-    std::string returnMsg;
-    for (int i = 0; i < jointAction.size()-1; i++) {
-        message += jointAction[i].toString() + ",";
+bool Client::send(const std::vector<JointAction> &plan, size_t *failingStep) {
+
+    size_t step = 0;
+    for(const JointAction& action: plan) {
+        bool isStepOkay = sendStep(action);
+        if(!isStepOkay) {
+            if(failingStep != nullptr) *failingStep = step;
+            return false;
+        }
+        step++;
     }
-    message += jointAction[jointAction.size()-1].toString() + "]";
-    std::cout << message;
+    return true;
+}
+
+bool Client::sendStep(const JointAction &jointAction) {
+    
+    // If no action has been scheduled, cancel the sending and return that the action has failed.
+    if(jointAction.getData().size() == 0) {
+        return false;
+    }
+    
+    // Construct the joint action string
+    std::string message = "[" + jointAction.getData()[0].toString();
+    for(auto ite =  jointAction.getData().begin() + 1; ite != jointAction.getData().end(); ite++)
+        message += "," + (*ite).toString();
+    message += "]";
+
+    // Send the joint action on the standard output
+    // std::cerr << message;
+    std::cout << message << std::endl; 
+
+    // Listen for the response of the server
+    std::string returnMsg;
     std::cin >> returnMsg;
-    actionsRecv = 0;
+
+    // Return the response code of the action
+    if(returnMsg == "[true]")
+        return true;
+    else if(returnMsg == "[false]") return false;
+    else {
+        std::cerr << "The server answered with a unintended response: " << returnMsg << std::endl;
+        return false;
+    }
 }
 
 Color stringToColor(std::string c) {
@@ -130,10 +199,15 @@ Color stringToColor(std::string c) {
     return ret;
 }
 
-const std::vector<SearchEngine::Agent>& Client::extractAgents() const {
-    return agents;
+
+void Client::saveJointAction() {
+    actionPlan_.emplace_back(onGoingJointAction);
+    std::cerr << actionPlan_[0].getData().size();
 }
 
-std::vector<SearchEngine::Agent>& Client::extractAgents() {
-    return agents;
+void Client::resetJointAction() {
+    
+    onGoingJointAction = JointAction();
+    onGoingJointAction.initialize(State::numAgents);
+
 }

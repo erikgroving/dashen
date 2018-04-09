@@ -3,6 +3,7 @@
 
 #include "state.h"
 #include <algorithm>
+#include <cmath>
 
 namespace SearchEngine {
 
@@ -54,6 +55,7 @@ namespace Predicate
     
     bool boxOnGoal(const State *input, const Box &box);
 
+    unsigned long distanceToClosestGoal(const State *input, const Box &box, int *goalIndex = nullptr);
     /**
      * \return true if (x, y) is a valid coordinate for state input.
      */

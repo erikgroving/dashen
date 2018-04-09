@@ -11,9 +11,16 @@ std::vector<std::vector<bool>> State::walls = std::vector< std::vector<bool> >()
 std::vector<Goal> State::goals = std::vector< Goal >();
 int State::numAgents = 0;
 
-State::State(): parent(0), children(), pathCost(0),
-    agents(), boxes(), action() {
+State::State(): agents(), boxes(), action(), 
+                pathCost(0), children(), parent(0) {
 
+}
+
+State::~State() {
+    for(auto ite = children.begin(); ite != children.end(); ite++) {
+        delete *ite;
+    }
+    children.clear();
 }
 
 std::vector<State*> State::getExpandedNodes(int agentIndex) {
@@ -24,13 +31,13 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
     for(const Command &cmd: Command::possibleActions) {
         // std::cerr << "--" << cmd.toString() << std::endl;
 
-        int newAgentRow = agt.loc.y + Command::rowToInt(cmd.d1);
-        int newAgentCol = agt.loc.x + Command::colToInt(cmd.d1);
+        int newAgentRow = agt.loc.y + Command::rowToInt(cmd.d1());
+        int newAgentCol = agt.loc.x + Command::colToInt(cmd.d1());
         
         if(!inBound(this, newAgentCol, newAgentRow))
             continue;
 
-        if(cmd.action == Action::MOVE) {
+        if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Agent could move to (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
 
             if( isFree(this, newAgentCol, newAgentRow) ) {
@@ -47,14 +54,14 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 std::cerr << "NO";
             std::cerr << std::endl; */
         }
-        else if( cmd.action == Action::PUSH ) {
+        else if( cmd.action() == Action::PUSH ) {
 
             //std::cerr << "Agent could push box at (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
 
             int boxIndex;
             if( boxAt(this, newAgentCol, newAgentRow, &boxIndex) ) {
-                int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2);
-                int newBoxCol = newAgentCol + Command::colToInt(cmd.d2);
+                int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
+                int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
 
                 if( isFree(this, newBoxCol, newBoxRow) ) {
                     State *childNode = makeChild();
@@ -76,11 +83,11 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
             //std::cerr << std::endl;
         }
-        else if( cmd.action == Action::PULL ) {
+        else if( cmd.action() == Action::PULL ) {
             int boxIndex;
             if( isFree(this, newAgentCol, newAgentRow)) {
-                int boxRow = agt.loc.y + Command::rowToInt(cmd.d2);
-                int boxCol = agt.loc.x + Command::colToInt(cmd.d2);
+                int boxRow = agt.loc.y + Command::rowToInt(cmd.d2());
+                int boxCol = agt.loc.x + Command::colToInt(cmd.d2());
 
                 if(boxAt(this, boxCol, boxRow, &boxIndex)) {
                     State *childNode = makeChild();
@@ -113,9 +120,6 @@ std::vector<State*> State::extractPlan() {
     //std::cerr << "Look at parents" << std::endl;
 
     State *parentState = parent;
-
-    if(parent == this) {}
-        //std::cerr << "I am my own parent" << std::endl;
 
     while(parentState != NULL) {
         // std::cerr << parentState;

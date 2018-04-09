@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS= -std=c++14 -g -Wall
-SOURCE= src/*.cpp src/searchclient/*.cpp src/strategies/*.cpp 
+SOURCE= src/*.cpp src/*.h src/searchclient/*.cpp src/searchclient/*.h src/strategies/*.h src/strategies/*.cpp src/searchengine/*.cpp
 TEST= test/*.cpp
 TEST_DIR= test
 GTEST_DIR = googletest

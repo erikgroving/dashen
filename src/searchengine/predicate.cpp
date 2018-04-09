@@ -78,3 +78,27 @@ bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
 bool SearchEngine::Predicate::inBound(const State *input, int x, int y) {
     return y < input->walls.size() && x < input->walls[y].size(); // if (x, y) is a coordinate representing (col, row), an inversion is necessary.
 }
+
+unsigned long SearchEngine::Predicate::distanceToClosestGoal(const State *input, const Box &box, int *goalIndex) {
+    if(input->goals.size() == 0)
+        return -1;
+
+    unsigned long min = abs(box.loc.x - input->goals[0].loc.x) + 
+                        abs(box.loc.y - input->goals[0].loc.y);
+    if(goalIndex != nullptr) *goalIndex = 0;
+
+    int i = 0;
+    for(const Goal &goal: input->goals) {
+        unsigned long min2 = abs(box.loc.x - goal.loc.x) + 
+                             abs(box.loc.y - goal.loc.y);
+
+        if(min2 < min) {
+            min = min2;
+            if(goalIndex != nullptr) *goalIndex = i;
+        }
+        i++;
+    }
+    return min;
+
+    
+}

@@ -1,10 +1,19 @@
 #include "agent.h"
 
-using SearchEngine::Agent;
+using SearchClient::Agent;
 using SearchEngine::SearchClient;
 using namespace SearchEngine::Predicate;
 
 SearchEngine::State *Agent::sharedState;
+
+Agent::Agent(Color color, char num, Coord loc,
+             SearchEngine::Strategy *strategy, SearchClient::Client *client) :
+            
+            color(color), num(num), loc(loc),
+            searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
+            private_initialState(), client_(client) {
+
+}
 
 void Agent::updateBoxesList(const SearchEngine::State &initialState) {
     movableBoxes.clear();
@@ -31,8 +40,8 @@ Goal Agent::chooseGoal() {
     return result;
 }
 
-std::vector<SearchEngine::State*> Agent::search(const Goal &goal) {
-    private_initialState = Agent::sharedState;
+std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngine::Strategy &strategy) {
+    auto *initialSearchState = Agent::sharedState;
     
     Box toMove;
     for(const Box &box: movableBoxes) {
@@ -43,15 +52,39 @@ std::vector<SearchEngine::State*> Agent::search(const Goal &goal) {
         break;
     }
 
-    SearchClient searcher(private_initialState);
+    SearchEngine::SearchClient searcher(initialSearchState);
     searcher.setGoalStatePredicate([&toMove](const SearchEngine::State *currentState) {
         return boxOnGoal(currentState, toMove);
     });    
 
-    ::Strategy::StrategyDFS strat;
-    return searcher.search(strat,(int)num);
+    return searcher.search(strategy, (int)num);
+}
+
+std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &strategy) {
+    auto *initialSearchState = Agent::sharedState;
+    
+    SearchEngine::SearchClient searcher(initialSearchState);
+    searcher.setGoalStatePredicate([](const SearchEngine::State *currentState) {
+        return isGoalState(currentState);
+    });    
+
+    return searcher.search(strategy, (int)num );
 }
 
 void Agent::setSharedState(SearchEngine::State *sharedState) {
     Agent::sharedState = sharedState;
+}
+
+void Agent::sendPlan(const std::vector<SearchEngine::State*> &plan) const {
+    for(const SearchEngine::State* state: plan)
+        client_->setAction(num, state->getAction());
+}
+
+void Agent::makeSearch() {
+    if(client_->getProblemType() == SearchClient::Client::SingleAgent) {
+        sendPlan(searchAllGoals(*searchStrategy_));
+    }
+    else if(client_->getProblemType() == SearchClient::Client::MultiAgent){
+        std::cerr << "MultiAgent problem are not supported yet." << std::endl;
+    }
 }

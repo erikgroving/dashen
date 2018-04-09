@@ -43,12 +43,15 @@ std::vector<Command> Command::possibleActions = std::vector<Command>{
                 Command(PULL,S,E)  // Command::Pull_SE
 };
 
-Command::Command(const Command &src): d1(src.d1), d2(src.d2), action(src.action) {}
+Command::Command(const Command &src): action_(src.action_), d1_(src.d1_), d2_(src.d2_) {
+}
 
-Command::Command(Action type): action(type), d1(NONE), d2(NONE) {}
-Command::Command(Action type, Direction dir1): action(type), d1(dir1), d2(NONE) {}
+Command::Command(Action type): action_(type), d1_(NONE), d2_(NONE) {
+}
+
+Command::Command(Action type, Direction dir1): action_(type), d1_(dir1), d2_(NONE) {}
 Command::Command(Action type, Direction dir1, Direction dir2) : 
-    action(type), d1(dir1), d2(dir2) {}
+    action_(type), d1_(dir1), d2_(dir2) {}
 
 std::string Command::actionToString(Action a) const {
     return  a == MOVE ? "Move" : 
@@ -64,13 +67,13 @@ std::string Command::dirToString(Direction d) const {
 }
 
 std::string Command::toString() const {
-    if (action == MOVE) {
-        return actionToString(action) + "(" + dirToString(d1) + ")";
+    if (action_ == MOVE) {
+        return actionToString(action_) + "(" + dirToString(d1_) + ")";
     }
-    else if (action == NOOP) {
+    else if (action_ == NOOP) {
         return "NoOp";
     }
-    return actionToString(action) + "(" + dirToString(d1) + "," + dirToString(d2) + ")";
+    return actionToString(action_) + "(" + dirToString(d1_) + "," + dirToString(d2_) + ")";
 }
 
 std::string Command::toActionString() const {

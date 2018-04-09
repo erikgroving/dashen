@@ -1,8 +1,8 @@
 #ifndef STRATEGY_STRATEGYDFS_H
 #define STRATEGY_STRATEGYDFS_H
 
-#include "../searchclient/strategy.h"
-#include "../searchclient/state.h"
+#include "../searchengine/strategy.h"
+#include "../searchengine/state.h"
 
 namespace Strategy {
 
