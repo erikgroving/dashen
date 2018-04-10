@@ -98,7 +98,7 @@ State Client::initState() {
                     if (mapping.find(s[i]) != mapping.end()) {
                         color = mapping[s[i]];
                     }
-                    int num = s[i] - '0';
+                    char num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
 
                     agents.push_back( Agent(color, num, currCoord, searchStrategy_, this) );
