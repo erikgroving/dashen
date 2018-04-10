@@ -75,7 +75,7 @@ bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
     return false;
 }
 
-bool SearchEngine::Predicate::inBound(const State *input, int x, int y) {
+bool SearchEngine::Predicate::inBound(const State *input, size_t x, size_t y) {
     return y < input->walls.size() && x < input->walls[y].size(); // if (x, y) is a coordinate representing (col, row), an inversion is necessary.
 }
 
