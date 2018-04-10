@@ -19,6 +19,7 @@ public:
     const Coord& getLocation() const { return loc; }
     Coord& getLocation() { return loc; }
 
+    int getIndex() const { return num; }
     const SearchEngine::Strategy* getSearchStrategy() const { return searchStrategy_; }
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
 
