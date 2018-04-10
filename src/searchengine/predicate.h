@@ -59,7 +59,7 @@ namespace Predicate
     /**
      * \return true if (x, y) is a valid coordinate for state input.
      */
-    bool inBound(const State *input, int x, int y);
+    bool inBound(const State *input, size_t x, size_t y);
 };
 
 

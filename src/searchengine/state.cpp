@@ -136,12 +136,12 @@ State::State(const State &src): agents(src.agents), boxes(src.boxes), action(src
 }
 
 bool State::operator==(const SearchEngine::State &compared) const {
-    for(int i = 0; i < agents.size(); i++)
+    for(unsigned int i = 0; i < agents.size(); i++)
         if(agents[i].loc != compared.agents[i].loc  )
             return false;
 
 
-    for(int i = 0; i < boxes.size(); i++)
+    for(unsigned int i = 0; i < boxes.size(); i++)
         if(boxes[i].loc != compared.boxes[i].loc)
             return false;
 

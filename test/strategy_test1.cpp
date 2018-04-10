@@ -1,19 +1,23 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include "../src/searchclient/searchclient"
+#include "../src/strategies/strategies"
+#include "../src/searchengine/searchengine"
 
-SearchEngine::State::walls = {
-    {true, true, true, true, true, true, true, true, true, true},
-    {true, false, false, false, false, false, false, false, false, true},
-    {true, false, true, true, true, true, true, true, false, true},
-    {true, false, false, false, false, false, false, false, false, true},
-    {true, true, true, true, true, true, true, true, true, true},
-};
-SearchEngine::State::goals = std::vector<Goal>{
-    Goal('A', Coord(8,1))
-};
-    
+using SearchEngine::Strategy;
+
 TEST(Strategy_Test1, StateCompareTest1) {
+    SearchEngine::State::walls = {
+        {true, true, true, true, true, true, true, true, true, true},
+        {true, false, false, false, false, false, false, false, false, true},
+        {true, false, true, true, true, true, true, true, false, true},
+        {true, false, false, false, false, false, false, false, false, true},
+        {true, true, true, true, true, true, true, true, true, true},
+    };
+    SearchEngine::State::goals = std::vector<Goal>{
+        Goal('A', Coord(8,1))
+    };
+    
     std::vector<SearchEngine::State*> states;
 
     for(size_t i = 2; i < 8; i++) {
@@ -26,7 +30,8 @@ TEST(Strategy_Test1, StateCompareTest1) {
 
     for(SearchEngine::State* state: states) {
         for(SearchEngine::State* st: states)
-            ASSERT_EQ(!StateCompare()(state, st)) << "Two different states have been declared identical by the state comparator";
+            if(state != st)
+                ASSERT_EQ(!StateCompare()(state, st), true) << "Two different states have been declared identical by the state comparator";
     }
 
     for(SearchEngine::State* state: states)
@@ -34,7 +39,17 @@ TEST(Strategy_Test1, StateCompareTest1) {
 }
 
 TEST(Strategy_Test1, StatesInHashMap) {
-    Strategy *myStrategy = new Strategy::StrategyBFS();
+    SearchEngine::State::walls = {
+        {true, true, true, true, true, true, true, true, true, true},
+        {true, false, false, false, false, false, false, false, false, true},
+        {true, false, true, true, true, true, true, true, false, true},
+        {true, false, false, false, false, false, false, false, false, true},
+        {true, true, true, true, true, true, true, true, true, true},
+    };
+    SearchEngine::State::goals = std::vector<Goal>{
+        Goal('A', Coord(8,1))
+    };
+    SearchEngine::Strategy *myStrategy = new Strategy::StrategyBFS();
 
     std::vector<SearchEngine::State*> sourceStates;
     SearchEngine::State *state1 = new SearchEngine::State();
@@ -54,14 +69,15 @@ TEST(Strategy_Test1, StatesInHashMap) {
     state2copy->setBoxes ( { Box(YELLOW, 'A', Coord(3,1))} );
 
 
-    myStrategy.addToFrontier(state1);
-    myStrategy.addToExplored(state2);
+    myStrategy->addToFrontier(state1);
+    myStrategy->addToExplored(state2);
 
-    ASSERT_EQ(myStrategy.inFrontier(state1copy));
-    ASSERT_EQ(myStrategy.isExplored(state2copy));
+    ASSERT_EQ(myStrategy->inFrontier(state1copy), true);
+    ASSERT_EQ(myStrategy->isExplored(state2copy), true);
     
     delete state1;
     delete state2;
-    delete state3;
+    delete state1copy;
+    delete state2copy;
     delete myStrategy;    
 }
