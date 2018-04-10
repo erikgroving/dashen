@@ -58,7 +58,7 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
 
         State *leaf = strategy.getAndRemoveLeaf();
         
-        if(iterations % 1000 == 0) {
+        if(iterations % 10000 == 0) {
             std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
             printMap(leaf);
         }
