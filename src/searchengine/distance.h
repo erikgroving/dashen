@@ -7,7 +7,9 @@
 #include <utility>
 
 #include "typedefs.h"
+#include "predicate.h"
 #include "state.h"
+#include "queue"
 
 namespace SearchEngine {
 
