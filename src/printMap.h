@@ -28,9 +28,9 @@ void printMap(SearchEngine::State *state) {
 void printDistances(std::vector<std::vector<short int> >  dist){
     for (const auto& inner : dist) {
         for (auto value : inner) {
-            cout << value << " ";
+            std::cout << value << " ";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 }
 

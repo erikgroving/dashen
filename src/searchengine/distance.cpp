@@ -3,6 +3,12 @@
 using SearchEngine::State;
 using SearchEngine::Distance;
 
+Distance::Distance() {
+    
+}
+Distance::~Distance() {
+    
+}
 
 std::vector<std::vector<short int> > 
 Distance::getDistanceFromPosition(const State &state, size_t x, size_t y) {

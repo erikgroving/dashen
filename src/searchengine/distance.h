@@ -17,10 +17,9 @@ class Distance {
 public:
 
     /* Constructors */
-    //Distance();
+    Distance();
     ~Distance();
-
-    Distance(const State &state);
+    //Distance(const State &state);
 
     std::vector<std::vector<short int> > 
         getDistanceFromPosition(const State &state, size_t x, size_t y);
@@ -29,8 +28,8 @@ public:
 
 private:
 
-    State &state;
-    std::vector<std::vector<std::vector<std::vector<short int> > > > distanceMatrix;
+    //State &state;
+    //std::vector<std::vector<std::vector<std::vector<short int> > > > distanceMatrix;
 
 };
 

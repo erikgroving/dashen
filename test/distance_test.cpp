@@ -4,6 +4,7 @@
 #include "../src/searchengine/searchengine"
 #include "../src/strategies/strategies"
 #include "../src/searchclient/searchclient"
+#include "../src/printMap.h"
 
 using SearchEngine::Command;
 using SearchEngine::Strategy;
@@ -32,7 +33,11 @@ TEST(DistanceTests, DistanceTest1) {
     initialState.setAgents(std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(1,1)} });
     initialState.setBoxes({ Box(YELLOW, 'A', Coord(7,1))});
 
-    
+    SearchEngine::Distance *distance = new SearchEngine::Distance();
+    auto result = distance->getDistanceFromPosition(initialState, 1, 1);
 
+    printDistances(result);
+
+    delete distance;
 
 }
