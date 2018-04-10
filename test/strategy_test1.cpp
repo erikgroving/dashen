@@ -30,8 +30,9 @@ TEST(Strategy_Test1, StateCompareTest1) {
 
     for(SearchEngine::State* state: states) {
         for(SearchEngine::State* st: states)
-            if(state != st)
+            if(state != st) {
                 ASSERT_EQ(!StateCompare()(state, st), true) << "Two different states have been declared identical by the state comparator";
+            }
     }
 
     for(SearchEngine::State* state: states)
