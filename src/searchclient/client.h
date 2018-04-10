@@ -26,7 +26,7 @@ class Client {
         /* Only a default constructor is required. The client class is the main one of the program
          * and is responsible for all the other elements.
          */
-        Client(SearchEngine::Strategy *strategy);
+        Client(SearchEngine::Strategy *strategy = nullptr);
 
     public:
         /**

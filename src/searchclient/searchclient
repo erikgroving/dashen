@@ -1,2 +1,3 @@
 #include "agent.h"
+#include "blackboard.h"
 #include "client.h"

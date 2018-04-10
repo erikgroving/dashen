@@ -9,7 +9,18 @@ typedef struct Coord {
     int x;
     int y;
 
-    Coord(int xCoord, int yCoord) : x(xCoord), y(yCoord){}
+    Coord(int xCoord = -1, int yCoord = -1) : x(xCoord), y(yCoord){}
+    Coord(const Coord &c): x(c.x), y(c.y) {}
+    Coord& operator=(const Coord &c) {
+        x = c.x;
+        y = c.y;
+        return *this;
+    }
+
+    bool operator==(const Coord &c) const {
+        return !operator!=(c);
+    }
+
     bool operator!=(const Coord &c) const {
         return c.x != x || c.y != y;
     }
