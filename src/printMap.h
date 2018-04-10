@@ -24,4 +24,15 @@ void printMap(SearchEngine::State *state) {
         std::cerr << std::endl;
     }
 }
+
+void printDistances(std::vector<std::vector<short int> >  dist){
+    for (const auto& inner : dist) {
+        for (auto value : inner) {
+            cout << value << " ";
+        }
+        cout << endl;
+    }
+}
+
+
 #endif
