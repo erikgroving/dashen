@@ -38,8 +38,8 @@ class Blackboard {
         std::vector<Entry>& getPositionEntries() { return positionEntries_; } 
         const std::vector<Entry>& getPositionEntries() const { return positionEntries_; }
         
-        const std::vector<Entry>& getGoalsEntries() const { return goalEntries_; }
-        std::vector<Entry>& getGoalsEntries() { return goalEntries_; }
+        const std::vector<Entry>& getGoalEntries() const { return goalEntries_; }
+        std::vector<Entry>& getGoalEntries() { return goalEntries_; }
 
         void removeEntry(const Entry &entry);
     private:

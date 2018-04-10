@@ -10,6 +10,13 @@ typedef struct Coord {
     int y;
 
     Coord(int xCoord = -1, int yCoord = -1) : x(xCoord), y(yCoord){}
+    Coord(const Coord &c): x(c.x), y(c.y) {}
+    Coord& operator=(const Coord &c) {
+        x = c.x;
+        y = c.y;
+        return *this;
+    }
+
     bool operator==(const Coord &c) const {
         return !operator!=(c);
     }
