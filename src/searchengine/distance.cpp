@@ -21,13 +21,15 @@ Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
         distances.push_back(std::vector<short int>(lengthOfRow, -1));
     }
 
-    // Set starting position to zero
-    //distances[x][y] = 0;
-
     // Go with BFS starting from x,y through level and update distance value
     std::queue<std::vector<size_t> > queue;
     std::vector<size_t> initialVector = {x, y, 0}; // x, y, value
-    queue.push(initialVector);
+
+    // if the starting point is a wall, do not add any position to the queue, i.e.
+    // return array filled with -1
+    if (!wallAt(state, x, y)) {
+        queue.push(initialVector);
+    }
 
     while (!queue.empty()) {
         // Get front element        
@@ -36,6 +38,7 @@ Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
 
         //std::cerr << currentElement[0] << " " << currentElement[1] << " "<< currentElement[2] << std::endl;
 
+        // distances are first indixed by row and then column (y,x)
         distances[currentElement[1]][currentElement[0]] = currentElement[2];        
 
         // Set all neighbour values (distances[][]) that are not -1 and add those to queue
@@ -51,7 +54,6 @@ Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
                     
                     queue.push(std::vector<size_t> {newX, newY, currentElement[2]+1});
                     //std::cerr << "pushing: " << newX << " " << newY << " "<< currentElement[2]+1 << std::endl;
-        
                 }
             }
         }
@@ -65,6 +67,20 @@ Distance::getDistanceMatrix(const State *state) {
 
     // Initialization
     std::vector<std::vector<std::vector<std::vector<short int> > > > result;
+
+    for (size_t y=0; y<state->walls.size(); y++) {
+        result.push_back(std::vector<std::vector<std::vector<short int> > > ());
+        for (size_t x=0; x<state->walls[y].size(); x++) {
+            result[y][x] = std::vector<std::vector<short int> > ();
+        }
+    }
+
+    for (size_t y=0; y<state->walls.size(); y++) {
+        //result.push_back(std::vector<std::vector<std::vector<short int> > > ());
+        for (size_t x=0; x<state->walls[y].size(); x++) {
+            result[y][x] = getDistanceFromPosition(state, x, y);
+        }
+    }
 
     return result;
 }

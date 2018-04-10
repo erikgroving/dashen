@@ -39,12 +39,11 @@ TEST(DistanceTests, DistanceTest1) {
 
     SearchEngine::Distance *distance = new SearchEngine::Distance();
     std::cerr << "distance initialization done" << std::endl;
-    auto result = distance->getDistanceFromPosition(&initialState, 1, 1);
+    auto result = distance->getDistanceFromPosition(&initialState, 0, 1);
     std::cerr << "getDistanceFromPosition done" << std::endl;
 
     printDistances(result);
     std::cerr << "printDistances done" << std::endl;
 
     delete distance;
-
 }
