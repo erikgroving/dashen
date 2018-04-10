@@ -33,10 +33,9 @@ Distance::getDistanceFromPosition(const State &state, size_t x, size_t y) {
         // ignore walls
         std::vector<std::vector<int> > directions = {{1,0},{0,1},{-1,0},{0,-1}}; 
         for (std::vector<int> curDirection : directions) {
-            int newX = currentElement[0] + curDirection[0];
-            int newY = currentElement[1] + curDirection[1];
-            if (newX >= 0 && newY >= 0 &&
-                newY <= state.walls.size() &&
+            size_t newX = currentElement[0] + curDirection[0];
+            size_t newY = currentElement[1] + curDirection[1];
+            if (newY <= state.walls.size() &&
                 newX <= state.walls[newY].size() ) {
                 if (distances[newX][newY] == -1 && 
                     !SearchEngine::Predicate::wallAt(&state, newX, newY)) {
