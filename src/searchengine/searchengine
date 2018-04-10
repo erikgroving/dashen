@@ -1,0 +1,8 @@
+#include "command.h"
+#include "heuristic.h"
+#include "predicate.h"
+#include "searchclient.h"
+#include "state_equal_to.h"
+#include "state.h"
+#include "strategy.h"
+#include "typedefs.h"

@@ -1,3 +1,8 @@
+/**
+	Example test file that verifies that the Makefile actually considers
+	both .h and .cpp files
+ */
+ 
 #include <gtest/gtest.h>
 
 int main(int argc, char **argv) {
