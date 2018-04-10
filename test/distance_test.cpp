@@ -11,13 +11,13 @@ using SearchEngine::Strategy;
 using SearchClient::Client;
 
 TEST(DistanceTests, DistanceTest1) {
-    
+    std::cerr << "starting DistanceTest1" << std::endl;
     Direction d1 = E;
     EXPECT_EQ(d1, E);
     Command command(MOVE, E);
     EXPECT_EQ(command.toString(), "Move(E)");
 
-    SearchEngine::Strategy *globalStrategy = new Strategy::StrategyBFS();
+    //SearchEngine::Strategy *globalStrategy = new Strategy::StrategyBFS();
 
     SearchEngine::State initialState;
     SearchEngine::State::walls = {
@@ -32,11 +32,18 @@ TEST(DistanceTests, DistanceTest1) {
     };
     initialState.setAgents(std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(1,1)} });
     initialState.setBoxes({ Box(YELLOW, 'A', Coord(7,1))});
+    std::cerr << "initial box setup done" << std::endl;
+
+    printMap(&initialState);
+    std::cerr << "printMap done" << std::endl;
 
     SearchEngine::Distance *distance = new SearchEngine::Distance();
-    auto result = distance->getDistanceFromPosition(initialState, 1, 1);
+    std::cerr << "distance initialization done" << std::endl;
+    auto result = distance->getDistanceFromPosition(&initialState, 1, 1);
+    std::cerr << "getDistanceFromPosition done" << std::endl;
 
     printDistances(result);
+    std::cerr << "printDistances done" << std::endl;
 
     delete distance;
 

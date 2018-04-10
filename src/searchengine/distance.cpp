@@ -2,6 +2,7 @@
 
 using SearchEngine::State;
 using SearchEngine::Distance;
+using namespace SearchEngine::Predicate;
 
 Distance::Distance() {
     
@@ -11,11 +12,11 @@ Distance::~Distance() {
 }
 
 std::vector<std::vector<short int> > 
-Distance::getDistanceFromPosition(const State &state, size_t x, size_t y) {
+Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
 
     // Initialization
     std::vector<std::vector<short int> > distances;//n, std::vector<short int>(n, -1);
-    for (std::vector<bool> wallvector : state.walls) {
+    for (std::vector<bool> wallvector : state->walls) {
         size_t lengthOfRow = wallvector.size();
         distances.push_back(std::vector<short int>(lengthOfRow, -1));
     }
@@ -33,7 +34,9 @@ Distance::getDistanceFromPosition(const State &state, size_t x, size_t y) {
         std::vector<size_t> currentElement = queue.front();
         queue.pop();
 
-        distances[currentElement[0]][currentElement[1]] = currentElement[2];        
+        //std::cerr << currentElement[0] << " " << currentElement[1] << " "<< currentElement[2] << std::endl;
+
+        distances[currentElement[1]][currentElement[0]] = currentElement[2];        
 
         // Set all neighbour values (distances[][]) that are not -1 and add those to queue
         // ignore walls
@@ -41,15 +44,27 @@ Distance::getDistanceFromPosition(const State &state, size_t x, size_t y) {
         for (std::vector<int> curDirection : directions) {
             size_t newX = currentElement[0] + curDirection[0];
             size_t newY = currentElement[1] + curDirection[1];
-            if (newY <= state.walls.size() &&
-                newX <= state.walls[newY].size() ) {
-                if (distances[newX][newY] == -1 && 
-                    !SearchEngine::Predicate::wallAt(&state, newX, newY)) {
+            //std::cerr << "testing " << newX << " " << newY << std::endl;
+            if (inBound(state, newX, newY) ) {
+                if (distances[newY][newX] == -1 && 
+                    !wallAt(state, newX, newY)) {
                     
                     queue.push(std::vector<size_t> {newX, newY, currentElement[2]+1});
+                    //std::cerr << "pushing: " << newX << " " << newY << " "<< currentElement[2]+1 << std::endl;
+        
                 }
             }
         }
     }
     return distances;
+}
+
+
+std::vector<std::vector<std::vector<std::vector<short int> > > > 
+Distance::getDistanceMatrix(const State *state) {
+
+    // Initialization
+    std::vector<std::vector<std::vector<std::vector<short int> > > > result;
+
+    return result;
 }
