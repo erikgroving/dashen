@@ -4,7 +4,7 @@
 using SearchEngine::Command;
 
 std::vector<Command> Command::possibleActions = std::vector<Command>{
-                /* No opeartion */
+                /* No operation */
                 Command(), // Command::NoOperation,
 
                 /* Move operation */
