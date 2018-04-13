@@ -4,7 +4,7 @@
 #include "../searchengine/strategy.h"
 #include "../searchengine/state.h"
 
-namespace Strategy {
+namespace Strat {
 
 class StrategyDFS : public SearchEngine::Strategy {
 

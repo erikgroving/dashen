@@ -2,7 +2,7 @@
 #define STRATEGY_STRATEGYBFS_H
 
 #include "../searchengine/strategy.h"
-namespace Strategy {
+namespace Strat {
 
 class StrategyBFS : public SearchEngine::Strategy {
 

@@ -22,16 +22,16 @@ int main(int argc,  char **argv) {
     std::string searchStrategy(argv[1], strlen(argv[1]));
 
     if(searchStrategy == "--dfs") {
-        globalStrategy = new Strategy::StrategyDFS();
+        globalStrategy = new Strat::StrategyDFS();
     }
     else if(searchStrategy == "--bfs") {
-        globalStrategy = new Strategy::StrategyBFS();
+        globalStrategy = new Strat::StrategyBFS();
     }
     else if(searchStrategy == "--greedy") {
-        // globalStrategy = new Strategy::StrategyHeuristic<>();
+        // globalStrategy = new Strat::StrategyHeuristic<>();
     }
     else if(searchStrategy == "--astar") {
-        globalStrategy = new Strategy::StrategyHeuristic<Heuristic::BasicAStar>();
+        globalStrategy = new Strat::StrategyHeuristic<Heuristic::BasicAStar>();
     }
     else {
         std::cerr << "Unrecognized search strategy" << searchStrategy << std::endl;

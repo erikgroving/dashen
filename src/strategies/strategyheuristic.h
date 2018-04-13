@@ -7,7 +7,7 @@
 #include "../searchengine/strategy.h"
 #include "../searchengine/heuristic.h"
 
-namespace Strategy {
+namespace Strat {
 
 template<typename Heuristic>
 class StrategyHeuristic: public SearchEngine::Strategy

@@ -50,7 +50,7 @@ TEST(Strategy_Test1, StatesInHashMap) {
     SearchEngine::State::goals = std::vector<Goal>{
         Goal('A', Coord(8,1))
     };
-    SearchEngine::Strategy *myStrategy = new Strategy::StrategyBFS();
+    SearchEngine::Strategy *myStrategy = new Strat::StrategyBFS();
 
     std::vector<SearchEngine::State*> sourceStates;
     SearchEngine::State *state1 = new SearchEngine::State();

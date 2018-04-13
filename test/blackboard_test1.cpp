@@ -5,12 +5,12 @@
 #include "../src/searchclient/client.h"
 #include "../src/searchclient/blackboard.h"
 #include "../src/searchengine/typedefs.h"
-
+#include "../src/strategies/strategies"
 using SearchClient::Blackboard;
 TEST(BlackboardTest1, AddEntry) {
     SearchClient::Blackboard blackboard;
 
-    SearchEngine::Strategy *strat;
+    SearchEngine::Strategy *strat = new Strat::StrategyDFS();
 
     SearchClient::Client client(strat);
     SearchClient::Agent dummyClient(Color::YELLOW, 0, Coord(), strat, &client);

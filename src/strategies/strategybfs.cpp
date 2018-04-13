@@ -1,6 +1,6 @@
 #include "strategybfs.h"
 
-using Strategy::StrategyBFS;
+using Strat::StrategyBFS;
 
 void StrategyBFS::addToFrontierStrategy(SearchEngine::State *state) {
       queue.push_back(state);

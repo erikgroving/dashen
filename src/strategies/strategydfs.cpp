@@ -1,6 +1,6 @@
 #include "strategydfs.h"
 
-using Strategy::StrategyDFS;
+using Strat::StrategyDFS;
 
 void StrategyDFS::addToFrontierStrategy(SearchEngine::State *state) {
       queue.emplace_back(state);

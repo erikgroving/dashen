@@ -1,7 +1,7 @@
 #include "strategyheuristic.h"
 
 using SearchEngine::State;
-using Strategy::StrategyHeuristic;
+using Strat::StrategyHeuristic;
 
 template<typename Heuristic>
 StrategyHeuristic<Heuristic>::StrategyHeuristic(): SearchEngine::Strategy(), queue(Heuristic()) {
