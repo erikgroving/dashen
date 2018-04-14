@@ -6,6 +6,7 @@
 #include "searchengine/searchengine"
 #include "strategies/strategies"
 #include "heuristics/astarheuristic.h"
+#include "searchengine/master.h"
 
 #define DEBUG_MODE true
 // #define SERVERLESS_MODE
@@ -28,10 +29,10 @@ int main(int argc,  char **argv) {
         globalStrategy = new Strat::StrategyBFS();
     }
     else if(searchStrategy == "--greedy") {
-        // globalStrategy = new Strat::StrategyHeuristic<>();
+        globalStrategy = new Strat::StrategyGreedy();
     }
     else if(searchStrategy == "--astar") {
-        globalStrategy = new Strat::StrategyHeuristic<Heuristic::BasicAStar>();
+    //    globalStrategy = new Strat::StrategyHeuristic<Heuristic::BasicAStar>();
     }
     else {
         std::cerr << "Unrecognized search strategy" << searchStrategy << std::endl;
@@ -71,10 +72,12 @@ int main(int argc,  char **argv) {
         
         std::cerr << "Single agent mode has been identified" << std::endl;
         std::cerr << "Starting the search..." << std::endl;
-        agents[0].makeSearch();
+        //agents[0].makeSearch();
+        SearchEngine::Master master;
+        master.conductSearch();
 
         std::cerr << "Search over. Sending the computed to the server... (Size = " << searchClient.getCurrentActionPlan().size() << ")";
-        searchClient.send( searchClient.getCurrentActionPlan() );
+        //searchClient.send( searchClient.getCurrentActionPlan() );
         std::cerr << " Complete !" << std::endl;
     }
 

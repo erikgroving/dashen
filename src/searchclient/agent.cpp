@@ -1,13 +1,13 @@
 #include "agent.h"
 
 using SearchClient::Agent;
-using SearchEngine::SearchClient;
+using SearchClient::Client;
 using namespace SearchEngine::Predicate;
 
 SearchEngine::State *Agent::sharedState;
 
-Agent::Agent(Color color, char num, Coord loc,
-             SearchEngine::Strategy *strategy, SearchClient::Client *client) :
+Agent::Agent(Color color, char num, Coord loc, 
+                SearchEngine::Strategy *strategy, SearchClient::Client *client) :
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 

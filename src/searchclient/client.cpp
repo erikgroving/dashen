@@ -31,7 +31,9 @@ void Client::setAction(size_t agentId, const Command &command) {
         resetJointAction();
     }
     else if( getProblemType() == MultiAgent ) {
-        std::cerr << "MultiAgent not supported yet" << std::endl;
+        for (int i = 0; i < State::numAgents; i++) {
+
+        }
     }
     else {
         std::cerr << "Cannot set a move in a invalid problem" << std::endl;

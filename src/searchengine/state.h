@@ -22,6 +22,7 @@ public:
 
     /* Operators */
     bool operator==(const State &compared) const;
+    bool operator<(const State &compared) const;
 
     /* Static public objects */
     static std::vector<Goal> goals;
