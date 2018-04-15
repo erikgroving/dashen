@@ -70,18 +70,9 @@ int main(int argc,  char **argv) {
 // SingleAgent mode
 #ifndef SERVERLESS_MODE   
 
-    if(searchClient.getProblemType() == SearchClient::Client::SingleAgent) {
-        
-        std::cerr << "Single agent mode has been identified" << std::endl;
         std::cerr << "Starting the search..." << std::endl;
-        //agents[0].makeSearch();
         SearchEngine::Master master(initialState, agents);
         master.conductSearch();
-
-        std::cerr << "Search over. Sending the computed to the server... (Size = " << searchClient.getCurrentActionPlan().size() << ")";
-        //searchClient.send( searchClient.getCurrentActionPlan() );
-        std::cerr << " Complete !" << std::endl;
-    }
 
 #else
 
@@ -93,15 +84,6 @@ int main(int argc,  char **argv) {
             std::cout << "Step " << ++i << ": " << step->getAction().toActionString() << std::endl;        
     }
 #endif
-    /*
-    else if(searchClient.getProblemType() == SearchClient::Client::MultiAgent) {
-        std::cerr << "Error: Multi agent problem solving in not available yet" << std::endl;
-    }
-    else {
-        std::cerr << "The level that was transmitted does not contain any agent." << std::endl;
-    }
-    */
-
     /* Solely to allow printing to finish */
     std::this_thread::sleep_for(std::chrono::seconds(1));
     std::cerr.flush();

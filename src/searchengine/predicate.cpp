@@ -4,7 +4,6 @@ using SearchEngine::State;
 using namespace SearchEngine::Predicate;
 
 bool SearchEngine::Predicate::isGoalState(const State *input) {
-    // TODO: OPTIMIZE THIS. 
     for (const Goal& g : State::goals) {
         bool satisfied = false;
         for (const Box& b : input->getBoxes()) {
@@ -20,7 +19,8 @@ bool SearchEngine::Predicate::isGoalState(const State *input) {
 }
 
 bool SearchEngine::Predicate::isFree(const State *input, int x, int y) {
-
+    //std::cerr << "inBound: " << inBound(input, x, y) << " agentAt: " << agentAt(input,x,y) <<
+    //        " boxAt" << boxAt(input, x, y) << " wallAt " << wallAt(input, x, y) << std::endl;
     return inBound(input, x, y)  &&
            !agentAt(input, x, y) &&
            !boxAt(input, x, y)   &&
@@ -57,13 +57,13 @@ bool SearchEngine::Predicate::goalAt(const State *input, int x, int y, int *goal
 
 
 bool SearchEngine::Predicate::agentAt(const State *input, int x, int y, int *agentIndex) {
-    for(size_t i = 0; i < input->getAgents().size(); i++ ){
-         if (input->getAgents()[i].loc.x == x &&
-             input->getAgents()[i].loc.y == y ) {
-
-             if(agentIndex > 0) *agentIndex = i;
-             return true;
-         }
+    std::vector<AgentDescription> agentDescs = input->getAgents();
+    for(size_t i = 0; i < agentDescs.size(); i++ ){
+        if (agentDescs[i].loc.x == x &&
+            agentDescs[i].loc.y == y ) {
+            if(agentIndex > 0) *agentIndex = i;
+            return true;
+        }
      }
      return false;
 }

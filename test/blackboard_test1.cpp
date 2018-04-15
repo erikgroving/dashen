@@ -15,9 +15,9 @@ TEST(BlackboardTest1, AddEntry) {
     SearchClient::Client client(strat);
     SearchClient::Agent dummyClient(Color::YELLOW, 0, Coord(), strat, &client);
 
-    Blackboard::Entry dummy1 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::PositionEntry, dummyClient);
-    Blackboard::Entry dummy2 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::GlobalGoalEntry, dummyClient);
-    Blackboard::Entry dummy3 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::MoveHelpGoalEntry, dummyClient);
+    Blackboard::Entry dummy1 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::POSITION_ENTRY, dummyClient);
+    Blackboard::Entry dummy2 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::GLOBAL_GOAL_ENTRY, dummyClient);
+    Blackboard::Entry dummy3 = SearchClient::Blackboard::Entry::create(SearchClient::Blackboard::Entry::MOVE_HELP_GOAL_ENTRY, dummyClient);
 
     dummy1.setPosition(Coord(1,1));
 

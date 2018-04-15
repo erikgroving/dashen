@@ -37,8 +37,13 @@ namespace SearchEngine {
             SearchClient::JointAction callForActions();
             /* Update the current state to reflect the previous actions */
             void updateCurrentState(SearchClient::JointAction);
-            /* Sends the joint plan once a universal goal state is found */
-            void sendJointPlan();
+            /* Sends the solution once a universal goal state is found */
+            void sendSolution();
+            /* Checks if a sub-action in a joint action plan is valid, used by updateCurrentState */
+            bool isActionValid(SearchEngine::Command, char, int, int);
+            /* Performs a sub-action on the internal state, used by updateCurrentState*/
+            void updateStateWithNewMove(SearchEngine::Command, char, int, int);
+
     };
 }
 

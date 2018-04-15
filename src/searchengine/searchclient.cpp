@@ -15,11 +15,11 @@ void printMap(const State *state) {
             if(wallAt(state, j, i))
                 std::cerr << "+"; 
             else if(agentAt(state, j, i, &index))
-                std::cerr << "0" /* state->getAgents()[index].num */ ;
+                std::cerr << (char)(state->getAgents()[index].num + '0');
             else if(boxAt(state, j, i, &index))
                 std::cerr << state->getBoxes()[index].letter;
             else if(goalAt(state, j, i, &index))
-                std::cerr << "a" /* SearchEngine::State::goals[index].letter */;
+                std::cerr << (char)(SearchEngine::State::goals[index].letter - 'A' + 'a');
             else
                 std::cerr << " ";
         }
@@ -81,7 +81,7 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
                //  std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
-             std::cerr << std::endl;
+             //std::cerr << std::endl;
         } 
 
         iterations++;

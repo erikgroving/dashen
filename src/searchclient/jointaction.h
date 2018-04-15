@@ -3,6 +3,7 @@
 
 #include "../searchengine/command.h"
 #include <vector>
+#include <string>
 
 namespace SearchClient {
 
@@ -31,6 +32,16 @@ class JointAction {
             for(size_t i = 0; i < size; i++)
                 data[i] = SearchEngine::Command();
         }
+
+        std::string toActionString() {
+           std::string ret = "[";
+           for (SearchEngine::Command cmd : data) {
+               ret += cmd.toString() + ",";
+           }
+           ret[ret.length() - 1] = ']';
+           return ret;
+        }
+
 
     private:
         std::vector<SearchEngine::Command> data;

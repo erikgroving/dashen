@@ -99,7 +99,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         if (satisfied) {
             // Identify a suitable goal from the blackboard
             std::vector<SearchClient::Blackboard::Entry> entries = b->getGoalEntries();
-            for (auto entry : entries) {
+            for (auto& entry : entries) {
                 if (entry.getType() == SearchClient::Blackboard::Entry::EntryType::GLOBAL_GOAL_ENTRY) {
                     /* Find the goal for that position */
                     Coord entryLoc = entry.getPosition();
@@ -110,6 +110,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
                         }
                     }
                     if (isEntryDoable(potGoal, s)) {
+                        b->removeEntry(entry); 
                         search_goal = potGoal;
                     }
                 }

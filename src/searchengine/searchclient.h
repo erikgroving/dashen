@@ -9,6 +9,8 @@
 #include "state.h"
 #include "predicate.h"
 
+void printMap(const SearchEngine::State*);
+
 namespace SearchEngine {
 
 /**

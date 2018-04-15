@@ -74,7 +74,7 @@ private:
 
     Color color;
     char num;
-    Coord loc; // is it still useful ?
+    Coord loc; // is it still useful ? not if we are using state
 
     SearchEngine::Strategy *searchStrategy_;
     std::vector<Goal> goalsToAchieve;
