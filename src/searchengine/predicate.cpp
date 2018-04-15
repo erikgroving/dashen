@@ -4,10 +4,17 @@ using SearchEngine::State;
 using namespace SearchEngine::Predicate;
 
 bool SearchEngine::Predicate::isGoalState(const State *input) {
-    for(const Box &box: input->getBoxes()) {
-        // Find if the goal is on the right location
-        if(!boxOnGoal(input, box))
+    // TODO: OPTIMIZE THIS. 
+    for (const Goal& g : State::goals) {
+        bool satisfied = false;
+        for (const Box& b : input->getBoxes()) {
+            if (g.loc == b.loc && g.letter == b.letter) {
+                satisfied = true;
+            }
+        }
+        if (!satisfied) {
             return false;
+        }
     }
     return true;
 }
@@ -71,6 +78,15 @@ bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
         if(box.loc.x != goal.loc.x || box.loc.y != goal.loc.y) continue;
 
         return true;
+    }
+    return false;
+}
+
+bool SearchEngine::Predicate::goalHasCorrectBox(const State* input, const Goal goal) {
+    for (const Box &b : input->getBoxes()) {
+        if (b.letter == goal.letter && b.loc == goal.loc) {
+            return true;
+        }
     }
     return false;
 }

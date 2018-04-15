@@ -3,10 +3,11 @@
 
 #include <vector>
 #include "../searchengine/searchengine"
+#include "blackboard.h"
 #include "client.h"
 
 namespace SearchClient {
-
+class Blackboard;
 class Client;
 class Agent {
 
@@ -41,11 +42,26 @@ public: // Search methods
     /**
      * Given a goal, return a sequence of action to accomplish it.
      */
-    std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy &strategy);
+    std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy* strategy);
     /**
      * Returns a sequence of action that accomplishes all the goals according to the given strategy.
      */
     std::vector<SearchEngine::State*> searchAllGoals(SearchEngine::Strategy &strategy);
+
+    /**
+     * Returns the next move in the plan if there is one. otherwise
+     * will generate a new plan and return head of that plan
+     */
+    SearchEngine::Command nextMove(SearchClient::Blackboard* b, SearchEngine::State s);
+
+    /**
+     * Checks to see if the entry is doable by the agent, this currently means
+     * that the agent checks that there is a box with th same color as the
+     * agent that has the same letter as the goal
+     */
+    bool isEntryDoable(Goal g, SearchEngine::State& s); 
+
+    
 
 public: // Static public methods
     /**
@@ -69,6 +85,11 @@ private:
 
     SearchClient::Client *client_;
 
+    /* Added with master class update. */
+    std::vector<Goal> takenGoals;   // goals taken down from blackboard.
+                                    // help requests delete upon completion,
+                                    // tile requests stay after completion
+    std::vector<SearchEngine::Command> plan_;
 };
 
 }

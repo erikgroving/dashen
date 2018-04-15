@@ -18,6 +18,7 @@ namespace Predicate
     bool isFree(const State *input, int x, int y);
 
     /**
+     * TODO: MODIFY THIS DESCRIPTION. GOAL STATE IS GOALS ARE MATCHED, NOT BOXES ALL MATCHED
      * Check if input is a goal state. A state is the goal state if all the boxes are placed on their respective goal.
      * \return true if all the boxes are on their respective goals in state input.
      */
@@ -54,6 +55,8 @@ namespace Predicate
     bool wallAt(const State *input, int x, int y);
     
     bool boxOnGoal(const State *input, const Box &box);
+
+    bool goalHasCorrectBox(const State* input, const Goal goal);
 
     unsigned long distanceToClosestGoal(const State *input, const Box &box, int *goalIndex = nullptr);
     /**

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <chrono>
+#include <thread>
 
 #include "searchclient/searchclient"
 #include "searchengine/searchengine"
@@ -73,7 +75,7 @@ int main(int argc,  char **argv) {
         std::cerr << "Single agent mode has been identified" << std::endl;
         std::cerr << "Starting the search..." << std::endl;
         //agents[0].makeSearch();
-        SearchEngine::Master master;
+        SearchEngine::Master master(initialState, agents);
         master.conductSearch();
 
         std::cerr << "Search over. Sending the computed to the server... (Size = " << searchClient.getCurrentActionPlan().size() << ")";
@@ -99,6 +101,10 @@ int main(int argc,  char **argv) {
         std::cerr << "The level that was transmitted does not contain any agent." << std::endl;
     }
     */
+
+    /* Solely to allow printing to finish */
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::cerr.flush();
     delete globalStrategy;
     return 0;
 }

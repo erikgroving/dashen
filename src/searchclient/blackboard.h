@@ -4,28 +4,30 @@
 #include <algorithm>
 #include <vector>
 
-#include "agent.h"
 #include "../searchengine/typedefs.h" 
+#include "agent.h"
 
 namespace SearchClient {
 
+class Agent; 
 /**
  * A blackboard is an environment in which different types of informations can be disposed
  * by agents.
  * The entries can have different types:
- * -> PositionEntry: indicates that an agent is going to be at a certain position at a certain timestep
+ * -> POSITIONENTRY: indicates that an agent is going to be at a certain position at a certain timestep
  * -> GoalEntry: indicates open goals that can be retrieved by agents.
- *      |_ GlobalGoalEntry: a goal tile needs a box on it
- *      |_ MoveHelpGoalEntry: a box needs to be moved
+ *      |_ GLOBAL_GOAL_ENTRY: a goal tile needs a box on it
+ *      |_ MOVE_HELP_GOAL_ENTRY: a box needs to be moved
  * 
  * More entry types can be added. Don't forget to update this little specification when designing a new one !
  * 
  * An entry MUST contain the following information:
  * -> Entry type
- * -> Position in the entry (coordinates of the goal for a GlobalGoalEntry, coordinates of the box that needs to 
- *    be moved for a MoveHelpGoalEntry, coordinates of the agent at a specific time step for a PositionEntry)
+ * -> Position in the entry (coordinates of the goal for a GLOBAL_GOAL_ENTRY, coordinates of the box that needs to 
+ *    be moved for a MOVE_HELP_GOAL_ENTRY, coordinates of the agent at a specific time step for a POSITIONENTRY)
  * -> Primary key (practically using the index) of the agent that created the entry
  */
+
 class Blackboard {
     public: 
         Blackboard();
@@ -50,10 +52,10 @@ class Blackboard {
 class Blackboard::Entry {
     public:
         enum EntryType {
-            None,
-            PositionEntry,
-            GlobalGoalEntry,
-            MoveHelpGoalEntry
+            NONE,
+            POSITION_ENTRY,
+            GLOBAL_GOAL_ENTRY,
+            MOVE_HELP_GOAL_ENTRY
         };
 
         Entry();

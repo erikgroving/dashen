@@ -30,7 +30,6 @@ class JointAction {
             data.resize(size);
             for(size_t i = 0; i < size; i++)
                 data[i] = SearchEngine::Command();
-
         }
 
     private:

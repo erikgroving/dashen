@@ -14,13 +14,13 @@ namespace SearchEngine {
 /**
  *  \brief A search client is in charge of supervising the search algorithm.
  */
-class SearchClient {
+class SearchCli {
 
 public:
     /**
      * \brief Creates the search client with the given initial state.
      */
-    SearchClient(SearchEngine::State *initialState, bool printInitialState = false);
+    SearchCli(SearchEngine::State *initialState, bool printInitialState = false);
     
     /**
      * Conduct a whole search with the given search strategy.

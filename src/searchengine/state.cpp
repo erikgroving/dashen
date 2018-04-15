@@ -37,6 +37,8 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
         if(!inBound(this, newAgentCol, newAgentRow))
             continue;
 
+
+
         if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Agent could move to (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
 
@@ -121,8 +123,7 @@ std::vector<State*> State::extractPlan() {
 
     State *parentState = parent;
 
-    while(parentState != NULL) {
-        // std::cerr << parentState;
+    while(parentState->parent != NULL) {
         result.insert(result.begin(), parentState);
         parentState = parentState->parent;
     }

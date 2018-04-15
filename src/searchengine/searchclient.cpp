@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-using SearchEngine::SearchClient;
+using SearchEngine::SearchCli;
 using SearchEngine::Strategy;
 using SearchEngine::State;
 using namespace SearchEngine::Predicate;
@@ -28,7 +28,7 @@ void printMap(const State *state) {
     }
 }
 
-SearchClient::SearchClient(State *initialState, bool printInitialState): initialState_(initialState) {
+SearchCli::SearchCli(State *initialState, bool printInitialState): initialState_(initialState) {
     if(printInitialState) {
         std::cerr << "Initial state:" << std::endl;
 
@@ -44,17 +44,17 @@ SearchClient::SearchClient(State *initialState, bool printInitialState): initial
         
 }
 
-std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int agentIndex) {
+std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agentIndex) {
     
     std::cerr << "The search is conducted with the Strategy " << strategy.name() << std::endl;
 
     int iterations = 0;
     strategy.addToFrontier(initialState_);
-
     while(true) {
         
-        if(strategy.frontierIsEmpty())
+        if(strategy.frontierIsEmpty()) {
             return std::vector<State*>();
+        }
 
         State *leaf = strategy.getAndRemoveLeaf();
         
@@ -73,16 +73,15 @@ std::vector<State*> SearchClient::search(SearchEngine::Strategy &strategy, int a
         
         std::cerr << "===================" << std::endl;
         std::cerr << "getExpendedNodes" << std::endl;*/
-        auto vector  = leaf->getExpandedNodes(agentIndex);
+        auto expandedNodes = leaf->getExpandedNodes(agentIndex);
         /*std::cerr << "===================" << std::endl;*/
-
-        for(State *state: vector) {
-            // std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
+        for(State *state: expandedNodes) {
+             //std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
             if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {
-                // std::cerr << "(Valid)";
+               //  std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
-            // std::cerr << std::endl;
+             std::cerr << std::endl;
         } 
 
         iterations++;

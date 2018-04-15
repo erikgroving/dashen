@@ -2,7 +2,7 @@
 
 using SearchClient::Blackboard;
 
-Blackboard::Entry::Entry(): parent_(0), type_(Entry::None), position_(), authorId_(-1) {}
+Blackboard::Entry::Entry(): parent_(0), type_(Entry::NONE), position_(), authorId_(-1) {}
 
 Blackboard::Entry::Entry(const Entry &src): parent_(src.parent_), type_(src.type_), 
     position_(src.position_), authorId_(src.authorId_) {}
@@ -52,11 +52,11 @@ Blackboard::Blackboard(): positionEntries_(), goalEntries_() { }
 void Blackboard::addEntry(Blackboard::Entry &entry) {
     
     switch(entry.getType()) {
-        case Blackboard::Entry::PositionEntry:
+        case Blackboard::Entry::POSITION_ENTRY:
             positionEntries_.push_back(entry);
             break;
-        case Blackboard::Entry::GlobalGoalEntry:
-        case Blackboard::Entry::MoveHelpGoalEntry:
+        case Blackboard::Entry::GLOBAL_GOAL_ENTRY:
+        case Blackboard::Entry::MOVE_HELP_GOAL_ENTRY:
             goalEntries_.push_back(entry);
             break;
 
@@ -71,13 +71,13 @@ void Blackboard::addEntry(Blackboard::Entry &entry) {
 void Blackboard::removeEntry(const Blackboard::Entry &entry) {
 
     switch(entry.getType()) {
-        case Blackboard::Entry::PositionEntry:
+        case Blackboard::Entry::POSITION_ENTRY:
             positionEntries_.erase(
                 std::remove(positionEntries_.begin(), positionEntries_.end(), entry)
             );
             break;
-        case Blackboard::Entry::GlobalGoalEntry:
-        case Blackboard::Entry::MoveHelpGoalEntry:
+        case Blackboard::Entry::GLOBAL_GOAL_ENTRY:
+        case Blackboard::Entry::MOVE_HELP_GOAL_ENTRY:
             goalEntries_.erase(
                 std::remove(goalEntries_.begin(), goalEntries_.end(), entry)
             );
