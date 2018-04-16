@@ -1,5 +1,6 @@
 #include "agent.h"
 #include "../strategies/strategies"
+#include "../heuristics/greedyheuristic.h"
 using SearchClient::Agent;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
@@ -11,7 +12,7 @@ Agent::Agent(Color color, char num, Coord loc,
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), client_(client) {
+            private_initialState(), client_(client), currentSearchGoal_(nullptr) {
 
 }
 
@@ -88,7 +89,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         Goal potGoal('-', Coord(-1, -1));
         Goal search_goal('-', Coord(-1, -1));
         // See if we have any unsatisfied goals
-        for (Goal& g : takenGoals) {
+        for (Goal& g : takenGoals_) {
             if (!goalHasCorrectBox(&s, g)) {
                 satisfied = false;
                 unsatGoal = g;
@@ -124,8 +125,11 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
             return SearchEngine::Command(); // no goals so send a NoOp back
         }
 
+        currentSearchGoal_ = &search_goal;
+
         // Search to find the answer for the goal
-        SearchEngine::Strategy* strat = new Strat::StrategyBFS();
+        //SearchEngine::Strategy* strat = new Strat::StrategyBFS();
+        SearchEngine::Strategy* strat = new Strat::StrategyHeuristic<Heur::GreedyHeuristic>(this);
         std::vector<SearchEngine::State*> ans = searchGoal(search_goal, strat); //TODO reflect proper strategy
         // Construct a  plan for the answer
         for (auto a : ans) {
@@ -133,6 +137,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         }
         delete(strat);
     }
+
 
     SearchEngine::Command ret = plan_[0];
     plan_.erase(plan_.begin());

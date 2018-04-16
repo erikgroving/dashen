@@ -13,12 +13,17 @@ class Agent {
 
 public:
     Agent (Color color, char num, Coord loc, SearchEngine::Strategy *strategy, SearchClient::Client *client);
+    
+    bool operator<(const Agent& a) { return num < a.num;  }
 
     void updateGoalsList(const SearchEngine::State &initialState);
     void updateBoxesList(const SearchEngine::State &initialState);
 
     const Coord& getLocation() const { return loc; }
     Coord& getLocation() { return loc; }
+
+    const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
+    Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
 
     int getIndex() const { return num; }
     const SearchEngine::Strategy* getSearchStrategy() const { return searchStrategy_; }
@@ -84,9 +89,9 @@ private:
     SearchEngine::State *private_initialState;
 
     SearchClient::Client *client_;
-
+    Goal* currentSearchGoal_;
     /* Added with master class update. */
-    std::vector<Goal> takenGoals;   // goals taken down from blackboard.
+    std::vector<Goal> takenGoals_;   // goals taken down from blackboard.
                                     // help requests delete upon completion,
                                     // tile requests stay after completion
     std::vector<SearchEngine::Command> plan_;

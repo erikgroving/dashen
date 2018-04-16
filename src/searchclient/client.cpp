@@ -102,7 +102,6 @@ State Client::initState() {
                     }
                     char num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
-
                     agents.push_back( Agent(color, num, currCoord, searchStrategy_, this) );
                     numAgents++;
                 }
@@ -122,13 +121,17 @@ State Client::initState() {
             row++;
         }
     }
-
+    
+    /* Sort agents so agent idx is correct */
+    std::sort(agents.begin(), agents.end());
+    std::sort(agentsDescription.begin(), agentsDescription.end());
     State::numAgents = numAgents;
     State::goals = goals;
     state.setAgents(agentsDescription);
     state.setBoxes(boxes);
 
     resetJointAction();
+
     switch(State::numAgents) {
         case 0: break;
         case 1: 
@@ -138,7 +141,7 @@ State Client::initState() {
             type_ = MultiAgent;
             break;
     }
-    
+
     return state;
 }
 

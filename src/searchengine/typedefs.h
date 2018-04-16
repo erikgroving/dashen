@@ -54,13 +54,15 @@ typedef struct Box {
 typedef struct Goal {
     char letter;
     Coord loc;
+    Goal () : letter('-'), loc(Coord(-1, -1)) {}
 
     Goal (char letter, Coord loc) : letter(letter), loc(loc) {}
-
 } Goal;
 
 typedef struct AgentDescription
-{
+{    
+    
+    bool operator<(const AgentDescription& a) { return num < a.num;  }
     Color color;
     char num;
     Coord loc;

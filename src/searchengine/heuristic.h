@@ -4,7 +4,7 @@
 #include <string>
 #include <queue>
 #include "state.h"
-
+#include "../searchclient/searchclient"
 namespace SearchEngine {
 
 /**
@@ -19,6 +19,7 @@ class Heuristic {
 
 public:
     Heuristic();
+    Heuristic(const SearchClient::Agent* agentPtr);
 
     /**
      * Compares the heuristic value of two nodes.

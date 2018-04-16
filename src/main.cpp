@@ -29,8 +29,9 @@ int main(int argc,  char **argv) {
     else if(searchStrategy == "--bfs") {
         globalStrategy = new Strat::StrategyBFS();
     }
-    else if(searchStrategy == "--greedy") {
-      //  globalStrategy = new Strat::StrategyHeurstic<Heuristic::GreedyHeuristic>();
+    else if(searchStrategy == "--greedy") {               
+        globalStrategy = new Strat::StrategyBFS(); 
+        //globalStrategy = new Strat::StrategyHeurstic<Heuristic::GreedyHeuristic>();
     }
     else if(searchStrategy == "--astar") {
     //    globalStrategy = new Strat::StrategyHeuristic<Heuristic::BasicAStar>();
@@ -43,10 +44,11 @@ int main(int argc,  char **argv) {
 
 #ifndef SERVERLESS_MODE
 
-    SearchClient::Client searchClient(globalStrategy);
-    SearchEngine::State initialState = searchClient.initState();
-    SearchClient::Agent::setSharedState(&initialState);
-    auto agents = searchClient.extractAgents();
+        SearchClient::Client searchClient(globalStrategy);
+        SearchEngine::State initialState = searchClient.initState();
+        SearchClient::Agent::setSharedState(&initialState);
+        auto agents = searchClient.extractAgents();
+
 
 #else
 

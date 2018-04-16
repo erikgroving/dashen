@@ -4,7 +4,7 @@ using SearchEngine::State;
 using Strat::StrategyHeuristic;
 
 template<typename Heuristic>
-StrategyHeuristic<Heuristic>::StrategyHeuristic(): SearchEngine::Strategy(), queue(Heuristic()) {
+StrategyHeuristic<Heuristic>::StrategyHeuristic(const SearchClient::Agent* agentPtr): SearchEngine::Strategy(), queue(Heuristic(agentPtr)) {
     static_assert(std::is_base_of<SearchEngine::Heuristic, Heuristic>::value, "");
 }
 
