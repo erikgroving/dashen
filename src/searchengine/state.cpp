@@ -62,20 +62,22 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
 
             int boxIndex;
             if( boxAt(this, newAgentCol, newAgentRow, &boxIndex) ) {
-                int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
-                int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
+                if (this->getBoxes()[boxIndex].color == agt.color) {
+                    int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
+                    int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
 
-                if( isFree(this, newBoxCol, newBoxRow) ) {
-                    State *childNode = makeChild();
+                    if( isFree(this, newBoxCol, newBoxRow) ) {
+                        State *childNode = makeChild();
 
-                    childNode->setAction(cmd);
-                    childNode->getAgents()[agentIndex].loc.x = newAgentCol;
-                    childNode->getAgents()[agentIndex].loc.y = newAgentRow;
+                        childNode->setAction(cmd);
+                        childNode->getAgents()[agentIndex].loc.x = newAgentCol;
+                        childNode->getAgents()[agentIndex].loc.y = newAgentRow;
 
-                    childNode->getBoxes()[boxIndex].loc.x = newBoxCol;
-                    childNode->getBoxes()[boxIndex].loc.y = newBoxRow;
+                        childNode->getBoxes()[boxIndex].loc.x = newBoxCol;
+                        childNode->getBoxes()[boxIndex].loc.y = newBoxRow;
 
-                    result.push_back(childNode);
+                        result.push_back(childNode);
+                    }
                 }
                 //else 
                 //    std::cerr << "(NO cause the box cannot be pushed)";
@@ -92,16 +94,18 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 int boxCol = agt.loc.x + Command::colToInt(cmd.d2());
 
                 if(boxAt(this, boxCol, boxRow, &boxIndex)) {
-                    State *childNode = makeChild();
-                    childNode->setAction(cmd);
+                    if (this->getBoxes()[boxIndex].color == agt.color) {
+                        State *childNode = makeChild();
+                        childNode->setAction(cmd);
 
-                    childNode->getBoxes()[boxIndex].loc.x = childNode->getAgents()[agentIndex].loc.x;
-                    childNode->getBoxes()[boxIndex].loc.y = childNode->getAgents()[agentIndex].loc.y;
-                    
-                    childNode->getAgents()[agentIndex].loc.x = newAgentCol;
-                    childNode->getAgents()[agentIndex].loc.y = newAgentRow;
+                        childNode->getBoxes()[boxIndex].loc.x = childNode->getAgents()[agentIndex].loc.x;
+                        childNode->getBoxes()[boxIndex].loc.y = childNode->getAgents()[agentIndex].loc.y;
+                        
+                        childNode->getAgents()[agentIndex].loc.x = newAgentCol;
+                        childNode->getAgents()[agentIndex].loc.y = newAgentRow;
 
-                    result.push_back(childNode);
+                        result.push_back(childNode);
+                    }
                 }
             }
         }        
