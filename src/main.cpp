@@ -31,7 +31,7 @@ int main(int argc,  char **argv) {
         globalStrategy = new Strat::StrategyBFS();
     }
     else if(searchStrategy == "--greedy") {
-        globalStrategy = new Strat::StrategyGreedy();
+      //  globalStrategy = new Strat::StrategyHeurstic<Heuristic::GreedyHeuristic>();
     }
     else if(searchStrategy == "--astar") {
     //    globalStrategy = new Strat::StrategyHeuristic<Heuristic::BasicAStar>();

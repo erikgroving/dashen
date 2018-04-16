@@ -1,5 +1,5 @@
-#ifndef STRATEGY_STRATEGYGREEDY_H
-#define STRATEGY_STRATEGYGREEDY_H
+#ifndef STRATEGY_STRATEGYHEURISTIC_H
+#define STRATEGY_STRATEGYHEURISTIC_H
 
 #include <queue>
 #include <unordered_map>
@@ -34,4 +34,4 @@ private:
 
 #include "strategyheuristic.tpp"
 
-#endif // STRATEGYGREEDY_H
+#endif // STRATEGYHEURISTIC_H

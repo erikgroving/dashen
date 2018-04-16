@@ -14,6 +14,13 @@ public:
         return f(state);
     }
 };
-
+/*
+class GreedyStrat: public SearchEngine::Heuristic {
+    unsigned long f(const SearchEngine::State* state) const;
+    unsigned long heuristic(const SearchEngine::State* state) const {
+        return f(state);
+    }
+};
+*/
 }
 #endif // GREEDYHEURISTIC_H

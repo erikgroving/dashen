@@ -23,7 +23,6 @@ void printMap(const State *state) {
             else
                 std::cerr << " ";
         }
-
         std::cerr << std::endl;
     }
 }

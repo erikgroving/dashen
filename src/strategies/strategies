@@ -1,4 +1,3 @@
 #include "strategydfs.h"
 #include "strategybfs.h"
-#include "strategygreedy.h"
 #include "strategyheuristic.h" 

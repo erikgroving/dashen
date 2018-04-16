@@ -110,7 +110,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
                         }
                     }
                     if (isEntryDoable(potGoal, s)) {
-                        b->removeEntry(entry); 
+                        b->removeEntry(entry);
                         search_goal = potGoal;
                     }
                 }

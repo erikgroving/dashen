@@ -7,7 +7,7 @@ SEOBJECTS= src/searchengine/command.o src/searchengine/distance.o src/searchengi
 			src/searchengine/master.o src/searchengine/predicate.o src/searchengine/searchclient.o \
 			src/searchengine/state_equal_to.o src/searchengine/state.o src/searchengine/strategy.o
 
-STROBJECTS= src/strategies/strategybfs.o src/strategies/strategydfs.o src/strategies/strategygreedy.o
+STROBJECTS= src/strategies/strategybfs.o src/strategies/strategydfs.o
 
 TEST= test/*.cpp
 TEST_DIR= test
