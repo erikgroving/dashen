@@ -1,6 +1,5 @@
 #include "master.h"
 #include "searchclient.h"
-#include <fstream>
 using SearchClient::Blackboard;
 using namespace SearchEngine;
 
@@ -43,11 +42,8 @@ void Master::conductSearch() {
 /* This adds all the goal tiles from the initial state to the blackboard */
 void Master::postBlackBoard() {
     for (Goal& g : masterState_.goals) {
-        Blackboard::Entry entry = Blackboard::Entry();
-        entry.setBlackboardParent(nullptr);
-        entry.setAuthorId(-1);  // -1 is master
+        Blackboard::Entry entry = Blackboard::Entry::create(Blackboard::Entry::GLOBAL_GOAL_ENTRY);
         entry.setPosition(g.loc);
-        entry.setType(Blackboard::Entry::GLOBAL_GOAL_ENTRY);
         masterBlackboard_.addEntry(entry);
     }
 }
