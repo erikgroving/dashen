@@ -1,8 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include <chrono>
-#include <thread>
+
 
 #include "searchclient/searchclient"
 #include "searchengine/searchengine"
@@ -84,9 +83,7 @@ int main(int argc,  char **argv) {
             std::cout << "Step " << ++i << ": " << step->getAction().toActionString() << std::endl;        
     }
 #endif
-    /* Solely to allow printing to finish */
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cerr.flush();
+
     delete globalStrategy;
     return 0;
 }

@@ -78,7 +78,9 @@ class Blackboard::Entry {
         
         static bool accept(Entry &entry, const Agent &receiver);
         static bool revoke(Entry &entry, const Agent &sender);
+        
         static Entry create(EntryType type, const Agent &author);
+        static Entry create(EntryType type);
 
     private:
         Blackboard *parent_;

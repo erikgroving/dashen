@@ -5,7 +5,7 @@ using SearchClient::Blackboard;
 Blackboard::Entry::Entry(): parent_(0), type_(Entry::NONE), position_(), authorId_(-1) {}
 
 Blackboard::Entry::Entry(const Entry &src): parent_(src.parent_), type_(src.type_), 
-    position_(src.position_), authorId_(src.authorId_) {}
+    position_(src.position_), authorId_(src.authorId_) { }
 
 Blackboard::Entry& Blackboard::Entry::operator=(const Entry &src) {
     parent_ = src.parent_;
@@ -26,7 +26,8 @@ bool Blackboard::Entry::operator==(const Blackboard::Entry &compared) const {
 }
 
 bool Blackboard::Entry::accept(Blackboard::Entry &entry, const SearchClient::Agent &receiver) {
-    entry.getParent()->removeEntry(entry);
+    if(entry.getParent() != nullptr)
+        entry.getParent()->removeEntry(entry);
     return true;
 }
 
@@ -47,16 +48,25 @@ Blackboard::Entry Blackboard::Entry::create(Blackboard::Entry::EntryType type, c
     return newEntry;
 }
 
+Blackboard::Entry Blackboard::Entry::create(Blackboard::Entry::EntryType type) {
+    Blackboard::Entry newEntry;
+
+    newEntry.setType(type);
+    return newEntry;
+}
+
 Blackboard::Blackboard(): positionEntries_(), goalEntries_() { }
 
 void Blackboard::addEntry(Blackboard::Entry &entry) {
-    
+
     switch(entry.getType()) {
         case Blackboard::Entry::POSITION_ENTRY:
+            entry.setBlackboardParent(this);
             positionEntries_.push_back(entry);
             break;
         case Blackboard::Entry::GLOBAL_GOAL_ENTRY:
         case Blackboard::Entry::MOVE_HELP_GOAL_ENTRY:
+            entry.setBlackboardParent(this);
             goalEntries_.push_back(entry);
             break;
 
@@ -64,8 +74,6 @@ void Blackboard::addEntry(Blackboard::Entry &entry) {
             std::cerr << "An invalid entry was tried to be put in the blackboard" << std::endl;
             return;
     }
-
-    entry.setBlackboardParent(this);
 }
 
 void Blackboard::removeEntry(const Blackboard::Entry &entry) {
