@@ -34,7 +34,7 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
 
     unsigned long result = minDist;
     /* Add the agent distance to box */
-    result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.x - agentLoc.y);
+    result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.y - agentLoc.y);
     
     return result;
 }
