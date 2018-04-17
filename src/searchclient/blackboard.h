@@ -4,12 +4,10 @@
 #include <algorithm>
 #include <vector>
 
-#include "../searchengine/typedefs.h" 
-#include "agent.h"
+#include "../searchengine/typedefs.h"
 
 namespace SearchClient {
 
-class Agent; 
 /**
  * A blackboard is an environment in which different types of informations can be disposed
  * by agents.
@@ -27,66 +25,26 @@ class Agent;
  *    be moved for a MOVE_HELP_GOAL_ENTRY, coordinates of the agent at a specific time step for a POSITIONENTRY)
  * -> Primary key (practically using the index) of the agent that created the entry
  */
-
+class BlackboardEntry;
 class Blackboard {
     public: 
         Blackboard();
-
+        ~Blackboard();
     public:
-        class Entry;
+        void addEntry(BlackboardEntry *entry);
 
-        void addEntry(Entry &entry);
-
-        std::vector<Entry>& getPositionEntries() { return positionEntries_; } 
-        const std::vector<Entry>& getPositionEntries() const { return positionEntries_; }
+        std::vector<BlackboardEntry*>& getPositionEntries() { return positionEntries_; } 
+        const std::vector<BlackboardEntry*>& getPositionEntries() const { return positionEntries_; }
         
-        const std::vector<Entry>& getGoalEntries() const { return goalEntries_; }
-        std::vector<Entry>& getGoalEntries() { return goalEntries_; }
+        const std::vector<BlackboardEntry*>& getGoalEntries() const { return goalEntries_; }
+        std::vector<BlackboardEntry*>& getGoalEntries() { return goalEntries_; }
 
-        void removeEntry(const Entry &entry);
-    private:
-        std::vector<Entry> positionEntries_;
-        std::vector<Entry> goalEntries_;
-};
-
-class Blackboard::Entry {
-    public:
-        enum EntryType {
-            NONE,
-            POSITION_ENTRY,
-            GLOBAL_GOAL_ENTRY,
-            MOVE_HELP_GOAL_ENTRY
-        };
-
-        Entry();
-        Entry(const Entry& src);
-        Entry& operator=(const Entry &src);
-        
-        bool operator==(const Entry &compared) const;
-
-        EntryType getType() const { return type_; }
-        Coord     getPosition() const { return position_; }
-        int       getAuthorId() const { return authorId_; }
-        
-        Blackboard* getParent() { return parent_; }
-        const Blackboard* getParent() const { return parent_; }
-
-        void setBlackboardParent(Blackboard *parent) { parent_ = parent; }
-        void setAuthorId(int authorId) { authorId_ = authorId_; }
-        void setPosition(const Coord &position) { position_ = position; }
-        void setType(EntryType type) { type_ = type; }
-        
-        static bool accept(Entry &entry, const Agent &receiver);
-        static bool revoke(Entry &entry, const Agent &sender);
-        
-        static Entry create(EntryType type, const Agent &author);
-        static Entry create(EntryType type);
+        void removeEntry(const BlackboardEntry *entry);
+        BlackboardEntry* findPositionEntry(unsigned int timeStep, int authorId);
 
     private:
-        Blackboard *parent_;
-        EntryType type_; // Entry type (see the specification)
-        Coord position_; // Position where the Entry 
-        int authorId_;     // ID of the agent that created the Entry 
+        std::vector<BlackboardEntry*> positionEntries_;
+        std::vector<BlackboardEntry*> goalEntries_;
 };
 
 }

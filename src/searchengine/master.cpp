@@ -1,6 +1,8 @@
 #include "master.h"
 #include "searchclient.h"
+
 using SearchClient::Blackboard;
+using SearchClient::BlackboardEntry;
 using namespace SearchEngine;
 
 /* 
@@ -42,8 +44,8 @@ void Master::conductSearch() {
 /* This adds all the goal tiles from the initial state to the blackboard */
 void Master::postBlackBoard() {
     for (Goal& g : masterState_.goals) {
-        Blackboard::Entry entry = Blackboard::Entry::create(Blackboard::Entry::GLOBAL_GOAL_ENTRY);
-        entry.setPosition(g.loc);
+        BlackboardEntry *entry = BlackboardEntry::create(BlackboardEntry::GLOBAL_GOAL_ENTRY, &masterBlackboard_);
+        entry->setPosition(g.loc);
         masterBlackboard_.addEntry(entry);
     }
 }
@@ -56,6 +58,8 @@ SearchClient::JointAction Master::callForActions() {
     for (size_t i = 0; i < agents_.size(); i++) {
         action.setAction(i, agents_[i].nextMove(bbptr, masterState_));
     } 
+
+    Agent::sharedTime++;
     return action;
 }
 

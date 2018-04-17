@@ -62,7 +62,7 @@ typedef struct Goal {
 typedef struct AgentDescription
 {    
     
-    bool operator<(const AgentDescription& a) { return num < a.num;  }
+    bool operator<(const AgentDescription& a) const { return num < a.num;  }
     Color color;
     char num;
     Coord loc;

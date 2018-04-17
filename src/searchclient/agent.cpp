@@ -6,13 +6,14 @@ using SearchClient::Client;
 using namespace SearchEngine::Predicate;
 
 SearchEngine::State *Agent::sharedState;
+unsigned int Agent::sharedTime = 0;
 
 Agent::Agent(Color color, char num, Coord loc, 
-                SearchEngine::Strategy *strategy, SearchClient::Client *client) :
+                SearchEngine::Strategy *strategy, SearchClient::Blackboard *blackboard) :
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), client_(client), currentSearchGoal_(nullptr) {
+            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard) {
 
 }
 
@@ -42,9 +43,13 @@ Goal Agent::chooseGoal() {
 }
 
 std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngine::Strategy* strategy) {
-    auto *initialSearchState = Agent::sharedState;
+    if(private_initialState != nullptr)
+        delete private_initialState;
 
-    SearchEngine::SearchCli searcher(initialSearchState);
+    private_initialState = new SearchEngine::State(*Agent::sharedState);
+    private_initialState->setInitialTimeStep(Agent::sharedTime);
+
+    SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([&goal](const SearchEngine::State *currentState) {
         return goalHasCorrectBox(currentState, goal);
     });    
@@ -53,9 +58,9 @@ std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngi
 }
 
 std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &strategy) {
-    auto *initialSearchState = Agent::sharedState;
+    auto initialSearchState = *Agent::sharedState;
     
-    SearchEngine::SearchCli searcher(initialSearchState);
+    SearchEngine::SearchCli searcher(&initialSearchState);
     searcher.setGoalStatePredicate([](const SearchEngine::State *currentState) {
         return isGoalState(currentState);
     });    
@@ -65,20 +70,6 @@ std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &
 
 void Agent::setSharedState(SearchEngine::State *sharedState) {
     Agent::sharedState = sharedState;
-}
-
-void Agent::sendPlan(const std::vector<SearchEngine::State*> &plan) const {
-    for(const SearchEngine::State* state: plan)
-        client_->setAction(num, state->getAction());
-}
-
-void Agent::makeSearch() {
-    if(client_->getProblemType() == SearchClient::Client::SingleAgent) {
-        sendPlan(searchAllGoals(*searchStrategy_));
-    }
-    else if(client_->getProblemType() == SearchClient::Client::MultiAgent){
-        std::cerr << "MultiAgent problem are not supported yet." << std::endl;
-    }
 }
 
 SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine::State s) {
@@ -99,11 +90,11 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
 
         if (satisfied) {
             // Identify a suitable goal from the blackboard
-            std::vector<SearchClient::Blackboard::Entry> entries = b->getGoalEntries();
-            for (auto& entry : entries) {
-                if (entry.getType() == SearchClient::Blackboard::Entry::EntryType::GLOBAL_GOAL_ENTRY) {
+            std::vector<SearchClient::BlackboardEntry*> entries = b->getGoalEntries();
+            for (auto *entry : entries) {
+                if (entry->getType() == SearchClient::BlackboardEntry::GLOBAL_GOAL_ENTRY) {
                     /* Find the goal for that position */
-                    Coord entryLoc = entry.getPosition();
+                    Coord entryLoc = entry->getPosition();
                     for (Goal& g : SearchEngine::State::goals) {
                         if (entryLoc == g.loc) {
                             potGoal = g;
@@ -111,7 +102,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
                         }
                     }
                     if (isEntryDoable(potGoal, s)) {
-                        Blackboard::Entry::accept(entry, *this);
+                        SearchClient::BlackboardEntry::accept(entry, *this);
                         search_goal = potGoal;
                         takenGoals_.push_back(search_goal);
                         break;
@@ -132,20 +123,32 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         // Search to find the answer for the goal
         //SearchEngine::Strategy* strat = new Strat::StrategyBFS();
         SearchEngine::Strategy* strat = new Strat::StrategyHeuristic<Heur::GreedyHeuristic>(this);
+        strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
+            return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, state->getTimeStep());
+        });
         std::vector<SearchEngine::State*> ans = searchGoal(search_goal, strat); //TODO reflect proper strategy
+
         // Construct a  plan for the answer
-        for (auto a : ans) {
+        for (auto *a : ans) {
             plan_.push_back(a->getAction());
+            auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, a->getTimeStep());
+            std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")";
+            entry->setPosition(a->getAgents()[num].loc);
         }
-        delete(strat);
+
+        delete strat;
     }
 
+    std::cerr << "Plan computed"; 
     if (plan_.empty()) {
         return SearchEngine::Command();
     }
 
     SearchEngine::Command ret = plan_[0];
     plan_.erase(plan_.begin());
+
+    SearchClient::BlackboardEntry::revoke(blackboard_->findPositionEntry(sharedTime, num), *this);
+
     return ret;
 }
 
@@ -163,3 +166,17 @@ bool Agent::isEntryDoable(Goal g, SearchEngine::State& s) {
     return false;
 }
     
+
+bool Agent::positionFree(size_t x, size_t y, unsigned int timeStep) {
+    auto positionEntries = blackboard_->getPositionEntries();
+
+    std::cerr << "(Agent " << (int) num << ") Size blackboard = " << positionEntries.size();
+
+    for(const SearchClient::BlackboardEntry *entry: positionEntries) {
+        if(entry->getPosition().x == x && entry->getPosition().y == y) {
+            std::cerr << "Refused" << std::endl;
+            return false;
+        }
+    }
+    return true;
+}

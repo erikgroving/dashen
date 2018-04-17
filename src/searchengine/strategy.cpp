@@ -3,7 +3,11 @@
 
 using SearchEngine::Strategy;
 
-Strategy::Strategy(): exploredMap_(), frontierMap_() { }
+Strategy::Strategy(): exploredMap_(), frontierMap_() {
+    additionalCheckPredicate_ = [ ](const State* /*input */) {
+        return true;
+    };
+}
 Strategy::~Strategy() { }
 
 void Strategy::addToExplored( State *leaf ) {

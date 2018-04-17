@@ -20,11 +20,15 @@ namespace SearchEngine {
         
             /* Constructor, copy constructor, and destructor */
             Master() { jointActions_ = vector<SearchClient::JointAction>(); } 
-            Master(State& s1, vector<Agent> agents) {
+            Master(State& s1, const vector<Agent> &agents) {
                 masterState_ = s1; 
                 agents_ = agents;
                 jointActions_ = vector<SearchClient::JointAction>(); 
                 masterBlackboard_ = Blackboard();
+
+                for(auto &agent: agents_)
+                    agent.setBlackboard(&masterBlackboard_);
+
             }
             Master(const Master& m) { jointActions_ = m.jointActions_; }
             ~Master() {}

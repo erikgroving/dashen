@@ -8,6 +8,7 @@
 #include <iostream>
 #include <queue>
 #include <unordered_map>
+#include <functional>
 
 #include "state.h"
 #include "state_equal_to.h"
@@ -74,9 +75,13 @@ class Strategy
      */
     virtual std::string name() const = 0;
 
+    void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; };
+    const std::function< bool(const State*) > additionalCheckPredicate() const { return additionalCheckPredicate_; }
+
   private:
      std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
      std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
+     std::function< bool(const State*) > additionalCheckPredicate_;
 };
 
 }

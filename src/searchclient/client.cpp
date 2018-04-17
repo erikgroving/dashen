@@ -42,7 +42,7 @@ void Client::setAction(size_t agentId, const Command &command) {
 }
 
 
-State Client::initState() {
+State Client::initState(std::istream &inputstream) {
     State state;
     std::string s;
     
@@ -54,7 +54,7 @@ State Client::initState() {
 
     std::unordered_map<char, Color> mapping;
 
-    while(std::getline(std::cin, s)) {
+    while(std::getline(inputstream, s)) {
         // We have finished reading the state
         if (s == "") break;
 
@@ -102,7 +102,7 @@ State Client::initState() {
                     }
                     char num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
-                    agents.push_back( Agent(color, num, currCoord, searchStrategy_, this) );
+                    agents.push_back( Agent(color, num, currCoord) );
                     numAgents++;
                 }
 

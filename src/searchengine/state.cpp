@@ -12,10 +12,13 @@ std::vector<Goal> State::goals = std::vector< Goal >();
 int State::numAgents = 0;
 SearchEngine::Distance State::distance = SearchEngine::Distance();
 
-State::State(): agents(), boxes(), action(), 
-                pathCost(0), children(), parent(0) {
+State::State(unsigned int initialTimeStep): agents(), boxes(), action(), 
+                pathCost(0), children(), parent(0), initialTime_(initialTimeStep) {
 
 }
+
+State::State(const State &src): agents(src.agents), boxes(src.boxes), action(src.action),
+    pathCost(src.pathCost), children(src.children), parent(src.parent), initialTime_(src.initialTime_) {}
 
 State::~State() {
     for(auto ite = children.begin(); ite != children.end(); ite++) {
@@ -37,8 +40,6 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
         
         if(!inBound(this, newAgentCol, newAgentRow))
             continue;
-
-
 
         if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Agent could move to (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
@@ -137,10 +138,6 @@ std::vector<State*> State::extractPlan() {
     return result;
 }
 
-State::State(const State &src): agents(src.agents), boxes(src.boxes), action(src.action), parent(src.parent) {
-
-}
-
 bool State::operator==(const SearchEngine::State &compared) const {
     for(unsigned int i = 0; i < agents.size(); i++)
         if(agents[i].loc != compared.agents[i].loc  )
@@ -156,12 +153,15 @@ bool State::operator==(const SearchEngine::State &compared) const {
 }
 
 State *State::makeChild() {
-    State *child = new State();
+    State *child = new State(initialTime_);
 
     child->setParent(this);
     child->setAgents(agents);
     child->setBoxes(boxes);
-    child->setPathCost(getPathCost() + 1);
+    if(parent != nullptr)
+        child->setPathCost(getPathCost() + 1);
+    else
+        child->setPathCost(getPathCost());
     
     addChildState(child);
 

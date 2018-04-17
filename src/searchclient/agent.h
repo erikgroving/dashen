@@ -4,17 +4,19 @@
 #include <vector>
 #include "../searchengine/searchengine"
 #include "blackboard.h"
+#include "blackboardentry.h"
 #include "client.h"
 
 namespace SearchClient {
+    
 class Blackboard;
 class Client;
 class Agent {
 
 public:
-    Agent (Color color, char num, Coord loc, SearchEngine::Strategy *strategy, SearchClient::Client *client);
+    Agent (Color color, char num, Coord loc, SearchEngine::Strategy *strategy = nullptr, SearchClient::Blackboard *blackboard = nullptr);
     
-    bool operator<(const Agent& a) { return num < a.num;  }
+    bool operator<(const Agent& a) const { return num < a.num;  }
 
     void updateGoalsList(const SearchEngine::State &initialState);
     void updateBoxesList(const SearchEngine::State &initialState);
@@ -26,6 +28,12 @@ public:
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
 
     int getIndex() const { return num; }
+
+    void setBlackboard(SearchClient::Blackboard *blackboard) { blackboard_ = blackboard; }
+    
+    const Blackboard* getBlackboard() const { return blackboard_; }
+    Blackboard* getBlackboard() { return blackboard_; }
+
     const SearchEngine::Strategy* getSearchStrategy() const { return searchStrategy_; }
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
 
@@ -35,13 +43,6 @@ public:
      * Return the highest priority goal
      */
     Goal chooseGoal();
-
-    void sendPlan(const std::vector<SearchEngine::State*> &plan) const;
-    
-    /**
-     * Compute a plan to accomplish all its goal.
-     */
-    void makeSearch();
 
 public: // Search methods
     /**
@@ -67,6 +68,7 @@ public: // Search methods
     bool isEntryDoable(Goal g, SearchEngine::State& s); 
 
     
+    bool positionFree(size_t x, size_t y, unsigned int timeStep);
 
 public: // Static public methods
     /**
@@ -74,7 +76,8 @@ public: // Static public methods
      * Note: Could trigger an event to indicate that the initial state has changed
      */
     static void setSharedState(SearchEngine::State *sharedState);
-
+    static void setSharedTime(unsigned int timeStep);
+    static unsigned int sharedTime;
 private:
 
     Color color;
@@ -86,15 +89,17 @@ private:
     std::vector<Box> movableBoxes;
 
     static SearchEngine::State *sharedState;
+
     SearchEngine::State *private_initialState;
 
-    SearchClient::Client *client_;
     Goal* currentSearchGoal_;
     /* Added with master class update. */
     std::vector<Goal> takenGoals_;   // goals taken down from blackboard.
                                     // help requests delete upon completion,
                                     // tile requests stay after completion
     std::vector<SearchEngine::Command> plan_;
+
+    SearchClient::Blackboard *blackboard_;
 };
 
 }

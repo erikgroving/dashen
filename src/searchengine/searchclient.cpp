@@ -57,11 +57,13 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
 
         State *leaf = strategy.getAndRemoveLeaf();
         
+        /*
         if(iterations % 10000 == 0) {
             std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
             printMap(leaf);
         }
-                            
+        */
+                           
         if(goalStatePredicate(leaf)) {
             return leaf->extractPlan();
         }
@@ -76,7 +78,7 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         /*std::cerr << "===================" << std::endl;*/
         for(State *state: expandedNodes) {
              //std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
-            if(!strategy.isExplored(state) && !strategy.inFrontier(state)) {
+            if(!strategy.isExplored(state) && !strategy.inFrontier(state) && strategy.additionalCheckPredicate()(state)) {
                //  std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }

@@ -48,7 +48,7 @@ class Client {
          * Read the standard input and construct the initial state from the data received.
          * Note: the agents are dynamically created in this method.
          */
-        SearchEngine::State initState();
+        SearchEngine::State initState(std::istream &inputstream = std::cin);
 
         /**
          * Extract the "Agent" units that are the intelligent objects capable

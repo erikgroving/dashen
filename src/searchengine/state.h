@@ -16,7 +16,7 @@ class State {
 public:
 
     /* Constructors */
-    State();
+    State(unsigned int timeStep = 0);
     ~State();
     State(const State &src);
     State* makeChild();
@@ -48,6 +48,7 @@ public:
     std::vector<AgentDescription>& getAgents() { return agents; }
     const std::vector<AgentDescription>& getAgents() const { return agents; }
 
+    unsigned int getTimeStep() const { return initialTime_ + getPathCost(); }
     Command& getAction() { return action; }
     const Command& getAction() const { return action; }
 
@@ -68,6 +69,8 @@ public:
     void setAction(Command command) { action = command; }
     void addChildState(State *child) { children.push_back(child); }
 
+    void setInitialTimeStep(unsigned int timeStep) { initialTime_ = timeStep; }
+
 private:
 
 
@@ -80,6 +83,7 @@ private:
     std::vector<State*> children;
     State *parent;
 
+    unsigned int initialTime_;
 };
 
 }

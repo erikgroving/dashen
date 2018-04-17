@@ -1,7 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-
+#include <cstring>
+#include <fstream>
 
 #include "searchclient/searchclient"
 #include "searchengine/searchengine"
@@ -42,49 +43,24 @@ int main(int argc,  char **argv) {
         return 2;
     }
 
+
+
+    SearchClient::Client searchClient(globalStrategy);
 #ifndef SERVERLESS_MODE
-
-        SearchClient::Client searchClient(globalStrategy);
-        SearchEngine::State initialState = searchClient.initState();
-        SearchClient::Agent::setSharedState(&initialState);
-        auto agents = searchClient.extractAgents();
-
-
+    SearchEngine::State initialState = searchClient.initState();
 #else
-
-    SearchEngine::State initialState;
-    SearchEngine::State::walls = {
-        {true, true, true, true, true, true, true, true, true, true},
-        {true, false, false, false, false, false, true, false, false, true},
-        {true, false, true, true, true, true, true, true, false, true},
-        {true, false, false, false, false, false, false, false, false, true},
-        {true, true, true, true, true, true, true, true, true, true},
-    };
-    SearchEngine::State::goals = std::vector<Goal>{
-        Goal('A', Coord(8,1))
-    };
-    initialState.setAgents(std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(1,1)} });
-    initialState.setBoxes({ Box(YELLOW, 'A', Coord(7,1))});
-    
-#endif    
-    
-// SingleAgent mode
-#ifndef SERVERLESS_MODE   
-
-        std::cerr << "Starting the search..." << std::endl;
-        SearchEngine::Master master(initialState, agents);
-        master.conductSearch();
-
-#else
-
-    if(initialState.getAgents().size() == 1) {
-        SearchEngine::SearchClient client(&initialState, DEBUG_MODE);
-        std::vector<SearchEngine::State*> plan = client.search(*globalStrategy, 0);
-        int i = 0;
-        for(SearchEngine::State *step: plan) 
-            std::cout << "Step " << ++i << ": " << step->getAction().toActionString() << std::endl;        
-    }
+    std::ifstream input_stream("./levels/MAsimple2.lvl");
+    SearchEngine::State initialState = searchClient.initState(input_stream);
 #endif
+
+    SearchClient::Agent::setSharedState(&initialState);
+    auto agents = searchClient.extractAgents();
+    
+
+    std::cerr << "Starting the search..." << std::endl;
+    SearchEngine::Master master(initialState, agents);
+    master.conductSearch();
+
 
     delete globalStrategy;
     return 0;
