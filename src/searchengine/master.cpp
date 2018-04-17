@@ -16,7 +16,7 @@ void Master::conductSearch() {
     postBlackBoard();
 
     int round = 0;
-    while (!SearchEngine::Predicate::isGoalState(&masterState_)) {
+    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
         jointActions_.push_back(ja); 
@@ -46,7 +46,6 @@ void Master::postBlackBoard() {
     for (Goal& g : masterState_.goals) {
         BlackboardEntry *entry = BlackboardEntry::create(BlackboardEntry::GLOBAL_GOAL_ENTRY, &masterBlackboard_);
         entry->setPosition(g.loc);
-        masterBlackboard_.addEntry(entry);
     }
 }
 

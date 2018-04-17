@@ -1,6 +1,7 @@
 #include "agent.h"
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
+
 using SearchClient::Agent;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
@@ -17,6 +18,10 @@ Agent::Agent(Color color, char num, Coord loc,
 
 }
 
+Agent::~Agent() {
+    if(private_initialState != nullptr)
+        delete private_initialState;
+}
 void Agent::updateBoxesList(const SearchEngine::State &initialState) {
     movableBoxes.clear();
 
@@ -58,9 +63,13 @@ std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngi
 }
 
 std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &strategy) {
-    auto initialSearchState = *Agent::sharedState;
+    if(private_initialState != nullptr)
+        delete private_initialState;
+
+    private_initialState = new SearchEngine::State(*Agent::sharedState);
+    private_initialState->setInitialTimeStep(Agent::sharedTime);
     
-    SearchEngine::SearchCli searcher(&initialSearchState);
+    SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([](const SearchEngine::State *currentState) {
         return isGoalState(currentState);
     });    

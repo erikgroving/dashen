@@ -5,12 +5,13 @@ using SearchClient::Blackboard;
 using SearchClient::BlackboardEntry;
 
 Blackboard::Blackboard(): positionEntries_(), goalEntries_() { }
+
 Blackboard::~Blackboard() {
     for(BlackboardEntry* entry: positionEntries_)
-        delete entry;
+            delete entry;
 
     for(BlackboardEntry* entry: goalEntries_)
-        delete entry;
+            delete entry;
 }
 
 void Blackboard::addEntry(BlackboardEntry *entry) {
@@ -40,12 +41,14 @@ void Blackboard::removeEntry(const BlackboardEntry *entry) {
             positionEntries_.erase(
                 std::remove(positionEntries_.begin(), positionEntries_.end(), entry)
             );
+            delete entry;
             break;
         case BlackboardEntry::GLOBAL_GOAL_ENTRY:
         case BlackboardEntry::MOVE_HELP_GOAL_ENTRY:
             goalEntries_.erase(
                 std::remove(goalEntries_.begin(), goalEntries_.end(), entry)
             );
+            delete entry;
             break;
         default:
             std::cerr << "Tried to remove an invalid entry" << std::endl;

@@ -49,7 +49,7 @@ int main(int argc,  char **argv) {
 #ifndef SERVERLESS_MODE
     SearchEngine::State initialState = searchClient.initState();
 #else
-    std::ifstream input_stream("./levels/MAsimple2.lvl");
+    std::ifstream input_stream("./environment/levels/MAsimple4.lvl");
     SearchEngine::State initialState = searchClient.initState(input_stream);
 #endif
 
@@ -60,7 +60,6 @@ int main(int argc,  char **argv) {
     std::cerr << "Starting the search..." << std::endl;
     SearchEngine::Master master(initialState, agents);
     master.conductSearch();
-
 
     delete globalStrategy;
     return 0;
