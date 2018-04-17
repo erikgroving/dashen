@@ -12,7 +12,7 @@ void printMap(SearchEngine::State *state) {
             if(wallAt(state, j, i))
                 std::cerr << "+"; 
             else if(agentAt(state, j, i, &index))
-                std::cerr << '0' + state->getAgents()[index].num;
+                std::cerr << '0' + (state->getAgents()[index].num - 96);
             else if(boxAt(state, j, i, &index))
                 std::cerr << state->getBoxes()[index].letter;
             else if(goalAt(state, j, i, &index))
@@ -24,4 +24,15 @@ void printMap(SearchEngine::State *state) {
         std::cerr << std::endl;
     }
 }
+
+void printDistances(std::vector<std::vector<short int> >  dist){
+    for (const auto& inner : dist) {
+        for (auto value : inner) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+
 #endif
