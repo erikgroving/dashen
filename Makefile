@@ -1,7 +1,8 @@
 CC=g++
-CFLAGS= -std=c++14 -Wall
+CFLAGS= -std=c++14 -Wall -g
 HEADERS=  src/heuristics/*.h src/heuristics/greedyheuristic.o
-SCOBJECTS= src/searchclient/agent.o src/searchclient/blackboard.o src/searchclient/client.o
+SCOBJECTS= src/searchclient/agent.o src/searchclient/blackboard.o src/searchclient/client.o \
+		   src/searchclient/blackboardentry.o
 
 SEOBJECTS= src/searchengine/command.o src/searchengine/distance.o src/searchengine/heuristic.o \
 			src/searchengine/master.o src/searchengine/predicate.o src/searchengine/searchclient.o \
@@ -82,4 +83,7 @@ src/strategies/strategydfs.o: src/strategies/strategydfs.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
 
 src/heuristics/greedyheuristic.o: src/heuristics/greedyheuristic.cpp
+	$(CC) $(CFLAGS) -c $^ -o $@
+
+src/searchclient/blackboardentry.o: src/searchclient/blackboardentry.cpp
 	$(CC) $(CFLAGS) -c $^ -o $@
