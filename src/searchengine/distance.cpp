@@ -94,7 +94,7 @@ std::vector<std::vector<std::vector<std::vector<short int> > > >
      for (size_t y=0; y<state->walls.size(); y++) {
         //result.push_back(std::vector<std::vector<std::vector<short int> > > ());
         for (size_t x=0; x<state->walls[y].size(); x++) {
-            std::cerr << x << " " << y << std::endl;
+            //std::cerr << x << " " << y << std::endl;
             result[y][x] = Distance::computeDistanceFromPosition(state, x, y);
         }
     } 

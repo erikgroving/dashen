@@ -11,7 +11,7 @@ GreedyHeuristic::GreedyHeuristic(const SearchClient::Agent* agentPtr)  : Heurist
 
 unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
     /** Very simple heuristic. Closest box to goal tile plus distance of agent to that box 
-     * Using hamiltonian distances like a scrub
+     *
      */
     unsigned long result = 0;
     char agtIdx = agentPtr_->getIndex();
