@@ -4,15 +4,16 @@ using SearchEngine::State;
 using SearchEngine::Distance;
 using namespace SearchEngine::Predicate;
 
-Distance::Distance() {
-    
+Distance::Distance(State *input): inputState_(input), distanceMatrix_() {
+    distanceMatrix_ = Distance::computeDistanceMatrix(input);    
 }
+
 Distance::~Distance() {
     
 }
-
+// increasing x moves the target to the right, on the printed level.
 std::vector<std::vector<short int> > 
-Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
+Distance::computeDistanceFromPosition(const State *state, size_t x, size_t y) {
 
     // Initialization
     std::vector<std::vector<short int> > distances;//n, std::vector<short int>(n, -1);
@@ -62,25 +63,28 @@ Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
 }
 
 
-std::vector<std::vector<std::vector<std::vector<short int> > > > 
-Distance::getDistanceMatrix(const State *state) {
+std::vector<std::vector<std::vector<std::vector<short int> > > >
+ Distance::computeDistanceMatrix(const State *state) {
 
     // Initialization
     std::vector<std::vector<std::vector<std::vector<short int> > > > result;
 
-    for (size_t y=0; y<state->walls.size(); y++) {
-        result.push_back(std::vector<std::vector<std::vector<short int> > > ());
+    std::cerr << "Vector init" << std::endl;
+     for (size_t y=0; y<state->walls.size(); y++) {
+        result.push_back(std::vector<std::vector<std::vector<short int> > > (state->walls[y].size()));
         for (size_t x=0; x<state->walls[y].size(); x++) {
             result[y][x] = std::vector<std::vector<short int> > ();
         }
     }
+    std::cerr << "End Vector init" << std::endl;
 
-    for (size_t y=0; y<state->walls.size(); y++) {
+     for (size_t y=0; y<state->walls.size(); y++) {
         //result.push_back(std::vector<std::vector<std::vector<short int> > > ());
         for (size_t x=0; x<state->walls[y].size(); x++) {
-            result[y][x] = getDistanceFromPosition(state, x, y);
+            result[y][x] = Distance::computeDistanceFromPosition(state, x, y);
         }
-    }
+    } 
 
     return result;
+
 }
