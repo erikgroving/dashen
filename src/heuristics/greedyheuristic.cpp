@@ -6,7 +6,6 @@ using std::vector;
 
 
 GreedyHeuristic::GreedyHeuristic(const SearchClient::Agent* agentPtr)  : Heuristic(agentPtr), agentPtr_(agentPtr) {
-    std::cerr << "Greedy heuristic was constructed!" << std::endl;
 }
 
 
