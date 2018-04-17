@@ -111,8 +111,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
                         }
                     }
                     if (isEntryDoable(potGoal, s)) {
-                        b->removeEntry(entry);
-                        takenGoals_.push_back(potGoal);
+                        Blackboard::Entry::accept(entry, *this);
                         search_goal = potGoal;
                     }
                 }
