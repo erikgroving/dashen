@@ -10,6 +10,7 @@ using namespace SearchEngine::Predicate;
 std::vector<std::vector<bool>> State::walls = std::vector< std::vector<bool> >();
 std::vector<Goal> State::goals = std::vector< Goal >();
 int State::numAgents = 0;
+SearchEngine::Distance State::distance = SearchEngine::Distance();
 
 State::State(): agents(), boxes(), action(), 
                 pathCost(0), children(), parent(0) {

@@ -151,6 +151,10 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
 
 bool Agent::isEntryDoable(Goal g, SearchEngine::State& s) {
     // TODO make boxes queryable by color/letter
+    AgentDescription agent = s.getAgents()[num];
+    if (SearchEngine::State::distance.getDistance(agent.loc, g.loc) == -1) {
+        return false;
+    }
     for (Box b : s.getBoxes()) {
         if (b.color == color && b.letter == g.letter) {
             return true;

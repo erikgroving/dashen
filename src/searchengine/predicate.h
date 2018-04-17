@@ -6,7 +6,7 @@
 #include <cmath>
 
 namespace SearchEngine {
-
+class State;
 // Namespace SearchEngine::Predicate
 namespace Predicate
 {

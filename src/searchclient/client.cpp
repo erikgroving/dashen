@@ -132,6 +132,10 @@ State Client::initState() {
 
     resetJointAction();
 
+    std::cerr << "Constructing..." << std::endl;
+    State::distance = SearchEngine::Distance(&state); 
+    std::cerr << "Done constructing..." << std::endl;
+
     switch(State::numAgents) {
         case 0: break;
         case 1: 

@@ -11,6 +11,19 @@ Distance::Distance(State *input): inputState_(input), distanceMatrix_() {
 Distance::~Distance() {
     
 }
+
+short int Distance::getDistance(size_t source_x, size_t source_y, size_t target_x, size_t target_y) const {
+        if(!SearchEngine::Predicate::inBound(inputState_, source_x, source_y) ||
+           !SearchEngine::Predicate::inBound(inputState_, target_x, target_y))
+           return -1;
+
+        return distanceMatrix_[source_y][source_x][target_y][target_x];
+}
+
+short int Distance::getDistance(Coord source, Coord target) const {
+    return Distance::getDistance(source.x, source.y, target.x, target.y);
+}
+
 // increasing x moves the target to the right, on the printed level.
 std::vector<std::vector<short int> > 
 Distance::computeDistanceFromPosition(const State *state, size_t x, size_t y) {
@@ -81,6 +94,7 @@ std::vector<std::vector<std::vector<std::vector<short int> > > >
      for (size_t y=0; y<state->walls.size(); y++) {
         //result.push_back(std::vector<std::vector<std::vector<short int> > > ());
         for (size_t x=0; x<state->walls[y].size(); x++) {
+            std::cerr << x << " " << y << std::endl;
             result[y][x] = Distance::computeDistanceFromPosition(state, x, y);
         }
     } 
