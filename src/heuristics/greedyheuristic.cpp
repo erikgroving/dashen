@@ -13,10 +13,19 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
     /** Very simple heuristic. Closest box to goal tile plus distance of agent to that box 
      * Using hamiltonian distances like a scrub
      */
+    unsigned long result = 0;
     char agtIdx = agentPtr_->getIndex();
     vector<AgentDescription> agents = state->getAgents();
     Coord agentLoc = state->getAgents()[agtIdx].loc;    
     Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
+
+
+    for (Goal g : SearchEngine::State::goals) {
+        if (!SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
+            result += 1;
+        }
+    }
+
 
     /* Find the closest box to the goal */
     Box closestBox;
@@ -31,7 +40,7 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
         }
     }
 
-    unsigned long result = minDist;
+    result += minDist;
     /* Add the agent distance to box */
     result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.y - agentLoc.y);
     

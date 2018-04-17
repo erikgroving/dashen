@@ -127,11 +127,11 @@ std::vector<State*> State::extractPlan() {
 
     State *parentState = parent;
 
-    while(parentState->parent != NULL) {
+    while(parentState != NULL) {
         result.insert(result.begin(), parentState);
         parentState = parentState->parent;
     }
-
+    result.erase(result.begin());
     //std::cerr << "Done";
     return result;
 }

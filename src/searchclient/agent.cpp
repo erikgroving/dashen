@@ -113,6 +113,8 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
                     if (isEntryDoable(potGoal, s)) {
                         Blackboard::Entry::accept(entry, *this);
                         search_goal = potGoal;
+                        takenGoals_.push_back(search_goal);
+                        break;
                     }
                 }
             }
@@ -138,6 +140,9 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         delete(strat);
     }
 
+    if (plan_.empty()) {
+        return SearchEngine::Command();
+    }
 
     SearchEngine::Command ret = plan_[0];
     plan_.erase(plan_.begin());
