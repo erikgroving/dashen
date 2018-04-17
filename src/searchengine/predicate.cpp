@@ -73,11 +73,9 @@ bool SearchEngine::Predicate::wallAt(const State *input, int x, int y) {
 }
 bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
     for(const Goal &goal: input->goals) {
-        
-        if(goal.letter != box.letter) continue;    
-        if(box.loc.x != goal.loc.x || box.loc.y != goal.loc.y) continue;
-
-        return true;
+        if (goal.letter == box.letter && box.loc == goal.loc) {
+            return true;
+        } 
     }
     return false;
 }
