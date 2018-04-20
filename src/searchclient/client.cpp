@@ -46,7 +46,7 @@ State Client::initState(std::istream &inputstream) {
     State state;
     std::string s;
     
-    int row = 0, numAgents = 0;
+    int row = 0, numAgents = 0, boxID = 0;
 
     std::vector<AgentDescription> agentsDescription = std::vector<AgentDescription>();
     std::vector<Box> boxes = std::vector<Box>();
@@ -113,7 +113,8 @@ State Client::initState(std::istream &inputstream) {
                     if (mapping.find(s[i]) != mapping.end()) {
                         color = mapping[s[i]];
                     }
-                    Box box = Box(color, s[i], currCoord);
+                    State::takenBoxes.push_back(false);
+                    Box box = Box(color, s[i], currCoord, boxID++);
                     boxes.push_back(box);
                 }
 
@@ -134,7 +135,6 @@ State Client::initState(std::istream &inputstream) {
     resetJointAction();
 
     std::cerr << "Constructing..." << std::endl;
-    State::distance = SearchEngine::Distance(&state); 
     std::cerr << "Done constructing..." << std::endl;
 
     switch(State::numAgents) {

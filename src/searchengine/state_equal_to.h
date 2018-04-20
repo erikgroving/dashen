@@ -2,7 +2,6 @@
 #define STATE_COMPARE
 
 #include "state.h"
-#include "predicate.h"
 #include <iostream>
 
 struct StateCompare {
@@ -31,20 +30,7 @@ struct hashAgentDescription {
 
 
 struct hashState {
-    std::size_t operator()(SearchEngine::State* const& source) const {
-        std::size_t result = 0;
-
-        std::size_t prime = 31;
-        for( const Box &box: source->getBoxes() ) {
-            result = prime * result + hashBox()(box);
-        }
-
-        for( const AgentDescription &ad: source->getAgents() ) {
-            result = prime * result + hashAgentDescription()(ad);
-        }
-
-        return result;
-    }
+    std::size_t operator()(SearchEngine::State* const& source) const;
 };
 
 #endif

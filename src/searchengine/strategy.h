@@ -10,12 +10,13 @@
 #include <unordered_map>
 #include <functional>
 
-#include "state.h"
 #include "state_equal_to.h"
+#include "state.h"
+
 
 namespace SearchEngine
 {
-
+class State;
 /**
  * Abstract class representing a given search strategy. All the methods about the explored
  * states are provided and one only needs to override the methods conserning the frontier.

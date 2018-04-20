@@ -28,40 +28,40 @@ typedef struct Coord {
 
 typedef struct Box {
     Color color;
-    char letter;
     Coord loc;
-
-    Box(): color(NOCOLOR), letter(0), loc({-1,-1}) {
+    short id;
+    char letter;
+    Box(): color(NOCOLOR), loc({-1,-1}), id(-1), letter(0) {
         
     }
-    Box(Color color, char letter, Coord loc) :  color(color),
-                                                letter(letter),
-                                                loc(loc) {}
+    Box(Color color, char letter, Coord loc, short id) :  color(color),
+                                                loc(loc),
+                                                id(id),
+                                                letter(letter)
+                                                 {}
 
-    Box(const Box &src): color(src.color), letter(src.letter), loc(src.loc) {}
+    Box(const Box &src): color(src.color), loc(src.loc), id(src.id), letter(src.letter) {}
     bool operator==(const Box &compared) const {
-        if(compared.letter != letter)
+        if (compared.letter != letter || compared.color != color || 
+            compared.id != id || compared.loc != loc) {
             return false;
-
-        if(compared.color != color)
-            return false;
-
-        return compared.loc != loc;
+        }
+        return true;
     }
 } Box;
 
 
 typedef struct Goal {
-    char letter;
     Coord loc;
-    Goal () : letter('-'), loc(Coord(-1, -1)) {}
+    short assignedBoxID;
+    char letter;
+    Goal () :  loc(Coord(-1, -1)), assignedBoxID(-1), letter('-') {}
 
-    Goal (char letter, Coord loc) : letter(letter), loc(loc) {}
+    Goal (char letter, Coord loc) : loc(loc), assignedBoxID(-1), letter(letter) {}
 } Goal;
 
 typedef struct AgentDescription
 {    
-    
     bool operator<(const AgentDescription& a) const { return num < a.num;  }
     Color color;
     char num;

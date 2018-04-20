@@ -25,6 +25,9 @@ public:
     const Coord& getLocation() const { return loc; }
     Coord& getLocation() { return loc; }
 
+    const short getCorrectGoals() const { return correctGoals_; }
+    short getCorrectGoals() { return correctGoals_; }
+    
     const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
 
@@ -50,6 +53,12 @@ public: // Search methods
      * Given a goal, return a sequence of action to accomplish it.
      */
     std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy* strategy);
+
+    /**
+     * Given a box, agent returns a sequence of actions to get to the box
+     */
+    std::vector<SearchEngine::State*> searchBox(const Box& box, SearchEngine::Strategy* strategy);
+    
     /**
      * Returns a sequence of action that accomplishes all the goals according to the given strategy.
      */
@@ -66,10 +75,12 @@ public: // Search methods
      * that the agent checks that there is a box with th same color as the
      * agent that has the same letter as the goal
      */
-    bool isEntryDoable(Goal g, SearchEngine::State& s); 
+    bool isEntryDoable(Goal& g, SearchEngine::State& s); 
 
     
     bool positionFree(size_t x, size_t y, unsigned int timeStep);
+
+    Goal getGoalFromBlackboard(SearchClient::Blackboard* b, SearchEngine::State s);
 
 public: // Static public methods
     /**
@@ -84,6 +95,7 @@ private:
     Color color;
     char num;
     Coord loc; // is it still useful ? not if we are using state
+
 
     SearchEngine::Strategy *searchStrategy_;
     std::vector<Goal> goalsToAchieve;
@@ -101,6 +113,7 @@ private:
     std::vector<SearchEngine::Command> plan_;
 
     SearchClient::Blackboard *blackboard_;
+    short correctGoals_;
 };
 
 }

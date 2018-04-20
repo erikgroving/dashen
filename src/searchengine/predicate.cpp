@@ -82,11 +82,20 @@ bool SearchEngine::Predicate::boxOnGoal(const State *input, const Box &box) {
 
 bool SearchEngine::Predicate::goalHasCorrectBox(const State* input, const Goal goal) {
     for (const Box &b : input->getBoxes()) {
-        if (b.letter == goal.letter && b.loc == goal.loc) {
+        if (b.letter == goal.letter && b.loc == goal.loc && b.id == goal.assignedBoxID) {
             return true;
         }
     }
     return false;
+}
+
+bool SearchEngine::Predicate::agentNextToBox(
+       const State* input, const Box box, const SearchClient::Agent* agentPtr) {
+    
+    /* can simply subtract the absolute value of the coordinates of the box and agent */
+    AgentDescription agent = input->getAgents()[agentPtr->getIndex()];
+    unsigned int dist = abs(agent.loc.x - box.loc.x) + abs(agent.loc.y - box.loc.y);
+    return dist == 1;
 }
 
 bool SearchEngine::Predicate::inBound(const State *input, size_t x, size_t y) {

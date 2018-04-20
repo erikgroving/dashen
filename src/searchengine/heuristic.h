@@ -7,6 +7,8 @@
 #include "../searchclient/searchclient"
 namespace SearchEngine {
 
+class State;
+
 /**
  * Base class representing every possible heuristic. The methods have been studied
  * such that Heuristic can be used on a std::priority_queue like this:
