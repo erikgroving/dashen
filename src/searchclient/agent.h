@@ -24,6 +24,9 @@ public:
     const Coord& getLocation() const { return loc; }
     Coord& getLocation() { return loc; }
 
+    const short getCorrectGoals() const { return correctGoals_; }
+    short getCorrectGoals() { return correctGoals_; }
+    
     const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
 
@@ -92,6 +95,7 @@ private:
     char num;
     Coord loc; // is it still useful ? not if we are using state
 
+
     SearchEngine::Strategy *searchStrategy_;
     std::vector<Goal> goalsToAchieve;
     std::vector<Box> movableBoxes;
@@ -108,6 +112,7 @@ private:
     std::vector<SearchEngine::Command> plan_;
 
     SearchClient::Blackboard *blackboard_;
+    short correctGoals_;
 };
 
 }

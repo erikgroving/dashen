@@ -19,12 +19,16 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
     Coord agentLoc = state->getAgents()[agtIdx].loc;    
     Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
 
-
+    short currCorrectGoals = 0;
+    short startSearchCorrectgoals = agentPtr_->getCorrectGoals();
     for (Goal& g : SearchEngine::State::goals) {
-        if (!SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
-            result += 1;
+        if (SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
+            currCorrectGoals += 1;
         }
     }
+
+    result += (startSearchCorrectgoals - currCorrectGoals);
+
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
@@ -55,12 +59,16 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
     vector<AgentDescription> agents = state->getAgents();
     Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
 
-
+    short currCorrectGoals = 0;
+    short startSearchCorrectgoals = agentPtr_->getCorrectGoals();
     for (Goal& g : SearchEngine::State::goals) {
-        if (!SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
-            result += 100;
+        if (SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
+            currCorrectGoals += 1;
         }
     }
+
+    result += (startSearchCorrectgoals - currCorrectGoals);
+
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];

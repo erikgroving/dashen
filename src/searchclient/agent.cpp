@@ -14,7 +14,7 @@ Agent::Agent(Color color, char num, Coord loc,
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard) {
+            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard), correctGoals_(0) {
 
 }
 
@@ -117,11 +117,21 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
 
         currentSearchGoal_ = &search_goal;
 
+
+
+        correctGoals_ = 0;
+        for (Goal& g : SearchEngine::State::goals) {
+            if (SearchEngine::Predicate::goalHasCorrectBox(&s, g)) {
+                correctGoals_ += 1;
+            }
+        }
+        
         // Search to find the answer for the goal
         std::vector<SearchEngine::State*> ans = std::vector<SearchEngine::State*>();
         Box targBox = s.getBoxes()[search_goal.assignedBoxID];
         SearchEngine::Strategy* strat;
-        
+
+
         if (!agentNextToBox(&s, targBox, this)) {
             strat = new Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic>(this);
             strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
