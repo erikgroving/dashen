@@ -15,7 +15,8 @@ class Agent {
 
 public:
     Agent (Color color, char num, Coord loc, SearchEngine::Strategy *strategy = nullptr, SearchClient::Blackboard *blackboard = nullptr);
-    
+    ~Agent();
+
     bool operator<(const Agent& a) const { return num < a.num;  }
 
     void updateGoalsList(const SearchEngine::State &initialState);

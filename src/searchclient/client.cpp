@@ -55,6 +55,7 @@ State Client::initState(std::istream &inputstream) {
     std::unordered_map<char, Color> mapping;
 
     while(std::getline(inputstream, s)) {
+
         // We have finished reading the state
         if (s == "") break;
 

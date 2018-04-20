@@ -30,6 +30,7 @@ namespace SearchEngine {
                     agent.setBlackboard(&masterBlackboard_);
 
             }
+
             Master(const Master& m) { jointActions_ = m.jointActions_; }
             ~Master() {}
             
