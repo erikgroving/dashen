@@ -49,6 +49,12 @@ public: // Search methods
      * Given a goal, return a sequence of action to accomplish it.
      */
     std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy* strategy);
+
+    /**
+     * Given a box, agent returns a sequence of actions to get to the box
+     */
+    std::vector<SearchEngine::State*> searchBox(const Box& box, SearchEngine::Strategy* strategy);
+    
     /**
      * Returns a sequence of action that accomplishes all the goals according to the given strategy.
      */
@@ -65,10 +71,12 @@ public: // Search methods
      * that the agent checks that there is a box with th same color as the
      * agent that has the same letter as the goal
      */
-    bool isEntryDoable(Goal g, SearchEngine::State& s); 
+    bool isEntryDoable(Goal& g, SearchEngine::State& s); 
 
     
     bool positionFree(size_t x, size_t y, unsigned int timeStep);
+
+    Goal getGoalFromBlackboard(SearchClient::Blackboard* b, SearchEngine::State s);
 
 public: // Static public methods
     /**

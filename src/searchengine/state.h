@@ -7,11 +7,9 @@
 #include <utility>
 
 #include "typedefs.h"
-#include "distance.h"
 #include "command.h"
 
 namespace SearchEngine {
-class Distance;
 class State {
 public:
 
@@ -28,8 +26,8 @@ public:
     /* Static public objects */
     static std::vector<Goal> goals;
     static std::vector< std::vector<bool> > walls;
+    static std::vector< bool > takenBoxes;
     static int numAgents;
-    static SearchEngine::Distance distance;
     /* Predicates */
 
 

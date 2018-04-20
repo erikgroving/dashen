@@ -57,12 +57,12 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
 
         State *leaf = strategy.getAndRemoveLeaf();
         
-        /*
+        
         if(iterations % 10000 == 0) {
             std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
             printMap(leaf);
         }
-        */
+        
                            
         if(goalStatePredicate(leaf)) {
             return leaf->extractPlan();

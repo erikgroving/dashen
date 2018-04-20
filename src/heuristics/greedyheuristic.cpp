@@ -20,7 +20,7 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
     Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
 
 
-    for (Goal g : SearchEngine::State::goals) {
+    for (Goal& g : SearchEngine::State::goals) {
         if (!SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
             result += 100;
         }
@@ -28,22 +28,10 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
 
 
     /* Find the closest box to the goal */
-    Box closestBox;
-    unsigned long minDist = 50000;
-    for (Box b : state->getBoxes()) {
-        if (b.letter == searchGoal.letter) {
-            unsigned long dist = SearchEngine::State::distance.getDistance(b.loc, searchGoal.loc);
-            if (dist == (unsigned long)-1) dist = 10000;
-            if (dist < minDist) {
-                minDist = dist;
-                closestBox = b;
-            }
-        }
-    }
-
-    result += minDist;
+    Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
+    result += abs(closestBox.loc.x - searchGoal.loc.x) + abs(closestBox.loc.y - searchGoal.loc.y);
     /* Add the agent distance to box */
-    result += SearchEngine::State::distance.getDistance(closestBox.loc, agentLoc);
+    result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.y - agentLoc.y);
     
     return result;
 }

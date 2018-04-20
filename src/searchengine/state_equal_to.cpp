@@ -1,4 +1,5 @@
 #include "state_equal_to.h"
+#include "predicate.h"
 
 bool StateCompare::operator()(SearchEngine::State* const& source, SearchEngine::State* const& compared) const {
 
@@ -27,4 +28,19 @@ bool StateCompare::operator()(SearchEngine::State* const& source, SearchEngine::
 
     return true;
 }   
+
+std::size_t hashState::operator()(SearchEngine::State* const& source) const {
+    std::size_t result = 0;
+
+    std::size_t prime = 31;
+    for( const Box &box: source->getBoxes() ) {
+        result = prime * result + hashBox()(box);
+    }
+
+    for( const AgentDescription &ad: source->getAgents() ) {
+        result = prime * result + hashAgentDescription()(ad);
+    }
+
+    return result;
+}
 
