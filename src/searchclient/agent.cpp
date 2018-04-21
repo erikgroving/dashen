@@ -98,15 +98,17 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
     Agent::sharedState = sharedState;
 }
 
-SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine::State s) {
+SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
+
         bool satisfied = true;
         Goal unsatGoal = Goal();
         Goal search_goal = Goal();
+
         // See if we have any unsatisfied goals
-        for (Goal& g : takenGoals_) {
-            if (!goalHasCorrectBox(&s, g)) {
+        for (const Goal& g : takenGoals_) {
+            if (!goalHasCorrectBox(sharedState, g)) {
                 satisfied = false;
                 unsatGoal = g;
                 break;
@@ -114,7 +116,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
         }
 
         if (satisfied) {
-            search_goal = getGoalFromBlackboard(b, s);
+            search_goal = getGoalFromBlackboard();
         }
         else {
             search_goal = unsatGoal;
@@ -126,22 +128,22 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
 
         currentSearchGoal_ = &search_goal;
 
-
-
         correctGoals_ = 0;
-        for (Goal& g : SearchEngine::State::goals) {
-            if (SearchEngine::Predicate::goalHasCorrectBox(&s, g)) {
+        for (const Goal& g : SearchEngine::State::goals) {
+            if (SearchEngine::Predicate::goalHasCorrectBox(sharedState, g)) {
                 correctGoals_ += 1;
             }
         }
         
         // Search to find the answer for the goal
         std::vector<SearchEngine::State*> ans = std::vector<SearchEngine::State*>();
-        Box targBox = s.getBoxes()[search_goal.assignedBoxID];
+        Box &targBox = sharedState->getBoxes()[search_goal.assignedBoxID];
         SearchEngine::Strategy* strat;
 
 
-        if (!agentNextToBox(&s, targBox, this)) {
+        if (!agentNextToBox(sharedState, targBox, this)) {
+
+            std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << std::endl;
             strat = new Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic>(this);
             strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
                 return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, state->getTimeStep());
@@ -150,6 +152,7 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
             delete strat;
         }
         else {
+            std::cerr << "Satisfying goal (" << search_goal.loc.x << ", " << search_goal.loc.y << ") with box " << targBox.id << std::endl;
             strat = new Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic>(this);
             strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
                 return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, state->getTimeStep());
@@ -180,27 +183,34 @@ SearchEngine::Command Agent::nextMove(SearchClient::Blackboard* b, SearchEngine:
     return ret;
 }
 
-bool Agent::isEntryDoable(Goal& g, SearchEngine::State& s) {
+bool Agent::isEntryDoable(const SearchClient::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
 
     Box closestBox = Box();
-    unsigned long minDist = 50000;
-    for (Box b : s.getBoxes()) {
-        if (b.color == color && b.letter == g.letter && !State::takenBoxes[b.id]) {
-            unsigned long dist = abs(b.loc.x - g.loc.x) + abs(b.loc.y - g.loc.y);
-            if (dist == (unsigned long)-1) dist = 50000;
+    int goalIndex = -1;
+        goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
+    Goal entryGoal = SearchEngine::State::goals[goalIndex];
+
+    unsigned long minDist = ULONG_MAX;
+    for (const Box &b : state->getBoxes()) {
+
+        if (b.color == color && b.letter == entryGoal.letter && !State::takenBoxes[b.id]) {
+            unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
             if (dist < minDist) {
                 minDist = dist;
                 closestBox = b;
             }
         }
+
     }
 
     if (closestBox.id == -1) {
         return false;
     }
 
-    State::takenBoxes[closestBox.id] = true;
-    g.assignedBoxID = closestBox.id;
+    if(boxIndex != nullptr) {
+        *boxIndex = closestBox.id;
+    }
+
     return true;
 }
     
@@ -208,32 +218,49 @@ bool Agent::isEntryDoable(Goal& g, SearchEngine::State& s) {
 bool Agent::positionFree(size_t x, size_t y, unsigned int timeStep) {
     auto positionEntries = blackboard_->getPositionEntries();
 
-    std::cerr << "(Agent " << (int) num << ") Size blackboard = " << positionEntries.size();
+    // std::cerr << "(Agent " << (int) num << ") Size blackboard = " << positionEntries.size();
 
     for(const SearchClient::BlackboardEntry *entry: positionEntries) {
-        if((size_t)entry->getPosition().x == x && (size_t)entry->getPosition().y == y) {
-            std::cerr << "Refused" << std::endl;
+        if((size_t)entry->getLocation().x == x && (size_t)entry->getLocation().y == y) {
+       //     std::cerr << "Refused" << std::endl;
             return false;
         }
     }
     return true;
 }
 
-Goal Agent::getGoalFromBlackboard(SearchClient::Blackboard* b, SearchEngine::State s) {
+Goal Agent::getGoalFromBlackboard() {
     // Identify a suitable goal from the blackboard
-    std::vector<SearchClient::BlackboardEntry*> entries = b->getGoalEntries();
-    for (auto *entry : entries) {
-        if (entry->getType() == SearchClient::BlackboardEntry::GLOBAL_GOAL_ENTRY) {
-            /* Find the goal for that position */
-            Coord entryLoc = entry->getPosition();
-            for (Goal& g : SearchEngine::State::goals) {
-                if (entryLoc == g.loc && isEntryDoable(g, s)) {
-                    SearchClient::BlackboardEntry::accept(entry, *this);
-                    takenGoals_.push_back(g);
-                    return g;
-                }
-            }
+    if(blackboard_->getGoalEntries().size() <= 0) return Goal();
+
+    SearchClient::BlackboardEntry *selectedEntry = nullptr;
+    unsigned int priority = 0;
+
+    int closestBoxIndex = -1;
+    for (SearchClient::BlackboardEntry *entry : blackboard_->getGoalEntries()) {
+        if (entry->getType() == SearchClient::BlackboardEntry::GLOBAL_GOAL_ENTRY &&
+            priority < entry->getPriority()                                      &&
+            isEntryDoable(entry, sharedState, &closestBoxIndex)                        ) {
+            selectedEntry = entry;
+            priority = entry->getPriority();
         }
     }
-    return Goal();
+
+    if(selectedEntry == nullptr)
+        return Goal();
+
+    /* Find the goal for that position */
+    int goalIndex;
+        goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
+
+    Goal &result = SearchEngine::State::goals[goalIndex];
+
+
+
+    State::takenBoxes[closestBoxIndex] = true;
+    result.assignedBoxID = closestBoxIndex;
+    takenGoals_.push_back(result);
+
+    SearchClient::BlackboardEntry::accept(selectedEntry, *this);
+    return result;
 }

@@ -49,8 +49,9 @@ int main(int argc,  char **argv) {
 #ifndef SERVERLESS_MODE
     SearchEngine::State initialState = searchClient.initState();
 #else
-    std::ifstream input_stream("./environment/levels/MAsimple4.lvl");
+    std::ifstream input_stream("./environment/levels/SAsokobanLevel96.lvl");
     SearchEngine::State initialState = searchClient.initState(input_stream);
+    SearchEngine::Distance distance(&initialState);
 #endif
 
     SearchClient::Agent::setSharedState(&initialState);

@@ -3,7 +3,7 @@
 using SearchClient::BlackboardEntry;
 using SearchClient::Blackboard;
 
-BlackboardEntry::BlackboardEntry(): parent_(0), type_(BlackboardEntry::NONE), position_(), authorId_(-1), timeStep_(-1) {}
+BlackboardEntry::BlackboardEntry(): parent_(0), type_(BlackboardEntry::NONE), position_(), authorId_(-1), timeStep_(-1), priority_(0) {}
 
 BlackboardEntry::BlackboardEntry(const BlackboardEntry &src): parent_(src.parent_), type_(src.type_), 
     position_(src.position_), authorId_(src.authorId_), timeStep_(src.timeStep_) { }
@@ -22,7 +22,7 @@ bool BlackboardEntry::operator==(const BlackboardEntry &compared) const {
     if(compared.getParent() != parent_ ) return false;
     else if(compared.getAuthorId() != authorId_ ) return false;
     else if(compared.getType() != type_ ) return false;
-    else if(compared.getPosition() != position_ ) return false;
+    else if(compared.getLocation() != position_ ) return false;
 
     return true;
 }
@@ -65,5 +65,15 @@ BlackboardEntry* BlackboardEntry::create(BlackboardEntry::EntryType type, Blackb
 
     parent->addEntry(newEntry);
     return newEntry;
+}
+
+unsigned int BlackboardEntry::getPriority() const
+{
+    return priority_;
+}
+
+void BlackboardEntry::setPriority(unsigned int value)
+{
+    priority_ = value;
 }
 

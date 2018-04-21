@@ -10,6 +10,7 @@
 #include "predicate.h"
 #include "state.h"
 #include <queue>
+
 namespace SearchEngine {
 class State;
 class Distance {
@@ -33,6 +34,10 @@ public:
     static std::vector<std::vector<std::vector<std::vector<short int> > > >
         getDistanceMatrix(const State *state);
 
+    static void
+        computeDistanceFromPositionRecursive(const State *state, std::vector<std::vector<short int>> *result, size_t x, size_t y, short int currentDistance);
+
+    static std::vector<std::vector<short int>> computeDistanceFromPosition(const State *state, size_t x, size_t y);
 private:
     State *inputState_;
     std::vector<std::vector<std::vector<std::vector<short int> > > > distanceMatrix_;

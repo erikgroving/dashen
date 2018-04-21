@@ -2,6 +2,7 @@
 #define MASTER_H
 
 #include "../searchclient/searchclient"
+#include "goalpriority.h"
 #include <vector>
 
 using SearchEngine::State;
@@ -48,6 +49,8 @@ namespace SearchEngine {
             bool isActionValid(SearchEngine::Command, char, int, int);
             /* Performs a sub-action on the internal state, used by updateCurrentState*/
             void updateStateWithNewMove(SearchEngine::Command, char, int, int);
+
+            void computeGoalPriorities();
 
     };
 }

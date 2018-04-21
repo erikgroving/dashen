@@ -23,7 +23,7 @@ class BlackboardEntry {
         bool operator==(const BlackboardEntry &compared) const;
 
         EntryType getType() const { return type_; }
-        Coord     getPosition() const { return position_; }
+        Coord     getLocation() const { return position_; }
         int       getAuthorId() const { return authorId_; }
         unsigned int getTimeStep() const { return timeStep_; }
         Blackboard* getParent() { return parent_; }
@@ -41,12 +41,16 @@ class BlackboardEntry {
         static BlackboardEntry* create(EntryType type, const Agent &author, Blackboard* parent,  unsigned int timeStep = -1);
         static BlackboardEntry* create(EntryType type, Blackboard* parent, unsigned int timeStep = -1);
 
-    private:
+        unsigned int getPriority() const;
+        void setPriority(unsigned int value);
+
+private:
         Blackboard *parent_;
         EntryType type_; // Entry type (see the specification)
         Coord position_; // Position where the Entry 
         int authorId_;     // ID of the agent that created the Entry 
         unsigned int timeStep_;
+        unsigned int priority_;
 };
 
 }

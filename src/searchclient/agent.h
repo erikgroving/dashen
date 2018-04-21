@@ -1,6 +1,8 @@
 #ifndef SEARCHENGINE_AGENT_H
 #define SEARCHENGINE_AGENT_H
 
+#include <algorithm>
+#include <climits>
 #include <vector>
 #include "../searchengine/searchengine"
 #include "blackboard.h"
@@ -68,19 +70,19 @@ public: // Search methods
      * Returns the next move in the plan if there is one. otherwise
      * will generate a new plan and return head of that plan
      */
-    SearchEngine::Command nextMove(SearchClient::Blackboard* b, SearchEngine::State s);
+    SearchEngine::Command nextMove();
 
     /**
      * Checks to see if the entry is doable by the agent, this currently means
      * that the agent checks that there is a box with th same color as the
      * agent that has the same letter as the goal
      */
-    bool isEntryDoable(Goal& g, SearchEngine::State& s); 
+    bool isEntryDoable(const SearchClient::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex = 0);
 
     
     bool positionFree(size_t x, size_t y, unsigned int timeStep);
 
-    Goal getGoalFromBlackboard(SearchClient::Blackboard* b, SearchEngine::State s);
+    Goal getGoalFromBlackboard();
 
 public: // Static public methods
     /**

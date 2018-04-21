@@ -27,13 +27,13 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
         }
     }
 
-    result += (startSearchCorrectgoals - currCorrectGoals);
+    result += (startSearchCorrectgoals - currCorrectGoals) * 10;
 
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
     /* Add the agent distance to box */
-    result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.y - agentLoc.y);
+    result += Coord::distance(closestBox.loc, agentLoc);
     
     return result;
 }

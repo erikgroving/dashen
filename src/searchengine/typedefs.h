@@ -10,7 +10,10 @@ typedef struct Coord {
     int y;
 
     Coord(int xCoord = -1, int yCoord = -1) : x(xCoord), y(yCoord){}
-    Coord(const Coord &c): x(c.x), y(c.y) {}
+    Coord(const Coord &c) {
+        x = c.x;
+        y = c.y;
+    }
     Coord& operator=(const Coord &c) {
         x = c.x;
         y = c.y;
@@ -24,6 +27,11 @@ typedef struct Coord {
     bool operator!=(const Coord &c) const {
         return c.x != x || c.y != y;
     }
+
+    static unsigned long distance(const Coord &c1, const Coord &c2) {
+        return std::abs(c2.x - c1.x) + std::abs(c2.y - c1.y);
+    }
+
 } Coord;
 
 typedef struct Box {
@@ -55,9 +63,24 @@ typedef struct Goal {
     Coord loc;
     short assignedBoxID;
     char letter;
-    Goal () :  loc(Coord(-1, -1)), assignedBoxID(-1), letter('-') {}
+    unsigned int priority;
+
+    Goal () :  loc(-1, -1), assignedBoxID(-1), letter('-') {}
 
     Goal (char letter, Coord loc) : loc(loc), assignedBoxID(-1), letter(letter) {}
+
+    Goal(const Goal &src): loc(src.loc), assignedBoxID(src.assignedBoxID), letter(src.letter), priority(src.priority) {
+
+    }
+
+    Goal& operator=(const Goal &src) {
+        loc = src.loc;
+        assignedBoxID = src.assignedBoxID;
+        letter = src.letter;
+        priority = src.priority;
+        return *this;
+    }
+
 } Goal;
 
 typedef struct AgentDescription

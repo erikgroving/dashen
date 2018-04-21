@@ -47,15 +47,15 @@ void Master::postBlackBoard() {
         BlackboardEntry *entry = BlackboardEntry::create(BlackboardEntry::GLOBAL_GOAL_ENTRY, &masterBlackboard_);
         entry->setPosition(g.loc);
     }
+    computeGoalPriorities();
 }
 
 /* This function calls for actions from all the agents */
 SearchClient::JointAction Master::callForActions() {
-    Blackboard* bbptr = &masterBlackboard_;
     SearchClient::JointAction action = SearchClient::JointAction();
     action.initialize(agents_.size());
     for (size_t i = 0; i < agents_.size(); i++) {
-        action.setAction(i, agents_[i].nextMove(bbptr, masterState_));
+        action.setAction(i, agents_[i].nextMove());
     } 
 
     Agent::sharedTime++;
@@ -136,6 +136,15 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID, int
         agentDescs[AgentID].loc.x = newAgentCol;
         agentDescs[AgentID].loc.y = newAgentRow;
         masterState_.setAgents(agentDescs);
+    }
+}
+
+void Master::computeGoalPriorities()
+{
+    for(BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
+        int goalIndex = -1;
+            SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
+        goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
     }
 }
 

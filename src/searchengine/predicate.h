@@ -63,13 +63,17 @@ namespace Predicate
 
     bool goalHasCorrectBox(const State* input, const Goal goal);
 
-    bool agentNextToBox(const State* input, const Box box, const SearchClient::Agent* agentPtr);
+    bool agentNextToBox(const State* input, const Box &box, const SearchClient::Agent* agentPtr);
 
     unsigned long distanceToClosestGoal(const State *input, const Box &box, int *goalIndex = nullptr);
     /**
      * \return true if (x, y) is a valid coordinate for state input.
      */
     bool inBound(const State *input, size_t x, size_t y);
+
+    size_t height(const State *input);
+
+    size_t width(const State *input, size_t row);
 };
 
 

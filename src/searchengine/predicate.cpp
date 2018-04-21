@@ -90,12 +90,11 @@ bool SearchEngine::Predicate::goalHasCorrectBox(const State* input, const Goal g
 }
 
 bool SearchEngine::Predicate::agentNextToBox(
-       const State* input, const Box box, const SearchClient::Agent* agentPtr) {
+       const State* input, const Box &box, const SearchClient::Agent* agentPtr) {
     
     /* can simply subtract the absolute value of the coordinates of the box and agent */
     AgentDescription agent = input->getAgents()[agentPtr->getIndex()];
-    unsigned int dist = abs(agent.loc.x - box.loc.x) + abs(agent.loc.y - box.loc.y);
-    return dist == 1;
+    return Coord::distance(agent.loc, box.loc) == 1;
 }
 
 bool SearchEngine::Predicate::inBound(const State *input, size_t x, size_t y) {
@@ -124,4 +123,16 @@ unsigned long SearchEngine::Predicate::distanceToClosestGoal(const State *input,
     return min;
 
     
+}
+
+size_t SearchEngine::Predicate::height(const SearchEngine::State *input)
+{
+    return input->walls.size();
+}
+
+size_t SearchEngine::Predicate::width(const SearchEngine::State *input, size_t row)
+{
+    if(inBound(input, 0, row))
+        return input->walls[row].size();
+    return -1;
 }
