@@ -5,7 +5,7 @@ using SearchEngine::Distance;
 using namespace SearchEngine::Predicate;
 
 Distance::Distance(State *input): inputState_(input), distanceMatrix_() {
-    distanceMatrix_ = Distance::computeDistanceMatrix(input);    
+    distanceMatrix_ = Distance::getDistanceMatrix(input);    
 }
 
 Distance::~Distance() {
@@ -26,7 +26,7 @@ short int Distance::getDistance(Coord source, Coord target) const {
 
 // increasing x moves the target to the right, on the printed level.
 std::vector<std::vector<short int> > 
-Distance::computeDistanceFromPosition(const State *state, size_t x, size_t y) {
+Distance::getDistanceFromPosition(const State *state, size_t x, size_t y) {
 
     // Initialization
     std::vector<std::vector<short int> > distances;//n, std::vector<short int>(n, -1);
@@ -77,7 +77,7 @@ Distance::computeDistanceFromPosition(const State *state, size_t x, size_t y) {
 
 
 std::vector<std::vector<std::vector<std::vector<short int> > > >
- Distance::computeDistanceMatrix(const State *state) {
+ Distance::getDistanceMatrix(const State *state) {
 
     // Initialization
     std::vector<std::vector<std::vector<std::vector<short int> > > > result;
@@ -95,7 +95,7 @@ std::vector<std::vector<std::vector<std::vector<short int> > > >
         //result.push_back(std::vector<std::vector<std::vector<short int> > > ());
         for (size_t x=0; x<state->walls[y].size(); x++) {
             //std::cerr << x << " " << y << std::endl;
-            result[y][x] = Distance::computeDistanceFromPosition(state, x, y);
+            result[y][x] = Distance::getDistanceFromPosition(state, x, y);
         }
     } 
 

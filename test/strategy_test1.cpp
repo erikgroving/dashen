@@ -23,7 +23,7 @@ TEST(Strategy_Test1, StateCompareTest1) {
     for(size_t i = 2; i < 8; i++) {
         SearchEngine::State *state = new SearchEngine::State();
         state->setAgents(std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(1,1)} });
-        state->setBoxes({ Box(YELLOW, 'A', Coord(i,1))});
+        state->setBoxes({ Box(YELLOW, 'A', Coord(i,1), 0)});
 
         states.push_back(state);
     }
@@ -55,19 +55,19 @@ TEST(Strategy_Test1, StatesInHashMap) {
     std::vector<SearchEngine::State*> sourceStates;
     SearchEngine::State *state1 = new SearchEngine::State();
     state1->setAgents( std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(2,1)} } );
-    state1->setBoxes ( { Box(YELLOW, 'A', Coord(1,1))} );
+    state1->setBoxes ( { Box(YELLOW, 'A', Coord(1,1), 0)} );
 
     SearchEngine::State *state1copy = new SearchEngine::State();
     state1copy->setAgents( std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(2,1)} } );
-    state1copy->setBoxes ( { Box(YELLOW, 'A', Coord(1,1))} );
+    state1copy->setBoxes ( { Box(YELLOW, 'A', Coord(1,1), 0)} );
 
     SearchEngine::State *state2 = new SearchEngine::State();
     state2->setAgents( std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(2,1)} } );
-    state2->setBoxes ( { Box(YELLOW, 'A', Coord(3,1))} );
+    state2->setBoxes ( { Box(YELLOW, 'A', Coord(3,1), 0)} );
 
     SearchEngine::State *state2copy = new SearchEngine::State();
     state2copy->setAgents( std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(2,1)} } );
-    state2copy->setBoxes ( { Box(YELLOW, 'A', Coord(3,1))} );
+    state2copy->setBoxes ( { Box(YELLOW, 'A', Coord(3,1), 0)} );
 
 
     myStrategy->addToFrontier(state1);

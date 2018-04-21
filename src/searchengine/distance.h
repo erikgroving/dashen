@@ -29,9 +29,9 @@ public:
     short int getDistance(Coord source, Coord target) const;
     
     static std::vector<std::vector<short int> > 
-        computeDistanceFromPosition(const State *state, size_t x, size_t y);
+        getDistanceFromPosition(const State *state, size_t x, size_t y);
     static std::vector<std::vector<std::vector<std::vector<short int> > > >
-        computeDistanceMatrix(const State *state);
+        getDistanceMatrix(const State *state);
 
 private:
     State *inputState_;

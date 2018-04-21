@@ -31,7 +31,7 @@ TEST(DistanceTests, DistanceTest1) {
         Goal('A', Coord(8,1))
     };
     initialState.setAgents(std::vector<AgentDescription>{ AgentDescription{YELLOW, '0', Coord(1,1)} });
-    initialState.setBoxes({ Box(YELLOW, 'A', Coord(7,1))});
+    initialState.setBoxes({ Box(YELLOW, 'A', Coord(7,1), 0)});
     std::cerr << "initial box setup done" << std::endl;
 
     printMap(&initialState);
