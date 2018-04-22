@@ -79,9 +79,6 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
 
              //std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
             if(!strategy.isExplored(state) && !strategy.inFrontier(state) && strategy.additionalCheckPredicate()(state)) {           
-                if (state->getAction().action() == PUSH && state->getAction().d1() == E && state->getAction().d2() == E) {
-                    std::cerr<<"Push ee added to frontier.\n";
-                }
                //  std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
