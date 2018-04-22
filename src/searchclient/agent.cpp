@@ -96,7 +96,6 @@ SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
         firstMoveInPlan_ = true;
-
         bool satisfied = true;
         Goal unsatGoal = Goal();
         Goal search_goal = Goal();
@@ -147,7 +146,7 @@ SearchEngine::Command Agent::nextMove() {
             delete strat;
         }
         else {
-            std::cerr << "Satisfying goal (" << search_goal.loc.x << ", " << search_goal.loc.y << ") with box " << targBox.id << std::endl;
+            //std::cerr << "Satisfying goal (" << search_goal.loc.x << ", " << search_goal.loc.y << ") with box " << targBox.id << std::endl;
             strat = new Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic>(this);
             strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
                 return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, state->getTimeStep());
@@ -164,7 +163,7 @@ SearchEngine::Command Agent::nextMove() {
         for (auto *a : ans) {
             plan_.push_back(a->getAction());
             auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, a->getTimeStep());
-            std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")";
+            //std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")\n";
             entry->setPosition(a->getAgents()[num].loc);
         }
     }
@@ -217,8 +216,6 @@ bool Agent::isEntryDoable(const SearchClient::BlackboardEntry *entry, const Sear
 
 bool Agent::positionFree(size_t x, size_t y, unsigned int timeStep) {
     auto positionEntries = blackboard_->getPositionEntries();
-
-    // std::cerr << "(Agent " << (int) num << ") Size blackboard = " << positionEntries.size();
 
     for(const SearchClient::BlackboardEntry *entry: positionEntries) {
         if((size_t)entry->getLocation().x == x && (size_t)entry->getLocation().y == y) {

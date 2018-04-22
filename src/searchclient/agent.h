@@ -31,8 +31,6 @@ public:
     short getCorrectGoals() { return correctGoals_; }
     
     bool isFirstMoveInPlan() { return firstMoveInPlan_; }
-
-
     
     const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }

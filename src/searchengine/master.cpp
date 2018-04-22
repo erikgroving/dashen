@@ -36,14 +36,6 @@ void Master::conductSearch() {
         printMap(&masterState_);
         printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
-        std::string x;
-        for (int i = 0; i < agents_.size(); i++) {
-            std::cin >> x;
-            if (x[0] == 'f') {
-                std::cerr << "Agent " << i << " had a wrong move.\n";
-                exit(0);
-            }
-        }
     }
 
     std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl; 
