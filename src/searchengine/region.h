@@ -9,7 +9,6 @@
 #include "typedefs.h"
 #include "predicate.h"
 #include "state.h"
-#include <queue>
 
 namespace SearchEngine {
 class State;
@@ -17,23 +16,28 @@ class Region {
 public:
 
     /* Constructors */
-    //Region() {};
+    Region() {};
     Region(State* input);
     ~Region();
 
-    short int getRegion(size_t source_x, size_t source_y) const;
-    short int getRegion(Coord source) const;
+    size_t getRegion(size_t source_x, size_t source_y) const;
+    size_t getRegion(Coord source) const;
     
     bool isInSameRegion(Coord a, Coord b) const;
 
-    std::vector<std::vector<short int> > getRegionMatrix() const {
+    std::vector<std::vector<size_t> > getRegionMatrix() const {
         return regionMatrix_;
     }
-    static std::vector<std::vector<short int> > getRegionMatrix(const State *state);
+    std::vector<std::vector<size_t> > getRegionMatrix(const State *state);
+
+    void computeRegionFromPositionRecursive(
+        const State *state, std::vector<std::vector<size_t>> *result, 
+        size_t x, size_t y, size_t regionCounter);
+
 
 private:
     State *inputState_;
-    std::vector<std::vector<short int> > regionMatrix_;
+    std::vector<std::vector<size_t> > regionMatrix_;
 
 };
 
