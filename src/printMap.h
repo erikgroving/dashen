@@ -1,5 +1,5 @@
-#ifndef PRINTMAP
-#define PRINTMAP
+#ifndef PRINTMAP_H
+#define PRINTMAP_H
 
 #include <iostream>
 #include "searchengine/searchengine"
@@ -27,6 +27,15 @@ void printMap(SearchEngine::State *state) {
 
 void printDistances(std::vector<std::vector<short int> >  dist){
     for (const auto& inner : dist) {
+        for (auto value : inner) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void printRegions(std::vector<std::vector<size_t> >  region){
+    for (const auto& inner : region) {
         for (auto value : inner) {
             std::cout << value << " ";
         }

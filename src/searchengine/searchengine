@@ -7,3 +7,4 @@
 #include "state_equal_to.h"
 #include "strategy.h"
 #include "typedefs.h"
+#include "region.h"
