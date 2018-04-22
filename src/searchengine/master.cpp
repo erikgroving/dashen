@@ -28,15 +28,22 @@ void Master::conductSearch() {
          * one of the agents was found to be invalid due to the action of another
          * agent, send a signal to the agent to recompute his plan
          */
-        updateCurrentState(ja);
-
+        prevMasterState_ = masterState_;
+        updateCurrentState(&ja);
         std::cerr << "Joint Action: " << ja.toActionString(); 
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
         printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
-
+        std::string x;
+        for (int i = 0; i < agents_.size(); i++) {
+            std::cin >> x;
+            if (x[0] == 'f') {
+                std::cerr << "Agent " << i << " had a wrong move.\n";
+                exit(0);
+            }
+        }
     }
 
     std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl; 
@@ -65,43 +72,49 @@ SearchClient::JointAction Master::callForActions() {
 }
 
 /* This function updates the current state to reflect the previous joint actions */
-void Master::updateCurrentState(SearchClient::JointAction ja) {
-    std::vector<SearchEngine::Command> actions = ja.getData();
+void Master::updateCurrentState(SearchClient::JointAction* ja) {
+    std::vector<SearchEngine::Command> actions = ja->getData();
     for (size_t i = 0; i < actions.size(); i++) {
-        int newAgentRow = masterState_.getAgents()[i].loc.y + Command::rowToInt(actions[i].d1());
-        int newAgentCol = masterState_.getAgents()[i].loc.x + Command::colToInt(actions[i].d1());
 
-        // TODO action has to have been valid in both previous and the 'in-progress' state
-        // this currently only checks the in-progress state
-        if (isActionValid(actions[i], i, newAgentCol, newAgentRow)) {
-            updateStateWithNewMove(actions[i], i, newAgentCol, newAgentRow);
-        } // TODO signal to agent that his plan has been made invalid
+        /* Move must be valid in the previous state and the in process state */
+        if (isActionValid(&masterState_, actions[i], i) &&
+            isActionValid(&prevMasterState_, actions[i], i)) {
+            updateStateWithNewMove(actions[i], i);
+        } 
         else {
+            std::cerr << "Detected a wrong move for agent " << i << std::endl;
+            ja->setAction(i, Command());
             agents_[i].clearPlan();
         }
     }
 }
 
-bool Master::isActionValid(SearchEngine::Command cmd, char AgentID, int newAgentCol, int newAgentRow) {
+bool Master::isActionValid(SearchEngine::State* state, SearchEngine::Command cmd, char AgentID) {
+    int newAgentRow = state->getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d1());
+    int newAgentCol = state->getAgents()[AgentID].loc.x + Command::colToInt(cmd.d1());
+
     if (cmd.action() == Action::MOVE) {
-        return SearchEngine::Predicate::isFree(&masterState_, newAgentCol, newAgentRow);
+        return SearchEngine::Predicate::isFree(state, newAgentCol, newAgentRow);
     }
     else if (cmd.action() == Action::PUSH) {
         int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
         int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
-        return (SearchEngine::Predicate::isFree(&masterState_, newBoxCol, newBoxRow) &&
-                SearchEngine::Predicate::boxAt(&masterState_, newAgentCol, newAgentRow));
+        return (SearchEngine::Predicate::isFree(state, newBoxCol, newBoxRow) &&
+                SearchEngine::Predicate::boxAt(state, newAgentCol, newAgentRow));
     }
     else if (cmd.action() == Action::PULL) {
-        int boxRow = masterState_.getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d2());
-        int boxCol = masterState_.getAgents()[AgentID].loc.x + Command::colToInt(cmd.d2());
-        return (SearchEngine::Predicate::isFree(&masterState_, newAgentCol, newAgentRow) &&
-                SearchEngine::Predicate::boxAt(&masterState_, boxCol, boxRow));
+        int boxRow = state->getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d2());
+        int boxCol = state->getAgents()[AgentID].loc.x + Command::colToInt(cmd.d2());
+        return (SearchEngine::Predicate::isFree(state, newAgentCol, newAgentRow) &&
+                SearchEngine::Predicate::boxAt(state, boxCol, boxRow));
     }
     return true; //NoOp
 }
 
-void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID, int newAgentCol, int newAgentRow) {
+void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {    
+    int newAgentRow = masterState_.getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d1());
+    int newAgentCol = masterState_.getAgents()[AgentID].loc.x + Command::colToInt(cmd.d1());
+
     vector<AgentDescription> agentDescs = masterState_.getAgents();
     vector<Box> boxes = masterState_.getBoxes();
     Action action = cmd.action();
@@ -164,10 +177,8 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
     for (unsigned int i = 0; i < commands.size(); i++) {
         if (commands[i].action() != NOOP) {
             unsigned int sharedTime = SearchClient::Agent::sharedTime;
-            std::cerr << "Revoking entry with time : " << sharedTime << std::endl;
             SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
             if (agents_[i].isFirstMoveInPlan()) {
-                std::cerr << "Revoking entry with time : " << sharedTime - 1 << std::endl;
                 SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
             }
         }

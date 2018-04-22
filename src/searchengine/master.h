@@ -14,6 +14,7 @@ namespace SearchEngine {
     class Master {
         vector<SearchClient::JointAction> jointActions_;
         State masterState_;
+        State prevMasterState_;
         vector<Agent> agents_;
         Blackboard masterBlackboard_;
 
@@ -42,13 +43,13 @@ namespace SearchEngine {
             /* Calls for joint actions from the agents, returns a joint action */
             SearchClient::JointAction callForActions();
             /* Update the current state to reflect the previous actions */
-            void updateCurrentState(SearchClient::JointAction);
+            void updateCurrentState(SearchClient::JointAction*);
             /* Sends the solution once a universal goal state is found */
             void sendSolution();
             /* Checks if a sub-action in a joint action plan is valid, used by updateCurrentState */
-            bool isActionValid(SearchEngine::Command, char, int, int);
+            bool isActionValid(SearchEngine::State*, SearchEngine::Command, char);
             /* Performs a sub-action on the internal state, used by updateCurrentState*/
-            void updateStateWithNewMove(SearchEngine::Command, char, int, int);
+            void updateStateWithNewMove(SearchEngine::Command, char);
 
             void computeGoalPriorities();
             void revokeBlackboardEntries(SearchClient::JointAction);
