@@ -29,6 +29,10 @@ public:
     
     const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
+    
+    
+    const bool getIsFirstMoveInPlan() const { return firstMoveInPlan_; }
+    bool getIsFirstMoveInPlan() { return firstMoveInPlan_; }
 
     int getIndex() const { return num; }
 
@@ -41,6 +45,8 @@ public:
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
 
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
+
+    void clearPlan();
 
     /**
      * Return the highest priority goal
@@ -78,7 +84,7 @@ public: // Search methods
 
     
     bool positionFree(size_t x, size_t y, unsigned int timeStep);
-
+    void configurePrivateInitialState();
     Goal getGoalFromBlackboard(SearchClient::Blackboard* b, SearchEngine::State s);
 
 public: // Static public methods
@@ -113,6 +119,7 @@ private:
 
     SearchClient::Blackboard *blackboard_;
     short correctGoals_;
+    bool firstMoveInPlan_;
 };
 
 }

@@ -47,7 +47,8 @@ namespace SearchEngine {
             bool isActionValid(SearchEngine::Command, char, int, int);
             /* Performs a sub-action on the internal state, used by updateCurrentState*/
             void updateStateWithNewMove(SearchEngine::Command, char, int, int);
-
+            /* Removes blackboard entries after moves are made */
+            void revokeBlackboardEntries(SearchClient::JointAction);
     };
 }
 

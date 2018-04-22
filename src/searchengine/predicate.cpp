@@ -38,7 +38,6 @@ bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIn
             return true;
         }
     }
-
     return false;
 }
 
@@ -64,8 +63,8 @@ bool SearchEngine::Predicate::agentAt(const State *input, int x, int y, int *age
             if(agentIndex > 0) *agentIndex = i;
             return true;
         }
-     }
-     return false;
+    }
+    return false;
 }
 
 bool SearchEngine::Predicate::wallAt(const State *input, int x, int y) {

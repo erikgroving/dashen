@@ -50,7 +50,11 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
     int iterations = 0;
     strategy.addToFrontier(initialState_);
     while(true) {
-        
+        /* change later*/
+        if (iterations > 5000) {
+            return std::vector<State*>();
+        }
+
         if(strategy.frontierIsEmpty()) {
             return std::vector<State*>();
         }
@@ -58,7 +62,7 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         State *leaf = strategy.getAndRemoveLeaf();
         
         
-        if(iterations % 10000 == 0) {
+        if(iterations % 1000 == 999) {
             std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
             printMap(leaf);
         }
