@@ -30,6 +30,10 @@ public:
     const short getCorrectGoals() const { return correctGoals_; }
     short getCorrectGoals() { return correctGoals_; }
     
+    bool isFirstMoveInPlan() { return firstMoveInPlan_; }
+
+
+    
     const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
 
@@ -44,7 +48,8 @@ public:
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
 
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
-
+    void configurePrivateInitialState();
+    void clearPlan();
     /**
      * Return the highest priority goal
      */
@@ -116,6 +121,7 @@ private:
 
     SearchClient::Blackboard *blackboard_;
     short correctGoals_;
+    bool firstMoveInPlan_;
 };
 
 }

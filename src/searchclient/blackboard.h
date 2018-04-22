@@ -40,6 +40,7 @@ class Blackboard {
         std::vector<BlackboardEntry*>& getGoalEntries() { return goalEntries_; }
 
         void removeEntry(const BlackboardEntry *entry);
+        void removeEntriesByAuthor(char agentID);
         BlackboardEntry* findPositionEntry(unsigned int timeStep, int authorId);
 
     private:

@@ -34,7 +34,6 @@ bool BlackboardEntry::accept(BlackboardEntry *entry, const SearchClient::Agent &
 }
 
 bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &sender) {
-    std::cerr << entry;
     if(sender.getIndex() != entry->getAuthorId()) // Only the author can erevoke a demand
         return false;
 
@@ -48,9 +47,6 @@ BlackboardEntry* BlackboardEntry::create(BlackboardEntry::EntryType type, const 
     newEntry->setType(type);
     newEntry->setAuthorId(author.getIndex());
     newEntry->setTimeStep(timeStep);
-
-    std::cerr << "Creating entry with author id " << newEntry->getAuthorId() << std::endl;
-
     parent->addEntry(newEntry);
 
     

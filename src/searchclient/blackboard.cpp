@@ -19,7 +19,6 @@ void Blackboard::addEntry(BlackboardEntry *entry) {
     switch(entry->getType()) {
         case BlackboardEntry::POSITION_ENTRY:
             entry->setBlackboardParent(this);
-            std::cerr << "Adding entry with author " << entry->getAuthorId();
             positionEntries_.push_back(entry);
             break;
         case BlackboardEntry::GLOBAL_GOAL_ENTRY:
@@ -55,10 +54,19 @@ void Blackboard::removeEntry(const BlackboardEntry *entry) {
             break;
     }
 }
+void Blackboard::removeEntriesByAuthor(char agentID) {
+    for (size_t i = 0; i < positionEntries_.size(); i++) {
+        if (positionEntries_[i]->getAuthorId() == agentID) {
+            positionEntries_[i] = positionEntries_.back();
+            i -= 1;
+            positionEntries_.pop_back(); 
+        }
+    }
+}
+
 
 BlackboardEntry* Blackboard::findPositionEntry(unsigned int timeStep, int authorId) {
     return *std::find_if(positionEntries_.begin(), positionEntries_.end(), [timeStep, authorId](const BlackboardEntry *entry){
-        std::cerr << entry->getTimeStep() << " / " << entry->getAuthorId() << std::endl;
         if(entry->getTimeStep() == timeStep && entry->getAuthorId() == authorId)
             return true;
         return false;
