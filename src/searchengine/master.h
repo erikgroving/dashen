@@ -51,6 +51,7 @@ namespace SearchEngine {
             void updateStateWithNewMove(SearchEngine::Command, char, int, int);
 
             void computeGoalPriorities();
+            void revokeBlackboardEntries(SearchClient::JointAction);
 
     };
 }

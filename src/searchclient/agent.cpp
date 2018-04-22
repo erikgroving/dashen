@@ -2,7 +2,10 @@
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
-
+#include <limits.h>
+#ifndef __LONG_MAX__
+#define __LONG_MAX__ 2147483647
+#endif
 using SearchClient::Agent;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
@@ -15,7 +18,8 @@ Agent::Agent(Color color, char num, Coord loc,
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard), correctGoals_(0) {
+            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard), 
+            correctGoals_(0), firstMoveInPlan_(false) {
 
 }
 
@@ -64,12 +68,7 @@ std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngi
 }
     
 std::vector<SearchEngine::State*> Agent::searchBox(const Box& box, SearchEngine::Strategy* strategy) {
-    if(private_initialState != nullptr)
-        delete private_initialState;
-
-    private_initialState = new SearchEngine::State(*Agent::sharedState);
-    private_initialState->setInitialTimeStep(Agent::sharedTime);
-
+    configurePrivateInitialState();
     SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([&box, this](const SearchEngine::State *currentState) {
         return agentNextToBox(currentState, box, this);
@@ -80,12 +79,7 @@ std::vector<SearchEngine::State*> Agent::searchBox(const Box& box, SearchEngine:
 }
 
 std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &strategy) {
-    if(private_initialState != nullptr)
-        delete private_initialState;
-
-    private_initialState = new SearchEngine::State(*Agent::sharedState);
-    private_initialState->setInitialTimeStep(Agent::sharedTime);
-    
+    configurePrivateInitialState();
     SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([](const SearchEngine::State *currentState) {
         return isGoalState(currentState);
@@ -101,6 +95,7 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
+        firstMoveInPlan_ = true;
 
         bool satisfied = true;
         Goal unsatGoal = Goal();
@@ -161,6 +156,10 @@ SearchEngine::Command Agent::nextMove() {
             delete strat;
         }
 
+        if (!ans.empty()) {
+            auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, sharedTime - 1);
+            entry->setPosition(private_initialState->getAgents()[num].loc);
+        }
         // Construct a  plan for the answer
         for (auto *a : ans) {
             plan_.push_back(a->getAction());
@@ -168,7 +167,9 @@ SearchEngine::Command Agent::nextMove() {
             std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")";
             entry->setPosition(a->getAgents()[num].loc);
         }
-
+    }
+    else {
+        firstMoveInPlan_ = false;
     }
 
     if (plan_.empty()) {
@@ -178,7 +179,6 @@ SearchEngine::Command Agent::nextMove() {
     SearchEngine::Command ret = plan_[0];
     plan_.erase(plan_.begin());
 
-    SearchClient::BlackboardEntry::revoke(blackboard_->findPositionEntry(sharedTime, num), *this);
 
     return ret;
 }
@@ -222,8 +222,11 @@ bool Agent::positionFree(size_t x, size_t y, unsigned int timeStep) {
 
     for(const SearchClient::BlackboardEntry *entry: positionEntries) {
         if((size_t)entry->getLocation().x == x && (size_t)entry->getLocation().y == y) {
-       //     std::cerr << "Refused" << std::endl;
-            return false;
+            // Okay... so an agent will go to this entry. But.. WHEN?
+            int timeDiff = entry->getTimeStep() - timeStep;
+            if (abs(timeDiff) <= 1) {
+                return false;
+            }
         }
     }
     return true;
@@ -263,4 +266,37 @@ Goal Agent::getGoalFromBlackboard() {
 
     SearchClient::BlackboardEntry::accept(selectedEntry, *this);
     return result;
+}
+
+void Agent::clearPlan() {
+    plan_.erase(plan_.begin(), plan_.end());
+    blackboard_->removeEntriesByAuthor(num);
+}
+
+void Agent::configurePrivateInitialState() {
+    if(private_initialState != nullptr)
+        delete private_initialState;
+
+    private_initialState = new SearchEngine::State(*Agent::sharedState);
+    private_initialState->setInitialTimeStep(Agent::sharedTime);
+
+    std::vector<char> agentsInMotion = std::vector<char>();
+    SearchClient::Blackboard* bbPtr = this->getBlackboard();
+
+    for (auto& entry : bbPtr->getPositionEntries()) {
+        if (std::find(agentsInMotion.begin(), agentsInMotion.end(), entry->getAuthorId()) 
+                == agentsInMotion.end()) {
+            agentsInMotion.push_back(entry->getAuthorId());
+            if (entry->getAuthorId() == num) {
+                std::cerr << "Found self. Self was " << (int)num << " \n";
+                exit(0);
+            }
+        }
+    }
+
+    std::vector<AgentDescription> agents = private_initialState->getAgents();
+    for (char& agentID : agentsInMotion) {
+        agents[agentID].loc.x = -1;
+    }
+    private_initialState->setAgents(agents);
 }

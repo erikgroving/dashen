@@ -3,6 +3,7 @@
 
 using SearchClient::Blackboard;
 using SearchClient::BlackboardEntry;
+void printBlackboard(SearchClient::Blackboard* b);
 using namespace SearchEngine;
 
 /* 
@@ -17,8 +18,10 @@ void Master::conductSearch() {
 
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
+        std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
+        revokeBlackboardEntries(ja);
         jointActions_.push_back(ja); 
 
         /** TODO When updating the internal state, if a command from
@@ -27,11 +30,11 @@ void Master::conductSearch() {
          */
         updateCurrentState(ja);
 
-        std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         std::cerr << "Joint Action: " << ja.toActionString(); 
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
+        printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
 
     }
@@ -58,7 +61,6 @@ SearchClient::JointAction Master::callForActions() {
         action.setAction(i, agents_[i].nextMove());
     } 
 
-    Agent::sharedTime++;
     return action;
 }
 
@@ -74,6 +76,9 @@ void Master::updateCurrentState(SearchClient::JointAction ja) {
         if (isActionValid(actions[i], i, newAgentCol, newAgentRow)) {
             updateStateWithNewMove(actions[i], i, newAgentCol, newAgentRow);
         } // TODO signal to agent that his plan has been made invalid
+        else {
+            agents_[i].clearPlan();
+        }
     }
 }
 
@@ -151,5 +156,32 @@ void Master::computeGoalPriorities()
 void Master::sendSolution () {
     for (SearchClient::JointAction ja : jointActions_) {
         std::cout << ja.toActionString() << std::endl;
+    }
+}
+
+void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
+    auto commands = ja.getData();
+    for (unsigned int i = 0; i < commands.size(); i++) {
+        if (commands[i].action() != NOOP) {
+            unsigned int sharedTime = SearchClient::Agent::sharedTime;
+            std::cerr << "Revoking entry with time : " << sharedTime << std::endl;
+            SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
+            if (agents_[i].isFirstMoveInPlan()) {
+                std::cerr << "Revoking entry with time : " << sharedTime - 1 << std::endl;
+                SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
+            }
+        }
+    }
+    Agent::sharedTime++;
+}
+
+void printBlackboard(SearchClient::Blackboard* b) {
+    auto posEntries = b->getPositionEntries();
+    std::cerr << "\n----Blackboard---\n";
+    std::cerr << "Timestep\tPosition\tAuthor\n";
+    for (auto& entry : posEntries) {
+        std::cerr << entry->getTimeStep() << "\t\t(" <<
+                    entry->getLocation().x << "," << entry->getLocation().y <<
+                    ")\t\t" << entry->getAuthorId() << std::endl;
     }
 }

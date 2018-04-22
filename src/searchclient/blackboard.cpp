@@ -55,6 +55,16 @@ void Blackboard::removeEntry(const BlackboardEntry *entry) {
             break;
     }
 }
+void Blackboard::removeEntriesByAuthor(char agentID) {
+    for (size_t i = 0; i < positionEntries_.size(); i++) {
+        if (positionEntries_[i]->getAuthorId() == agentID) {
+            positionEntries_[i] = positionEntries_.back();
+            i -= 1;
+            positionEntries_.pop_back(); 
+        }
+    }
+}
+
 
 BlackboardEntry* Blackboard::findPositionEntry(unsigned int timeStep, int authorId) {
     return *std::find_if(positionEntries_.begin(), positionEntries_.end(), [timeStep, authorId](const BlackboardEntry *entry){
