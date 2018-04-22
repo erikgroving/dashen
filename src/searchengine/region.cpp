@@ -28,8 +28,22 @@ void Region::computeRegionFromPositionRecursive(const State *state, std::vector<
     //  check if not out of bounds, is -1, is not wall, 
     //  then set to same counter 
     //  recursive call
+    std::cerr << "computeRegionFromPositionRecursive start" << std::endl;
+    std::cerr << x << " " << y << " " << regionCounter << " " << inBound(state, x, y) << std::endl;
     if(!inBound(state, x, y)) return;
-    else if((*result)[y][x] != 0 || wallAt(state, x, y)) return;
+    //std::cerr << (*result)[y][x] << std::endl;
+
+    if((*result)[y][x] != 0) return;
+    //std::cerr << "this line2" << std::endl;
+    if(wallAt(state, x, y)) return;
+    //std::cerr << "this line3" << std::endl;
+    /*
+    for (const auto& inner : *result) {
+        for (auto value : inner) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }*/
 
     (*result)[y][x] = regionCounter;
     if(inBound(state, x + 1, y))
@@ -58,13 +72,13 @@ std::vector<std::vector<size_t> > Region::getRegionMatrix(const State *state) {
         for (size_t x=0; x<state->walls[y].size(); x++) {
             if (result[y][x]==0 && !wallAt(state, x, y)) {
                 // BFS
-                result[y][x] = regionCounter;
+                //result[y][x] = regionCounter;
                 
                 // for all neighbours, 
                 //  check if not out of bounds, is -1, is not wall, 
                 //  then set to same counter 
                 //  recursive call
-                Region::computeRegionFromPositionRecursive(state, &result, x, y, regionCounter);
+                computeRegionFromPositionRecursive(state, &result, x, y, regionCounter);
 
                 // counter + 1
                 regionCounter++;
