@@ -2,6 +2,7 @@
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
+#include "../searchengine/region.h"
 #include <limits.h>
 #ifndef __LONG_MAX__
 #define __LONG_MAX__ 2147483647
@@ -39,10 +40,26 @@ void Agent::updateBoxesList(const SearchEngine::State &initialState) {
 void Agent::updateGoalsList(const SearchEngine::State &initialState) {
     goalsToAchieve.clear();
 
+    // TODO: should be shared resource, maybe in state.h?
+    SearchEngine::Region region = SearchEngine::Region(sharedState);
+
     for( const Goal &goal: SearchEngine::State::goals ) {
-           for(const Box &box: movableBoxes)
-            if(goal.letter == box.letter)  
+        for(const Box &box: movableBoxes) {
+            // check:
+            // goal and box matching letters
+            // agent in same region as box
+            // agent in same region as goal
+            // code does not seem used here??
+            Coord agentLocation = sharedState->getAgents()[(int) num].loc;
+            std::cerr << "agent location: " << agentLocation.x << " " << agentLocation.y << std::endl;
+            
+            if(goal.letter == box.letter 
+            && region.isInSameRegion(agentLocation, box.loc)
+            && region.isInSameRegion(agentLocation, goal.loc)) {
+                std::cerr << "here" << std::endl;
                 goalsToAchieve.push_back(goal);
+            }
+        }
     }
 }
 
