@@ -33,7 +33,7 @@ public:
 
 private:
     State *inputState_;
-    std::vector<std::vector<short int> > regionMatrix;
+    std::vector<std::vector<short int> > regionMatrix_;
 
 };
 

@@ -5,16 +5,25 @@ using SearchEngine::Region;
 using namespace SearchEngine::Predicate;
 
 Region::Region(State *input): inputState_(input), regionMatrix_() {
-    regionMatrix_ = Distance::getRegionMatrix(input);    
+    regionMatrix_ = Region::getRegionMatrix(input);    
 }
 
 Region::~Region() {
     
 }
 
+short int Region::getRegion(size_t source_x, size_t source_y) const {
+    return regionMatrix_[source_y][source_x];
+}
+short int Region::getRegion(Coord source) const {
+    return Region::getRegion(source.x, source.y);
+}
+
+bool Region::isInSameRegion(Coord a, Coord b) const {
+    return Region::getRegion(a) == Region::getRegion(b);
+}
 
 std::vector<std::vector<short int> > Region::getRegionMatrix(const State *state) {
-
     // Initialization
     std::vector<std::vector<short int> > result;
     size_t s_height = height(state);
@@ -23,7 +32,6 @@ std::vector<std::vector<short int> > Region::getRegionMatrix(const State *state)
     for(size_t i = 0; i < s_height; i++) {
         result[i].resize(width(state, i), -1);
     }
-
     size_t regionCounter = 0;
 
     for (size_t y=0; y<state->walls.size(); y++) {
@@ -36,7 +44,5 @@ std::vector<std::vector<short int> > Region::getRegionMatrix(const State *state)
             }
         }
     }
-
     return result;
-
 }
