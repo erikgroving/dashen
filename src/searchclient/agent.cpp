@@ -213,7 +213,8 @@ bool Agent::isEntryDoable(const SearchClient::BlackboardEntry *entry, const Sear
     for (const Box &b : state->getBoxes()) {
 
         if (b.color == color && b.letter == entryGoal.letter && !State::takenBoxes[b.id]) {
-            unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
+            //unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
+            unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, b.loc);
             if (dist < minDist) {
                 minDist = dist;
                 closestBox = b;
