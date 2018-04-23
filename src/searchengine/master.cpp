@@ -163,10 +163,20 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
 
 void Master::computeGoalPriorities()
 {
+    auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
     for(BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
         int goalIndex = -1;
-            SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
-        goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
+        SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
+        goalEntry->setPriority(goalPriorities[goalIndex]);
+        //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
+        char letter;
+        for (Goal g : masterState_.goals) {
+            if (g.loc == goalEntry->getLocation()) {
+                letter = g.letter;
+                break;
+            }
+        }
+        std::cerr << "Goal with letter: " << letter <<  " had priority " << goalEntry->getPriority() << std::endl;
     }
 }
 

@@ -14,6 +14,11 @@ namespace SearchEngine {
     namespace GoalPriorityComputation {
         unsigned int computeGoalPriority(const SearchEngine::State *state, const Goal &goal);
         unsigned int computeTilePriority(const SearchEngine::State *state, size_t x, size_t y, std::vector<Coord> &visitedTiles);
+
+        std::vector<unsigned int> computeAllGoalPriorities(const SearchEngine::State* state);
+        bool goalsStillAccessible(const SearchEngine::State& s, std::vector<Goal> remGoals, Goal prospectiveGoal);
+        bool canReach(const SearchEngine::State& state, Coord agent, Coord goal);
+        int getSurroundingWalls(const SearchEngine::State& state, Coord c);
     }
 }
 #endif // GOALPRIORITY_H

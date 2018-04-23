@@ -1,5 +1,11 @@
 #include "goalpriority.h"
-
+#ifndef __INT_MAX__
+#define __INT_MAX__ 2147483647
+#endif
+#include <queue>
+using std::queue;
+using std::pair;
+using std::vector;
 using namespace SearchEngine::Predicate;
 
 unsigned int SearchEngine::GoalPriorityComputation::computeTilePriority(const SearchEngine::State *state, size_t x, size_t y, std::vector<Coord> &visitedTiles) {
@@ -36,4 +42,140 @@ unsigned int SearchEngine::GoalPriorityComputation::computeGoalPriority(const Se
 {
     std::vector<Coord> visitedTiles;
     return computeTilePriority(state, goal.loc.x, goal.loc.y, visitedTiles);
+}
+
+
+std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(const SearchEngine::State* state) {
+    SearchEngine::State s = *state;
+
+    std::vector<Goal> goalsRemaining = s.goals;
+    std::vector<unsigned int> priorities = std::vector<unsigned int>(s.goals.size());
+
+    while (!goalsRemaining.empty()) {
+        int minWallCount = -1;
+        int minGoalIdx;
+        
+        // Count surrounding walls. IF 3 then definitely next one
+        for (size_t j = 0; j < goalsRemaining.size(); j++) {
+            Goal g = goalsRemaining[j];
+            int surroundingWalls = getSurroundingWalls(s, g.loc);
+            if (surroundingWalls > minWallCount) {
+                minWallCount = surroundingWalls;
+                minGoalIdx = j;
+                if (minWallCount == 3) {
+                    break;
+                }
+            }
+        }
+
+        Goal priorityGoal = goalsRemaining[minGoalIdx];
+        int goalID = -1;
+        for (size_t j = 0; j < s.goals.size(); j++) {
+            if (priorityGoal.loc == s.goals[j].loc) {
+                goalID = j;
+                break;
+            }
+        }
+        s.walls[priorityGoal.loc.y][priorityGoal.loc.x] = true;
+        if (!goalsStillAccessible(s, goalsRemaining, priorityGoal)) {
+            // Choosing this goal made another goal inaccessible.
+            // We then put it in the back so another goal is chosen
+            s.walls[priorityGoal.loc.y][priorityGoal.loc.x] = false;
+            std::rotate(goalsRemaining.begin(), goalsRemaining.begin() +1, goalsRemaining.end());
+        }
+        else {
+            // Can still reach all goals! Give this goal a priority and continue
+            // Add the min goal to have the top priority
+            priorities[goalID] = goalsRemaining.size();
+            goalsRemaining.erase(goalsRemaining.begin() + minGoalIdx, goalsRemaining.begin() + minGoalIdx + 1);
+        }
+    } 
+
+
+    // De-wall the goal tiles.. since walls are a static object in the State class
+    for (Goal& g: state->goals) {
+        s.walls[g.loc.y][g.loc.x] = false;
+    }
+    return priorities; 
+}
+
+/* Are all the remaining goals still accessible by an agent ? */
+bool SearchEngine::GoalPriorityComputation::goalsStillAccessible(const SearchEngine::State& state, std::vector<Goal> remGoals, Goal prospectiveGoal) {
+    for (Goal g : remGoals) {
+        if (g.loc == prospectiveGoal.loc) {
+            continue;
+        }
+
+        bool reached = false;
+        for (AgentDescription agent : state.getAgents()) {
+            if (canReach(state, agent.loc, g.loc)) {
+                reached = true;
+                break;
+            }
+        }
+        if (!reached) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/* Can we reach the goal from the agent's current position? only looking at walls */
+bool SearchEngine::GoalPriorityComputation::canReach(const SearchEngine::State& state, Coord agent, Coord goal) {
+    queue<Coord> unexplored;
+
+    vector< vector<bool> > seen;
+
+    for (size_t i = 0; i < state.walls.size(); i++) {
+        seen.push_back(vector<bool>());
+        for (size_t j = 0; j < state.walls[i].size(); j++) {
+            seen[i].push_back(false);
+        }
+    }
+
+    unexplored.push(agent);
+    seen[agent.y][agent.x] = true;
+
+    while (!unexplored.empty()) {
+        Coord currCoord  = unexplored.front();
+        unexplored.pop();
+
+        if (currCoord == goal) {
+            return true;
+        }
+
+        Coord northCoord = Coord(currCoord.x - 1, currCoord.y);
+        Coord eastCoord = Coord(currCoord.x, currCoord.y + 1);
+        Coord southCoord = Coord(currCoord.x + 1, currCoord.y);
+        Coord westCoord = Coord(currCoord.x, currCoord.y - 1);
+        vector< Coord > coords = {northCoord, eastCoord, southCoord, westCoord};
+
+        for (Coord c : coords) {
+            if (SearchEngine::Predicate::inBound(&state, c.x, c.y)) {
+                if (!seen[c.y][c.x] && !SearchEngine::Predicate::wallAt(&state, c.x, c.y)) {
+                    unexplored.push(c);
+                    seen[c.y][c.x] = true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+int SearchEngine::GoalPriorityComputation::getSurroundingWalls(const SearchEngine::State& state, Coord c) {
+    Coord northCoord = Coord(c.x - 1, c.y);
+    Coord eastCoord = Coord(c.x, c.y + 1);
+    Coord southCoord = Coord(c.x + 1, c.y);
+    Coord westCoord = Coord(c.x, c.y - 1);
+    std::vector< Coord > coords = {northCoord, eastCoord, southCoord, westCoord};
+
+    int res = 0;
+    for (Coord c : coords) {
+        if (wallAt(&state, c.x, c.y)) {
+            res++;
+        }
+    }
+
+    return res;
 }
