@@ -87,11 +87,8 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
             updateStateWithNewMove(actions[i], i);
         } 
         else {
-            std::cerr<<"Detected invalid move for agent " << i << std::endl;
             ja->setAction(i, Command());
             agents_[i].clearPlan(actions[i]);
-            printBlackboard(&masterBlackboard_);
-           // exit(0);
         }
     }
 }

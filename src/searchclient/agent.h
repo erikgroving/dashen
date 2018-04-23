@@ -45,9 +45,16 @@ public:
     const SearchEngine::Strategy* getSearchStrategy() const { return searchStrategy_; }
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
 
+    const SearchEngine::State* getState() const { return sharedState; }
+    SearchEngine::State* getState() { return sharedState; }
+    
+    
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
     void clearPlan(SearchEngine::Command);
+
+    
+
     /**
      * Return the highest priority goal
      */
@@ -95,6 +102,7 @@ public: // Static public methods
     static void setSharedState(SearchEngine::State *sharedState);
     static void setSharedTime(unsigned int timeStep);
     static unsigned int sharedTime;
+    static SearchEngine::State *sharedState;
 private:
 
     Color color;
@@ -106,7 +114,6 @@ private:
     std::vector<Goal> goalsToAchieve;
     std::vector<Box> movableBoxes;
 
-    static SearchEngine::State *sharedState;
 
     SearchEngine::State *private_initialState;
 

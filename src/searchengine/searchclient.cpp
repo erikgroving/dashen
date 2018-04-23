@@ -51,7 +51,7 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
     strategy.addToFrontier(initialState_);
     while(true) {
         
-        if(strategy.frontierIsEmpty() || iterations > 1000) {
+        if(strategy.frontierIsEmpty() /*|| iterations > 1000*/) {
             return std::vector<State*>();
         }
 
