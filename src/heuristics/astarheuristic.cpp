@@ -27,9 +27,7 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
         }
     }
 
-    if (startSearchCorrectgoals > currCorrectGoals) {
-        result += (startSearchCorrectgoals - currCorrectGoals) * 10;
-    }
+    result += (1 + startSearchCorrectgoals - currCorrectGoals) * 10;
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
@@ -68,9 +66,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
         }
     }
 
-    if (startSearchCorrectgoals > currCorrectGoals) {
-        result += startSearchCorrectgoals - currCorrectGoals;
-    }
+    result += 1 + startSearchCorrectgoals - currCorrectGoals;
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];

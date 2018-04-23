@@ -32,19 +32,26 @@ class Blackboard {
         ~Blackboard();
     public:
         void addEntry(BlackboardEntry *entry);
+        void initBoxEntries(size_t numBoxes);
 
         std::vector<BlackboardEntry*>& getPositionEntries() { return positionEntries_; } 
         const std::vector<BlackboardEntry*>& getPositionEntries() const { return positionEntries_; }
         
         const std::vector<BlackboardEntry*>& getGoalEntries() const { return goalEntries_; }
         std::vector<BlackboardEntry*>& getGoalEntries() { return goalEntries_; }
+        
+        const std::vector<BlackboardEntry*>& getBoxEntries(int boxID) const { return boxPositionEntries_[boxID]; }
+        std::vector<BlackboardEntry*>& getBoxEntries(int boxID) { return boxPositionEntries_[boxID]; }
 
         void removeEntry(const BlackboardEntry *entry);
         void removeEntriesByAuthor(char agentID);
+        void popBoxPosEntry(short boxID);
+        void clearBoxEntries(short boxID);
         BlackboardEntry* findPositionEntry(unsigned int timeStep, int authorId);
 
     private:
         std::vector<BlackboardEntry*> positionEntries_;
+        std::vector<std::vector<BlackboardEntry*>> boxPositionEntries_;
         std::vector<BlackboardEntry*> goalEntries_;
 };
 

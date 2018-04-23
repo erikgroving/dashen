@@ -32,7 +32,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
     
     AgentDescription &agt = agents[agentIndex];
 
-    for(const Command &cmd: Command::possibleActions) {
+    for(Command cmd: Command::possibleActions) {
         // std::cerr << "--" << cmd.toString() << std::endl;
 
         int newAgentRow = agt.loc.y + Command::rowToInt(cmd.d1());
@@ -71,6 +71,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                     if( isFree(this, newBoxCol, newBoxRow) ) {
                         State *childNode = makeChild();
 
+                        cmd.setTargBoxId(boxIndex);
                         childNode->setAction(cmd);
                         childNode->getAgents()[agentIndex].loc.x = newAgentCol;
                         childNode->getAgents()[agentIndex].loc.y = newAgentRow;
@@ -98,6 +99,7 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 if(boxAt(this, boxCol, boxRow, &boxIndex)) {
                     if (this->getBoxes()[boxIndex].color == agt.color) {
                         State *childNode = makeChild();
+                        cmd.setTargBoxId(boxIndex);
                         childNode->setAction(cmd);
 
                         childNode->getBoxes()[boxIndex].loc.x = childNode->getAgents()[agentIndex].loc.x;

@@ -14,11 +14,14 @@ class Command {
         Command(Action type = NOOP);
         Command(Action type, Direction dir1);
         Command(Action type, Direction dir1, Direction dir2);
+        Command(Action type, Direction dir1, Direction dir2, short targBoxID);
         Command(const Command &src);
         Command& operator=(const Command &src) {
             action_ = src.action();
             d1_ = src.d1();
             d2_ = src.d2();
+            targBoxID_ = src.targBoxId();
+
             return *this;
         }
 
@@ -26,6 +29,10 @@ class Command {
         Action action() const { return action_; }
         Direction d1() const { return d1_; }
         Direction d2() const { return d2_; }
+        short targBoxId() const { return targBoxID_; }
+
+        // Setter for target box
+        void setTargBoxId(short a) { targBoxID_ = a; }
 
     public:
         enum Operation {
@@ -61,6 +68,7 @@ class Command {
         Action action_;
         Direction d1_;
         Direction d2_;
+        short targBoxID_ = -1;
 };
 
 }

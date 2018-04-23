@@ -21,7 +21,6 @@ void Master::conductSearch() {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
-        revokeBlackboardEntries(ja);
         jointActions_.push_back(ja); 
 
         /** TODO When updating the internal state, if a command from
@@ -30,6 +29,7 @@ void Master::conductSearch() {
          */
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
+        revokeBlackboardEntries(ja);
         std::cerr << "Joint Action: " << ja.toActionString(); 
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
@@ -50,6 +50,19 @@ void Master::postBlackBoard() {
         entry->setPosition(g.loc);
     }
     computeGoalPriorities();
+    
+    masterBlackboard_.initBoxEntries(masterState_.getBoxes().size());
+    /* 
+     * Create box position entries, these entries do not get removed
+     * Box position entries are updated by changing the time step and
+     * position values
+     */
+    for (Box& b : masterState_.getBoxes()) {
+        BlackboardEntry* entry = BlackboardEntry::create(BlackboardEntry::BOX_POSITION_ENTRY, 
+                                &masterBlackboard_, b.id, -2);
+        entry->setPosition(b.loc);
+        //blackboardEntries_.push_back(entry);
+    }
 }
 
 /* This function calls for actions from all the agents */
@@ -74,9 +87,11 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
             updateStateWithNewMove(actions[i], i);
         } 
         else {
-            std::cerr << "Detected a wrong move for agent " << i << std::endl;
+            std::cerr<<"Detected invalid move for agent " << i << std::endl;
             ja->setAction(i, Command());
-            agents_[i].clearPlan();
+            agents_[i].clearPlan(actions[i]);
+            printBlackboard(&masterBlackboard_);
+           // exit(0);
         }
     }
 }
@@ -174,17 +189,31 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
                 SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
             }
         }
+        if (commands[i].action() == PUSH || commands[i].action() == PULL) {
+            // pop the front of the positional entry vector 
+            masterBlackboard_.popBoxPosEntry(commands[i].targBoxId());
+        }
     }
     Agent::sharedTime++;
 }
 
-void printBlackboard(SearchClient::Blackboard* b) {
+void Master::printBlackboard(SearchClient::Blackboard* b) {
     auto posEntries = b->getPositionEntries();
-    std::cerr << "\n----Blackboard---\n";
-    std::cerr << "Timestep\tPosition\tAuthor\n";
+    std::cerr << "\n---------Position Blackboard--------\n";
+    std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
     for (auto& entry : posEntries) {
-        std::cerr << entry->getTimeStep() << "\t\t(" <<
+        std::cerr << (int)entry->getTimeStep() << "\t\t\t(" <<
                     entry->getLocation().x << "," << entry->getLocation().y <<
-                    ")\t\t" << entry->getAuthorId() << std::endl;
+                    ")\t\t\t" << entry->getAuthorId() << std::endl;
+    }
+    std::cerr << "\n---------Box Blackboard--------\n";
+    std::cerr << "Timestep\t\tPosition\t\tBox\n";
+    for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
+        auto boxEntries = b->getBoxEntries(boxID);
+        for (auto& entry : boxEntries) {
+            std::cerr << (int)entry->getTimeStep() << "\t\t\t(" <<
+                        entry->getLocation().x << "," << entry->getLocation().y <<
+                        ")\t\t\t" << entry->getAuthorId() << std::endl;
+        }
     }
 }
