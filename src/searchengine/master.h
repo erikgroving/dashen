@@ -15,6 +15,7 @@ namespace SearchEngine {
         vector<SearchClient::JointAction> jointActions_;
         State masterState_;
         State prevMasterState_;
+        vector<SearchClient::BlackboardEntry> blackboardEntries_;
         vector<Agent> agents_;
         Blackboard masterBlackboard_;
 
@@ -53,6 +54,7 @@ namespace SearchEngine {
 
             void computeGoalPriorities();
             void revokeBlackboardEntries(SearchClient::JointAction);
+            void printBlackboard(SearchClient::Blackboard* b);
 
     };
 }

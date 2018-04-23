@@ -63,6 +63,17 @@ BlackboardEntry* BlackboardEntry::create(BlackboardEntry::EntryType type, Blackb
     return newEntry;
 }
 
+BlackboardEntry* BlackboardEntry::create(BlackboardEntry::EntryType type, Blackboard *parent, int ID,  unsigned int timeStep) {
+    BlackboardEntry *newEntry = new BlackboardEntry();
+
+    newEntry->setType(type);
+    newEntry->setAuthorId(ID);
+    newEntry->setTimeStep(timeStep);
+
+    parent->addEntry(newEntry);
+    return newEntry;
+}
+
 unsigned int BlackboardEntry::getPriority() const
 {
     return priority_;

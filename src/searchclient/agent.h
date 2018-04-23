@@ -47,7 +47,7 @@ public:
 
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
-    void clearPlan();
+    void clearPlan(SearchEngine::Command);
     /**
      * Return the highest priority goal
      */
@@ -83,7 +83,7 @@ public: // Search methods
     bool isEntryDoable(const SearchClient::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex = 0);
 
     
-    bool positionFree(size_t x, size_t y, unsigned int timeStep);
+    bool positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned int timeStep);
 
     Goal getGoalFromBlackboard();
 

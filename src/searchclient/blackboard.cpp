@@ -4,7 +4,7 @@
 using SearchClient::Blackboard;
 using SearchClient::BlackboardEntry;
 
-Blackboard::Blackboard(): positionEntries_(), goalEntries_() { }
+Blackboard::Blackboard(): positionEntries_(), boxPositionEntries_(), goalEntries_() { }
 
 Blackboard::~Blackboard() {
     for(BlackboardEntry* entry: positionEntries_)
@@ -21,6 +21,10 @@ void Blackboard::addEntry(BlackboardEntry *entry) {
             entry->setBlackboardParent(this);
             positionEntries_.push_back(entry);
             break;
+        case BlackboardEntry::BOX_POSITION_ENTRY:
+            entry->setBlackboardParent(this);
+            boxPositionEntries_[entry->getAuthorId()].push_back(entry);
+            break;
         case BlackboardEntry::GLOBAL_GOAL_ENTRY:
         case BlackboardEntry::MOVE_HELP_GOAL_ENTRY:
             entry->setBlackboardParent(this);
@@ -31,6 +35,20 @@ void Blackboard::addEntry(BlackboardEntry *entry) {
             std::cerr << "An invalid entry was tried to be put in the blackboard" << std::endl;
             return;
     }
+}
+
+void Blackboard::initBoxEntries(size_t numBoxes) {
+    for (size_t i = 0; i < numBoxes; i++) {
+        boxPositionEntries_.push_back(std::vector<BlackboardEntry*>());
+    }
+}
+
+void Blackboard::popBoxPosEntry(short ID) {
+    boxPositionEntries_[ID].erase(boxPositionEntries_[ID].begin(), boxPositionEntries_[ID].begin() + 1);
+}
+
+void Blackboard::clearBoxEntries(short ID) {
+    boxPositionEntries_[ID].erase(boxPositionEntries_[ID].begin() + 1, boxPositionEntries_[ID].end());
 }
 
 void Blackboard::removeEntry(const BlackboardEntry *entry) {

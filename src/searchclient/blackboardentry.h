@@ -12,6 +12,7 @@ class BlackboardEntry {
         enum EntryType {
             NONE,
             POSITION_ENTRY,
+            BOX_POSITION_ENTRY,
             GLOBAL_GOAL_ENTRY,
             MOVE_HELP_GOAL_ENTRY
         };
@@ -40,6 +41,7 @@ class BlackboardEntry {
         
         static BlackboardEntry* create(EntryType type, const Agent &author, Blackboard* parent,  unsigned int timeStep = -1);
         static BlackboardEntry* create(EntryType type, Blackboard* parent, unsigned int timeStep = -1);
+        static BlackboardEntry* create(EntryType type, Blackboard *parent, int ID,  unsigned int timeStep = -2);
 
         unsigned int getPriority() const;
         void setPriority(unsigned int value);

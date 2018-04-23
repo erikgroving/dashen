@@ -43,7 +43,7 @@ std::vector<Command> Command::possibleActions = std::vector<Command>{
                 Command(PULL,S,E)  // Command::Pull_SE
 };
 
-Command::Command(const Command &src): action_(src.action_), d1_(src.d1_), d2_(src.d2_) {
+Command::Command(const Command &src): action_(src.action_), d1_(src.d1_), d2_(src.d2_), targBoxID_(src.targBoxID_) {
 }
 
 Command::Command(Action type): action_(type), d1_(NONE), d2_(NONE) {
