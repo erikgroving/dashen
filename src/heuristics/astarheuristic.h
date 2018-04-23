@@ -2,8 +2,22 @@
 #define HEURISTICS_ASTAR
 
 #include "../searchengine/searchengine"
-
+#include <vector>
 namespace Heur {
+    std::vector< std::vector<unsigned long> > calculateDistancesFromPoint(Coord point, const SearchEngine::State* s);
+
+    class CoordHash {
+        public:
+            std::size_t operator () (const Coord &A) const;
+    };
+
+    class DistanceOracle {
+        private:
+            static std::unordered_map<Coord, std::vector<std::vector<unsigned long> >, CoordHash > distances_;
+        public:
+            static unsigned long fetchDistFromCoord(Coord A, Coord B);
+    };
+
     class AgentToBoxAStarHeuristic: public SearchEngine::Heuristic
     {
     private:
