@@ -119,7 +119,7 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
 }
 
 unsigned long AgentToBoxAStarHeuristic::heuristic(const SearchEngine::State* state) const {
-    return f(state) + state->getPathCost();
+    return 2 * f(state) + state->getPathCost();
 }
 
 std::string AgentToBoxAStarHeuristic::name() const {
@@ -159,7 +159,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
 }
 
 unsigned long BoxToGoalAStarHeuristic::heuristic(const SearchEngine::State* state) const {
-    return f(state) + state->getPathCost();
+    return 2 * f(state) + state->getPathCost();
 }
 
 std::string BoxToGoalAStarHeuristic::name() const {

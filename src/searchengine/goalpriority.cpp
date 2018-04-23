@@ -99,7 +99,7 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
     return priorities; 
 }
 
-/* Are all the remaining goals still accessible by an agent ? */
+/* Are all the remaining goals still accessible by a box with correct letter ? */
 bool SearchEngine::GoalPriorityComputation::goalsStillAccessible(const SearchEngine::State& state, std::vector<Goal> remGoals, Goal prospectiveGoal) {
     for (Goal g : remGoals) {
         if (g.loc == prospectiveGoal.loc) {
@@ -107,10 +107,20 @@ bool SearchEngine::GoalPriorityComputation::goalsStillAccessible(const SearchEng
         }
 
         bool reached = false;
-        for (AgentDescription agent : state.getAgents()) {
-            if (canReach(state, agent.loc, g.loc)) {
-                reached = true;
-                break;
+        for (Box box : state.getBoxes()) {
+            if (box.letter == g.letter) {
+                if (canReach(state, box.loc, g.loc)) {
+                    reached = true;
+                    break;
+                }
+            }
+        }
+        if (!reached) {
+            for (auto agent : state.getAgents()) {
+                if (canReach(state, agent.loc, g.loc)) {
+                    reached = true;
+                    break;
+                }
             }
         }
         if (!reached) {
@@ -121,8 +131,8 @@ bool SearchEngine::GoalPriorityComputation::goalsStillAccessible(const SearchEng
     return true;
 }
 
-/* Can we reach the goal from the agent's current position? only looking at walls */
-bool SearchEngine::GoalPriorityComputation::canReach(const SearchEngine::State& state, Coord agent, Coord goal) {
+/* Can we reach the goal from the box's current position? only looking at walls */
+bool SearchEngine::GoalPriorityComputation::canReach(const SearchEngine::State& state, Coord box, Coord goal) {
     queue<Coord> unexplored;
 
     vector< vector<bool> > seen;
@@ -134,8 +144,8 @@ bool SearchEngine::GoalPriorityComputation::canReach(const SearchEngine::State& 
         }
     }
 
-    unexplored.push(agent);
-    seen[agent.y][agent.x] = true;
+    unexplored.push(box);
+    seen[box.y][box.x] = true;
 
     while (!unexplored.empty()) {
         Coord currCoord  = unexplored.front();

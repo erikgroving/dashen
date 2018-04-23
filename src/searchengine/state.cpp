@@ -113,8 +113,6 @@ std::vector<State*> State::getExpandedNodes(int agentIndex) {
                 }
             }
         }        
-
-
     }
     std::random_shuffle(result.begin(), result.end());
     return result;

@@ -17,7 +17,7 @@ namespace SearchEngine {
 
         std::vector<unsigned int> computeAllGoalPriorities(const SearchEngine::State* state);
         bool goalsStillAccessible(const SearchEngine::State& s, std::vector<Goal> remGoals, Goal prospectiveGoal);
-        bool canReach(const SearchEngine::State& state, Coord agent, Coord goal);
+        bool canReach(const SearchEngine::State& state, Coord box, Coord goal);
         int getSurroundingWalls(const SearchEngine::State& state, Coord c);
     }
 }

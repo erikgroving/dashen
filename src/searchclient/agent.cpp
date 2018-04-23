@@ -209,6 +209,10 @@ bool Agent::isEntryDoable(const SearchClient::BlackboardEntry *entry, const Sear
         goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
     Goal entryGoal = SearchEngine::State::goals[goalIndex];
 
+    if (Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
+        return false;
+    }
+
     unsigned long minDist = ULONG_MAX;
     for (const Box &b : state->getBoxes()) {
 
