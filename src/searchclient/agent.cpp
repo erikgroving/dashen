@@ -18,7 +18,7 @@ Agent::Agent(Color color, char num, Coord loc,
             
             color(color), num(num), loc(loc),
             searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), currentSearchGoal_(nullptr), blackboard_(blackboard), 
+            private_initialState(), currentSearchGoal_(Goal()), blackboard_(blackboard), 
             correctGoals_(0), firstMoveInPlan_(false) {
 
 }
@@ -92,100 +92,26 @@ SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
         firstMoveInPlan_ = true;
-        bool satisfied = true;
-        Goal unsatGoal = Goal();
-        Goal search_goal = Goal();
 
-        // See if we have any unsatisfied goals
-        for (const Goal& g : takenGoals_) {
-            if (!goalHasCorrectBox(sharedState, g)) {
-                satisfied = false;
-                unsatGoal = g;
-                break;
-            }
-        }
+        // Find the next goal to complete
+        currentSearchGoal_ = determineNextGoal();
 
-        if (satisfied) {
-            search_goal = getGoalFromBlackboard();
-        }
-        else {
-            search_goal = unsatGoal;
-        }
-
-        if (search_goal.letter == '-') {
+        // If the search goal is '-', there are no goals available
+        if (currentSearchGoal_.letter == '-') {
             return SearchEngine::Command(); // no goals so send a NoOp back
         }
 
-        currentSearchGoal_ = &search_goal;
-
-        correctGoals_ = 0;
-        for (const Goal& g : SearchEngine::State::goals) {
-            if (SearchEngine::Predicate::goalHasCorrectBox(sharedState, g)) {
-                correctGoals_ += 1;
-            }
-        }
+        // Gets the current amount of goals satisfied in the current state
+        correctGoals_ = SearchEngine::Predicate::getCorrectGoals(sharedState);
         
         // Search to find the answer for the goal
-        std::vector<SearchEngine::State*> ans = std::vector<SearchEngine::State*>();
-        Box &targBox = sharedState->getBoxes()[search_goal.assignedBoxID];
-        SearchEngine::Strategy* strat;
+        std::vector<SearchEngine::State*> ans = conductSubgoalSearch();
+        
+        // Extract the plan from the search
+        extractPlan(ans);
 
-
-        if (!agentNextToBox(sharedState, targBox, this)) {
-            std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << std::endl;
-            strat = new Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic>(this);
-            strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
-                return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
-                                    state->getAction() ,state->getTimeStep());
-            });
-            ans = searchBox(targBox, strat); //TODO reflect proper strategy
-            delete strat;
-        }
-        else {
-            //std::cerr << "Satisfying goal (" << search_goal.loc.x << ", " << search_goal.loc.y << ") with box " << targBox.id << std::endl;
-            strat = new Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic>(this);
-            strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
-                return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
-                                    state->getAction(), state->getTimeStep());
-            });
-            ans = searchGoal(search_goal, strat);
-            delete strat;
-        }
-
-        if (!ans.empty()) {
-            auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, sharedTime - 1);
-            entry->setPosition(private_initialState->getAgents()[num].loc);
-
-        }
-        // Construct a  plan for the answer
-        for (auto *a : ans) {
-            plan_.push_back(a->getAction());
-            auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, a->getTimeStep());
-            //std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")\n";
-            entry->setPosition(a->getAgents()[num].loc);
-
-            SearchEngine::Command cmd = a->getAction();
-
-            // Add the box position entries
-            if (cmd.action() == PUSH || cmd.action() == PULL) { 
-                Box targBox;
-                targBox = a->getBoxes()[cmd.targBoxId()];
-                int newBoxCol, newBoxRow;
-                if (cmd.action() == PUSH) {
-                    newBoxCol = a->getAgents()[num].loc.x + SearchEngine::Command::colToInt(cmd.d2());
-                    newBoxRow = a->getAgents()[num].loc.y + SearchEngine::Command::rowToInt(cmd.d2());
-                }
-                else if (cmd.action() == PULL) {
-                    targBox = a->getBoxes()[cmd.targBoxId()];
-                    newBoxCol = a->getAgents()[num].loc.x;
-                    newBoxRow = a->getAgents()[num].loc.y;
-                }
-                Coord newBoxLoc = Coord(newBoxCol, newBoxRow);
-                auto* boxEntry = SearchClient::BlackboardEntry::create(
-                        SearchClient::BlackboardEntry::BOX_POSITION_ENTRY, blackboard_, targBox.id, a->getTimeStep());
-                boxEntry->setPosition(newBoxLoc);
-            }
-        }
+        // Post entries to the blackboard
+        postAllPositionEntries(ans);
     }
     else {
         firstMoveInPlan_ = false;
@@ -365,4 +291,100 @@ void Agent::configurePrivateInitialState() {
         agents[agentID].loc.x = -1;
     }
     private_initialState->setAgents(agents);
+}
+
+Goal Agent::determineNextGoal() {
+    bool satisfied = true;
+    Goal unsatGoal = Goal();
+    Goal search_goal = Goal();
+
+    // See if we have any unsatisfied goals
+    for (const Goal& g : takenGoals_) {
+        if (!goalHasCorrectBox(sharedState, g)) {
+            satisfied = false;
+            unsatGoal = g;
+            break;
+        }
+    }
+
+    if (satisfied) {
+        search_goal = getGoalFromBlackboard();
+    }
+    else {
+        search_goal = unsatGoal;
+    }
+
+    return search_goal;
+}
+    
+    
+std::vector<SearchEngine::State*> Agent::conductSubgoalSearch() {
+    std::vector<SearchEngine::State*> ans = std::vector<SearchEngine::State*>();
+    Box &targBox = sharedState->getBoxes()[currentSearchGoal_.assignedBoxID];
+    SearchEngine::Strategy* strat;
+
+    if (!agentNextToBox(sharedState, targBox, this)) {
+        std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << std::endl;
+        strat = new Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic>(this);
+        strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
+            return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
+                                state->getAction() ,state->getTimeStep());
+        });
+        ans = searchBox(targBox, strat); //TODO reflect proper strategy
+        delete strat;
+    }
+    else {
+        std::cerr << "Satisfying goal (" << currentSearchGoal_.loc.x << ", " << currentSearchGoal_.loc.y << ") with box " << targBox.id << std::endl;
+        strat = new Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic>(this);
+        strat->setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
+            return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
+                                state->getAction(), state->getTimeStep());
+        });
+        ans = searchGoal(currentSearchGoal_, strat);
+        delete strat;
+    }
+
+    return ans;
+}
+
+void Agent::extractPlan(const std::vector<SearchEngine::State*>& ans) {
+    // Construct a  plan for the answer
+    for (auto *a : ans) {
+        plan_.push_back(a->getAction());
+    }
+}
+
+void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans) {
+    if (!ans.empty()) {
+        auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, sharedTime - 1);
+        entry->setPosition(private_initialState->getAgents()[num].loc);
+    }
+    // Construct a  plan for the answer
+    for (auto *a : ans) {
+        auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, a->getTimeStep());
+        //std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")\n";
+        entry->setPosition(a->getAgents()[num].loc);
+
+        SearchEngine::Command cmd = a->getAction();
+
+        // Add the box position entries
+        if (cmd.action() == PUSH || cmd.action() == PULL) { 
+            Box targBox;
+            targBox = a->getBoxes()[cmd.targBoxId()];
+            int newBoxCol, newBoxRow;
+            if (cmd.action() == PUSH) {
+                newBoxCol = a->getAgents()[num].loc.x + SearchEngine::Command::colToInt(cmd.d2());
+                newBoxRow = a->getAgents()[num].loc.y + SearchEngine::Command::rowToInt(cmd.d2());
+            }
+            else if (cmd.action() == PULL) {
+                targBox = a->getBoxes()[cmd.targBoxId()];
+                newBoxCol = a->getAgents()[num].loc.x;
+                newBoxRow = a->getAgents()[num].loc.y;
+            }
+            Coord newBoxLoc = Coord(newBoxCol, newBoxRow);
+            auto* boxEntry = SearchClient::BlackboardEntry::create(
+                    SearchClient::BlackboardEntry::BOX_POSITION_ENTRY, blackboard_, targBox.id, a->getTimeStep());
+            boxEntry->setPosition(newBoxLoc);
+        }
+    }
 }
