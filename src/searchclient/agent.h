@@ -32,8 +32,8 @@ public:
     
     bool isFirstMoveInPlan() { return firstMoveInPlan_; }
     
-    const Goal* getCurrentSearchGoal() const { return currentSearchGoal_; }
-    Goal* getCurrentSearchGoal() { return currentSearchGoal_; }
+    const Goal getCurrentSearchGoal() const { return currentSearchGoal_; }
+    Goal getCurrentSearchGoal() { return currentSearchGoal_; }
 
     int getIndex() const { return num; }
 
@@ -92,7 +92,20 @@ public: // Search methods
     
     bool positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned int timeStep);
 
+    /* Fetches a goal from the blackboard, used by determineNextGoal */
     Goal getGoalFromBlackboard();
+
+    /* Determines the next goal for the agent */
+    Goal determineNextGoal();
+
+    /* Conducts the search for a subgoal */
+    std::vector<SearchEngine::State*> conductSubgoalSearch();
+
+    /* Extracts the plan from a subgoal search */
+    void extractPlan(const std::vector<SearchEngine::State*>& ans);
+
+    /* Posts the position and box position entries */
+    void postAllPositionEntries(const std::vector<SearchEngine::State*>& ans);
 
 public: // Static public methods
     /**
@@ -117,7 +130,7 @@ private:
 
     SearchEngine::State *private_initialState;
 
-    Goal* currentSearchGoal_;
+    Goal currentSearchGoal_;
     /* Added with master class update. */
     std::vector<Goal> takenGoals_;   // goals taken down from blackboard.
                                     // help requests delete upon completion,

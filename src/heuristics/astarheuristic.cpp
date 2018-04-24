@@ -47,7 +47,7 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
     char agtIdx = agentPtr_->getIndex();
     vector<AgentDescription> agents = state->getAgents();
     Coord agentLoc = state->getAgents()[agtIdx].loc;    
-    Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
+    Goal searchGoal = agentPtr_->getCurrentSearchGoal();
 
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = agentPtr_->getCorrectGoals();
@@ -87,7 +87,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
       */
     unsigned long result = 0;
     vector<AgentDescription> agents = state->getAgents();
-    Goal searchGoal = *(agentPtr_->getCurrentSearchGoal());
+    Goal searchGoal = agentPtr_->getCurrentSearchGoal();
 
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = agentPtr_->getCorrectGoals();
