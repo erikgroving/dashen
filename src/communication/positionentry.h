@@ -11,12 +11,9 @@ namespace Communication {
 class PositionEntry: public BlackboardEntry
 {
 public:
-    PositionEntry(): Communication::BlackboardEntry() {}
-    PositionEntry(const PositionEntry &src): Communication::BlackboardEntry(src) {}
-    PositionEntry& operator=(const PositionEntry &src) {
-        Communication::BlackboardEntry::operator=(src);
-        return *this;
-    }
+    PositionEntry();
+    PositionEntry(const PositionEntry &src);
+    PositionEntry& operator=(const PositionEntry &src);
 
     static PositionEntry* create(const Coord &location, unsigned int timeStep, const SearchClient::Agent &author, Blackboard* parent);
 

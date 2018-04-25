@@ -14,6 +14,7 @@ class BlackboardEntry {
         BlackboardEntry();
         BlackboardEntry(const BlackboardEntry& src);
         virtual ~BlackboardEntry() {}
+
     public: // Operators
         virtual BlackboardEntry& operator=(const BlackboardEntry &src);
         virtual bool operator==(const BlackboardEntry &compared) const;

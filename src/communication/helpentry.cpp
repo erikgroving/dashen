@@ -6,6 +6,18 @@ HelpEntry::HelpEntry() : Communication::BlackboardEntry(), priority_(0), forbidd
 
 }
 
+HelpEntry::HelpEntry(const Communication::HelpEntry &src): Communication::BlackboardEntry(src),
+    priority_(src.priority_), forbiddenPath_(src.forbiddenPath_) {
+}
+
+HelpEntry& HelpEntry::operator=(const Communication::HelpEntry &src)
+{
+    Communication::BlackboardEntry::operator=(src);
+    priority_ = src.priority_;
+    forbiddenPath_ = src.forbiddenPath_;
+    return *this;
+}
+
 HelpEntry* HelpEntry::create(const Coord &location, unsigned int timeStep, const SearchClient::Agent &author, Communication::Blackboard *parent)
 {
     HelpEntry *entry = new HelpEntry;

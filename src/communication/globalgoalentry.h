@@ -10,6 +10,8 @@ class GlobalGoalEntry : public BlackboardEntry
 {
 public:
     GlobalGoalEntry();
+    GlobalGoalEntry(const GlobalGoalEntry& src);
+    GlobalGoalEntry& operator=(const GlobalGoalEntry &src);
 
     unsigned int getPriority() const { return priority_; }
     void setPriority(unsigned int priority) { priority_ = priority; }

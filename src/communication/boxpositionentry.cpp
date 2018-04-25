@@ -2,6 +2,19 @@
 
 using Communication::BoxPositionEntry;
 
+BoxPositionEntry::BoxPositionEntry(): Communication::BlackboardEntry() {}
+
+BoxPositionEntry::BoxPositionEntry(const Communication::BoxPositionEntry &src): Communication::BlackboardEntry(src),
+    boxId_(src.boxId_) {
+}
+
+BoxPositionEntry& BoxPositionEntry::operator=(const BoxPositionEntry& src) {
+    Communication::BlackboardEntry::operator=(src);
+    boxId_ = src.boxId_;
+    return *this;
+}
+
+
 BoxPositionEntry* BoxPositionEntry::create(const Coord &location, unsigned int timeStep, short boxId, const SearchClient::Agent &author, Communication::Blackboard *parent)
 {
     BoxPositionEntry *entry = new BoxPositionEntry;

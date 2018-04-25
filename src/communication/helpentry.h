@@ -12,6 +12,8 @@ class HelpEntry : public BlackboardEntry
 {
 public:
     HelpEntry();
+    HelpEntry(const HelpEntry& src);
+    HelpEntry& operator=(const HelpEntry& src);
 
     unsigned int getPriority() const { return priority_; }
     void setPriority(unsigned int priority) { priority_ = priority; }

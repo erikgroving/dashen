@@ -11,7 +11,9 @@ namespace Communication {
 class BoxPositionEntry : public BlackboardEntry
 {
 public:
-    BoxPositionEntry(): Communication::BlackboardEntry() {}
+    BoxPositionEntry();
+    BoxPositionEntry(const BoxPositionEntry& src);
+    BoxPositionEntry& operator=(const BoxPositionEntry& src);
 
     short getBoxId() const { return boxId_; }
     void setBoxId(short boxId) { boxId_ = boxId; }
