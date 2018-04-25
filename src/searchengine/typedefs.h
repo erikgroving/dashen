@@ -1,6 +1,8 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
+#include <cmath>
+
 enum Color { NOCOLOR, BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
 enum Direction { N, E, S, W, NONE};
 enum Action { MOVE, PUSH, PULL, NOOP };

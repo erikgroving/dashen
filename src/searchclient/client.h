@@ -1,5 +1,5 @@
-#ifndef SEARCHENGINE_CLIENT_H
-#define SEARCHENGINE_CLIENT_H
+#ifndef SEARCHCLIENT_CLIENT_H
+#define SEARCHCLIENT_CLIENT_H
 
 #include <string>
 #include <vector>
@@ -26,7 +26,7 @@ class Client {
         /* Only a default constructor is required. The client class is the main one of the program
          * and is responsible for all the other elements.
          */
-        Client(SearchEngine::Strategy *strategy = nullptr);
+        Client();
 
     public:
         /**
@@ -102,8 +102,6 @@ class Client {
 
         std::vector<SearchClient::Agent> agents;
         int actionsRecv;  
-
-        SearchEngine::Strategy *searchStrategy_;
 };
 
 }

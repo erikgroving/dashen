@@ -7,14 +7,9 @@ using SearchClient::JointAction;
 using SearchEngine::State;
 using SearchEngine::Command;
 
-Client::Client(SearchEngine::Strategy *strategy): 
+Client::Client():
     type_(None), onGoingJointAction(), actionPlan_(), 
-    agents(), actionsRecv(0), searchStrategy_(strategy)  {
-
-    if(strategy == nullptr) {
-        std::cerr << "Error: no strategy has been provided to the client." << std::endl;
-        std::cerr << "No solving will be executed" << std::endl;
-    }
+    agents(), actionsRecv(0)  {
 }
 
 void Client::setAction(size_t agentId, const Command &command) {

@@ -1,11 +1,19 @@
 #include "agent.h"
+
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
+
+#include "../communication/boxpositionentry.h"
+#include "../communication/globalgoalentry.h"
+#include "../communication/positionentry.h"
+#include "../communication/helpentry.h"
+
 #include <limits.h>
 #ifndef __LONG_MAX__
 #define __LONG_MAX__ 2147483647
 #endif
+
 using SearchClient::Agent;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
@@ -13,12 +21,9 @@ using namespace SearchEngine::Predicate;
 SearchEngine::State *Agent::sharedState;
 unsigned int Agent::sharedTime = 0;
 
-Agent::Agent(Color color, char num, Coord loc, 
-                SearchEngine::Strategy *strategy, SearchClient::Blackboard *blackboard) :
-            
-            color(color), num(num), loc(loc),
-            searchStrategy_(strategy), goalsToAchieve(), movableBoxes(), 
-            private_initialState(), currentSearchGoal_(Goal()), blackboard_(blackboard), 
+Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackboard) :
+            color(color), num(num), loc(loc), goalsToAchieve(), movableBoxes(),
+            private_initialState(), currentSearchGoal_(Goal()), blackboard_(blackboard),
             correctGoals_(0), firstMoveInPlan_(false) {
 
 }
@@ -27,14 +32,26 @@ Agent::~Agent() {
     if(private_initialState != nullptr)
         delete private_initialState;
 }
+
 void Agent::updateBoxesList(const SearchEngine::State &initialState) {
     movableBoxes.clear();
 
     for( const Box &box: initialState.getBoxes() ) {
         if(box.color == color)
             movableBoxes.push_back(box);
-    }   
+    }
 }
+
+/*
+void Agent::askForHelp(const Coord &helpPosition, const std::string &helpType, const std::vector<State *> &path)
+{
+    SearchClient::BlackboardEntry *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::MOVE_HELP_GOAL_ENTRY, *this, blackboard_, sharedTime);
+    entry->setPosition(helpPosition);
+
+    if(helpPosition == "Agent")
+
+}
+*/
 
 void Agent::updateGoalsList(const SearchEngine::State &initialState) {
     goalsToAchieve.clear();
@@ -128,7 +145,7 @@ SearchEngine::Command Agent::nextMove() {
     return ret;
 }
 
-bool Agent::isEntryDoable(const SearchClient::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
+bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
 
     Box closestBox = Box();
     int goalIndex = -1;
@@ -178,7 +195,7 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
     auto positionEntries = blackboard_->getPositionEntries();
 
     // check against agents
-    for(const SearchClient::BlackboardEntry *entry: positionEntries) {
+    for(const Communication::BlackboardEntry *entry: positionEntries) {
         Coord entryPos = entry->getLocation();
         if(newAgentPos == entryPos || newBoxPos == entryPos) {
             // Okay... so an agent/box will go to this entry. But.. WHEN?
@@ -192,7 +209,7 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
     // check against boxes
     for (size_t id = 0; id < private_initialState->getBoxes().size(); id++) {
         auto boxPositionEntries = blackboard_->getBoxEntries(id);
-        for (const SearchClient::BlackboardEntry* entry: boxPositionEntries) {
+        for (const Communication::BlackboardEntry* entry: boxPositionEntries) {
             Coord entryPos = entry->getLocation();
             if(newAgentPos == entryPos || newBoxPos == entryPos) {
                 // Okay... so an agent will go to this entry. But.. WHEN?
@@ -211,16 +228,16 @@ Goal Agent::getGoalFromBlackboard() {
     // Identify a suitable goal from the blackboard
     if(blackboard_->getGoalEntries().size() <= 0) return Goal();
 
-    SearchClient::BlackboardEntry *selectedEntry = nullptr;
+    Communication::GlobalGoalEntry *selectedEntry = nullptr;
     unsigned int priority = 0;
 
     int closestBoxIndex = -1;
-    for (SearchClient::BlackboardEntry *entry : blackboard_->getGoalEntries()) {
-        if (entry->getType() == SearchClient::BlackboardEntry::GLOBAL_GOAL_ENTRY &&
-            priority < entry->getPriority()                                      &&
-            isEntryDoable(entry, sharedState, &closestBoxIndex)                        ) {
-            selectedEntry = entry;
-            priority = entry->getPriority();
+    for (Communication::BlackboardEntry *entry : blackboard_->getGoalEntries()) {
+        Communication::GlobalGoalEntry *entry_casted = static_cast<Communication::GlobalGoalEntry*>(entry);
+        if( priority < entry_casted ->getPriority()                      &&
+            isEntryDoable(entry_casted , sharedState, &closestBoxIndex) ) {
+            selectedEntry = entry_casted ;
+            priority = entry_casted ->getPriority();
         }
     }
 
@@ -239,23 +256,23 @@ Goal Agent::getGoalFromBlackboard() {
     result.assignedBoxID = closestBoxIndex;
     takenGoals_.push_back(result);
 
-    SearchClient::BlackboardEntry::accept(selectedEntry, *this);
+    Communication::BlackboardEntry::accept(selectedEntry, *this);
     return result;
 }
 
 void Agent::clearPlan(SearchEngine::Command cmd) {
     if (cmd.action() == PUSH || cmd.action() == PULL) {
         int id = cmd.targBoxId();
-        blackboard_->clearBoxEntries(id);
+        blackboard_->clear(Communication::Blackboard::BoxPositionEntry, id);
     }
     for (SearchEngine::Command cmd : plan_) {
         if (cmd.action() == PUSH || cmd.action() == PULL) {
             int id = cmd.targBoxId();
-            blackboard_->clearBoxEntries(id);
+            blackboard_->clear(Communication::Blackboard::BoxPositionEntry, id);
         }
     }
     plan_.erase(plan_.begin(), plan_.end());
-    blackboard_->removeEntriesByAuthor(num);
+    blackboard_->removeEntriesByAuthor(num, Communication::Blackboard::PositionEntry);
 }
 
 void Agent::configurePrivateInitialState() {
@@ -266,7 +283,7 @@ void Agent::configurePrivateInitialState() {
     private_initialState->setInitialTimeStep(Agent::sharedTime);
 
     std::vector<char> agentsInMotion = std::vector<char>();
-    SearchClient::Blackboard* bbPtr = this->getBlackboard();
+    Communication::Blackboard* bbPtr = this->getBlackboard();
 
 
     // Remove agents in motion. Will use blackboard instead 
@@ -355,15 +372,12 @@ void Agent::extractPlan(const std::vector<SearchEngine::State*>& ans) {
 }
 
 void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans) {
-    if (!ans.empty()) {
-        auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, sharedTime - 1);
-        entry->setPosition(private_initialState->getAgents()[num].loc);
-    }
+    if (!ans.empty())
+        Communication::PositionEntry::create(private_initialState->getAgents()[num].loc, sharedTime - 1, *this, blackboard_);
+
     // Construct a  plan for the answer
     for (auto *a : ans) {
-        auto *entry = SearchClient::BlackboardEntry::create(SearchClient::BlackboardEntry::POSITION_ENTRY, *this, blackboard_, a->getTimeStep());
-        //std::cerr << "Location (" << a->getAgents()[num].loc.x << ", " << a->getAgents()[num].loc.y << ")\n";
-        entry->setPosition(a->getAgents()[num].loc);
+        Communication::PositionEntry::create(a->getAgents()[num].loc, a->getTimeStep(), *this, blackboard_ );
 
         SearchEngine::Command cmd = a->getAction();
 
@@ -381,10 +395,9 @@ void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans)
                 newBoxCol = a->getAgents()[num].loc.x;
                 newBoxRow = a->getAgents()[num].loc.y;
             }
-            Coord newBoxLoc = Coord(newBoxCol, newBoxRow);
-            auto* boxEntry = SearchClient::BlackboardEntry::create(
-                    SearchClient::BlackboardEntry::BOX_POSITION_ENTRY, blackboard_, targBox.id, a->getTimeStep());
-            boxEntry->setPosition(newBoxLoc);
+
+            Communication::BoxPositionEntry::create(
+                    Coord(newBoxCol, newBoxRow), a->getTimeStep(), targBox.id, blackboard_ );
         }
     }
 }
