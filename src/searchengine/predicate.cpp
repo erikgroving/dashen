@@ -125,6 +125,16 @@ unsigned long SearchEngine::Predicate::distanceToClosestGoal(const State *input,
     
 }
 
+short SearchEngine::Predicate::getCorrectGoals(const SearchEngine::State* state) {
+    short correctGoals = 0;
+    for (const Goal& g : SearchEngine::State::goals) {
+        if (SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
+            correctGoals += 1;
+        }
+    }
+    return correctGoals;
+}
+
 size_t SearchEngine::Predicate::height(const SearchEngine::State *input)
 {
     return input->walls.size();

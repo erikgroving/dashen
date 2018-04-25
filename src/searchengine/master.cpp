@@ -188,6 +188,9 @@ void Master::computeGoalPriorities()
         SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
         static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities[goalIndex]);
         //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
+
+        /*
+
         char letter;
         for (Goal g : masterState_.goals) {
             if (g.loc == goalEntry->getLocation()) {
@@ -195,6 +198,7 @@ void Master::computeGoalPriorities()
                 break;
             }
         }
+        */
         // std::cerr << "Goal with letter: " << letter <<  " had priority " << goalEntry->getPriority() << std::endl;
     }
 }

@@ -71,6 +71,8 @@ namespace Predicate
      */
     bool inBound(const State *input, size_t x, size_t y);
 
+    short getCorrectGoals(const SearchEngine::State* state);
+
     size_t height(const State *input);
 
     size_t width(const State *input, size_t row);
