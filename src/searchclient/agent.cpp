@@ -3,16 +3,13 @@
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
+#include "../heuristics/distanceoracle.h"
 
 #include "../communication/boxpositionentry.h"
 #include "../communication/globalgoalentry.h"
 #include "../communication/positionentry.h"
 #include "../communication/helpentry.h"
 
-#include <limits.h>
-#ifndef __LONG_MAX__
-#define __LONG_MAX__ 2147483647
-#endif
 
 using SearchClient::Agent;
 using SearchClient::Client;

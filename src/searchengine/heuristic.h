@@ -17,12 +17,13 @@ class State;
  *     Heuristic myHeuristic;
  *     std::priority_queue<State, std::vector<State>, Heuristic> queue(myHeuristic);
  *     State nextState = queue.pop();
+ *
+ * A agent pointer can be referenced to the heuristic.
  */
 class Heuristic {
 
 public:
-    Heuristic();
-    Heuristic(const SearchClient::Agent* agentPtr);
+    Heuristic(SearchClient::Agent* agentPtr = nullptr);
 
     /**
      * Compares the heuristic value of two nodes.
@@ -42,6 +43,21 @@ public:
      *  \return String representation of the Heuristic object
      */
     virtual std::string name() const = 0;
+
+
+    /**
+     * \return the reference agent registered by the heuristic
+     */
+    SearchClient::Agent* getReferenceAgent() { return agentPtr_; }
+    const SearchClient::Agent* getReferenceAgent() const { return agentPtr_; }
+
+    /**
+     * \brief Sets the reference agent so it can be used by the heuristic
+     */
+    void setReferenceAgent(SearchClient::Agent *refAgent) { agentPtr_ = refAgent; }
+
+private:
+    SearchClient::Agent *agentPtr_;
 };
 
 };

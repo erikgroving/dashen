@@ -13,7 +13,7 @@ template<typename Heuristic>
 class StrategyHeuristic: public SearchEngine::Strategy
 {
 public:
-    StrategyHeuristic(const SearchClient::Agent* agentPtr);
+    StrategyHeuristic(SearchClient::Agent* agentPtr);
 public:
     std::string name() const { return "Heuristic Strategy with " + heuristicName; }
     void addToFrontierStrategy(SearchEngine::State *leaf);
