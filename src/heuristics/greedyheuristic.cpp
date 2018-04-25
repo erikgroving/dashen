@@ -5,7 +5,7 @@ using Heur::GreedyHeuristic;
 using std::vector;
 
 
-GreedyHeuristic::GreedyHeuristic(const SearchClient::Agent* agentPtr)  : Heuristic(agentPtr), agentPtr_(agentPtr) {
+GreedyHeuristic::GreedyHeuristic(SearchClient::Agent* agentPtr)  : SearchEngine::Heuristic(agentPtr) {
 }
 
 
@@ -14,10 +14,9 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
      *
      */
     unsigned long result = 0;
-    char agtIdx = agentPtr_->getIndex();
-    vector<AgentDescription> agents = state->getAgents();
+    char agtIdx = getReferenceAgent()->getIndex();
     Coord agentLoc = state->getAgents()[agtIdx].loc;    
-    Goal searchGoal = agentPtr_->getCurrentSearchGoal();
+    Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
 
 
     for (Goal& g : SearchEngine::State::goals) {
@@ -29,15 +28,11 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
 
     /* Find the closest box to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
-    result += abs(closestBox.loc.x - searchGoal.loc.x) + abs(closestBox.loc.y - searchGoal.loc.y);
+    result += Coord::distance(closestBox.loc, searchGoal.loc);
     /* Add the agent distance to box */
-    result += abs(closestBox.loc.x - agentLoc.x) + abs(closestBox.loc.y - agentLoc.y);
+    result += Coord::distance(closestBox.loc, agentLoc);
     
     return result;
-}
-
-unsigned long GreedyHeuristic::heuristic(const SearchEngine::State* state) const {
-    return f(state);
 }
 
 std::string GreedyHeuristic::name() const {

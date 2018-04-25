@@ -2,11 +2,7 @@
 
 using SearchEngine::Heuristic;
 
-Heuristic::Heuristic() {
-
-}
-
-Heuristic::Heuristic(const SearchClient::Agent* agentPtr) {
+Heuristic::Heuristic(SearchClient::Agent *agentPtr): agentPtr_(agentPtr) {
 
 }
 

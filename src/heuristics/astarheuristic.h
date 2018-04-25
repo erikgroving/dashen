@@ -2,68 +2,68 @@
 #define HEURISTICS_ASTAR
 
 #include "../searchengine/searchengine"
+#include "distanceoracle.h"
 #include <vector>
+
 namespace Heur {
-    std::vector< std::vector<unsigned long> > calculateDistancesFromPoint(Coord point, const SearchEngine::State* s);
 
-    class CoordHash {
-        public:
-            std::size_t operator () (const Coord &A) const;
-    };
-
-    class DistanceOracle {
-        private:
-            static std::unordered_map<Coord, std::vector<std::vector<unsigned long> >, CoordHash > distances_;
-        public:
-            static unsigned long fetchDistFromCoord(Coord A, Coord B);
-    };
-
-    class AgentToBoxAStarHeuristic: public SearchEngine::Heuristic
-    {
-    private:
-        const SearchClient::Agent* agentPtr_;
-    public:    
-        AgentToBoxAStarHeuristic(const SearchClient::Agent* agentPtr);
-        unsigned long f(const SearchEngine::State *state) const;
-        unsigned long heuristic(const SearchEngine::State *state) const;  
-        std::string name() const;
-    };
-    
-    class BoxToGoalAStarHeuristic: public SearchEngine::Heuristic
-    {
-    private:
-        const SearchClient::Agent* agentPtr_;
-    public:    
-        BoxToGoalAStarHeuristic(const SearchClient::Agent* agentPtr);
-        unsigned long f(const SearchEngine::State *state) const;
-        unsigned long heuristic(const SearchEngine::State *state) const;  
-        std::string name() const;
-    };
-}
-/*
+/**
+ * \brief Base class for the AStar heuristic
+ */
 class AStarHeuristic: public SearchEngine::Heuristic {
 
 public:
-    // WARNING: name() needs to be overriden in deriving classes !!
+    AStarHeuristic(SearchClient::Agent* agentPtr, unsigned int f_weight = 1);
     virtual unsigned long f(const SearchEngine::State *state) const = 0;
-    virtual unsigned long heuristic(const SearchEngine::State *state) const {
-        return state->getPathCost() + f(state);
+    unsigned long heuristic(const SearchEngine::State *state) const {
+        return state->getPathCost() + f_weight_ * f(state);
     }
+
+    void setHeuristicWeight(unsigned int nWeight) { f_weight_ = nWeight; }
+    unsigned int getHeuristicWeight() const { return f_weight_; }
+
+private:
+    unsigned int f_weight_;
 };
 
-class BasicAStar : public AStarHeuristic {
+/**
+ * \brief Heuristic used to compute the path from a agent to a box.
+ *
+ * Computation:
+ * f(state) = #(goals that have been unsatisfied by the sequence of moves)*10 + (real distance agent to box)
+ */
+class AgentToBoxAStarHeuristic: public AStarHeuristic
+{
 
 public:
-    virtual std::string name() const { return "BasicAStar"; }
-    virtual unsigned long f(const SearchEngine::State *state) const {
-        unsigned long result = 0;
-        for(const Box &box: state->getBoxes())
-            result += SearchEngine::Predicate::distanceToClosestGoal(state, box);
-
-        return result;
+    AgentToBoxAStarHeuristic(SearchClient::Agent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
+        setHeuristicWeight(2);
     }
+
+    unsigned long f(const SearchEngine::State *state) const;
+    std::string name() const { return "AStar Agent To Box"; }
 };
 
+/**
+ * \brief Heuristic used to compute the path from a agent with a box to a goal.
+ *
+ * Computation:
+ * f(state) = #(goals that have been unsatisfied by the sequence of moves)*10 + (real distance agent to box)
+ */
+class BoxToGoalAStarHeuristic: public AStarHeuristic
+{
+private:
+    const SearchClient::Agent* agentPtr_;
+public:
+    BoxToGoalAStarHeuristic(SearchClient::Agent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
+        setHeuristicWeight(2);
+    }
+    unsigned long f(const SearchEngine::State *state) const;
+    std::string name() const { return "AStar - Box To Goal"; }
+};
+
+    std::vector< std::vector<unsigned long> > calculateDistancesFromPoint(Coord point, const SearchEngine::State* s);
+
 }
-*/
+
 #endif
