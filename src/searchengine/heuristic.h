@@ -5,6 +5,7 @@
 #include <queue>
 #include "state.h"
 #include "../searchclient/searchclient"
+
 namespace SearchEngine {
 
 class State;

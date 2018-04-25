@@ -1,12 +1,12 @@
-#ifndef SEARCHCLIENT_BLACKBOARD_H
-#define SEARCHCLIENT_BLACKBOARD_H
+#ifndef COMMUNICATION_BLACKBOARD_H
+#define COMMUNICATION_BLACKBOARD_H
 
 #include <algorithm>
 #include <vector>
 
 #include "../searchengine/typedefs.h"
 
-namespace SearchClient {
+namespace Communication {
 
 /**
  * A blackboard is an environment in which different types of informations can be disposed
@@ -30,9 +30,17 @@ class Blackboard {
     public: 
         Blackboard();
         ~Blackboard();
+
     public:
-        void addEntry(BlackboardEntry *entry);
-        void initBoxEntries(size_t numBoxes);
+        enum Registry {
+            PositionEntry,
+            BoxPositionEntry,
+            GoalEntry,
+            HelpEntry
+        };
+
+    public:
+        void addEntry(BlackboardEntry *entry, Registry registry);
 
         std::vector<BlackboardEntry*>& getPositionEntries() { return positionEntries_; } 
         const std::vector<BlackboardEntry*>& getPositionEntries() const { return positionEntries_; }
@@ -43,16 +51,21 @@ class Blackboard {
         const std::vector<BlackboardEntry*>& getBoxEntries(int boxID) const { return boxPositionEntries_[boxID]; }
         std::vector<BlackboardEntry*>& getBoxEntries(int boxID) { return boxPositionEntries_[boxID]; }
 
-        void removeEntry(const BlackboardEntry *entry);
-        void removeEntriesByAuthor(char agentID);
-        void popBoxPosEntry(short boxID);
-        void clearBoxEntries(short boxID);
+        void setBoxEntryRegistrySize(size_t numBoxes);
+
+        void removeEntry(const BlackboardEntry *entry, Registry registry);
+        void removeEntriesByAuthor(char agentID, Registry registry);
+
+        void clear(Registry registry, short id = -1);
+        void erase_front(Registry registry, short id = -1);
+
         BlackboardEntry* findPositionEntry(unsigned int timeStep, int authorId);
 
     private:
         std::vector<BlackboardEntry*> positionEntries_;
         std::vector<std::vector<BlackboardEntry*>> boxPositionEntries_;
         std::vector<BlackboardEntry*> goalEntries_;
+        std::vector<BlackboardEntry*> helpEntries_;
 };
 
 }

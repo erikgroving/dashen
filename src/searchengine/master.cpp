@@ -1,15 +1,37 @@
 #include "master.h"
 #include "searchclient.h"
+#include "../communication/communication"
 
-using SearchClient::Blackboard;
-using SearchClient::BlackboardEntry;
-void printBlackboard(SearchClient::Blackboard* b);
+using Communication::Blackboard;
+void printBlackboard(Communication::Blackboard* b);
 using namespace SearchEngine;
 
 /* 
  * This is the primary function of the master class, that
  * conducts the main search
  */
+Master::Master(): jointActions_(), masterState_(), prevMasterState_(), agents_(), masterBlackboard_() {
+
+}
+
+Master::Master(const State &s1, const std::vector<SearchClient::Agent> &agents): jointActions_(), masterState_(s1),
+    prevMasterState_(), agents_(agents), masterBlackboard_() {
+
+    for(auto &agent: agents_)
+        agent.setBlackboard(&masterBlackboard_);
+
+}
+
+Master::Master(const Master &m) {
+
+    jointActions_ = m.jointActions_;
+    masterState_ = m.masterState_;
+    prevMasterState_ = m.prevMasterState_;
+    masterBlackboard_ = m.masterBlackboard_;
+    agents_ = m.agents_;
+
+}
+
 void Master::conductSearch() {
     std::cerr << "--- Starting conductSearch! ---\n";
 
@@ -46,22 +68,18 @@ void Master::conductSearch() {
 /* This adds all the goal tiles from the initial state to the blackboard */
 void Master::postBlackBoard() {
     for (Goal& g : masterState_.goals) {
-        BlackboardEntry *entry = BlackboardEntry::create(BlackboardEntry::GLOBAL_GOAL_ENTRY, &masterBlackboard_);
-        entry->setPosition(g.loc);
+        Communication::GlobalGoalEntry::create(g.loc, -1, 0, &masterBlackboard_);
     }
     computeGoalPriorities();
     
-    masterBlackboard_.initBoxEntries(masterState_.getBoxes().size());
+    masterBlackboard_.setBoxEntryRegistrySize(masterState_.getBoxes().size());
     /* 
      * Create box position entries, these entries do not get removed
      * Box position entries are updated by changing the time step and
      * position values
      */
     for (Box& b : masterState_.getBoxes()) {
-        BlackboardEntry* entry = BlackboardEntry::create(BlackboardEntry::BOX_POSITION_ENTRY, 
-                                &masterBlackboard_, b.id, -2);
-        entry->setPosition(b.loc);
-        //blackboardEntries_.push_back(entry);
+        Communication::BoxPositionEntry::create(b.loc, 0, b.id, &masterBlackboard_);
     }
 }
 
@@ -119,8 +137,9 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
     int newAgentRow = masterState_.getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d1());
     int newAgentCol = masterState_.getAgents()[AgentID].loc.x + Command::colToInt(cmd.d1());
 
-    vector<AgentDescription> agentDescs = masterState_.getAgents();
-    vector<Box> boxes = masterState_.getBoxes();
+    std::vector<AgentDescription> agentDescs = masterState_.getAgents();
+    std::vector<Box> boxes = masterState_.getBoxes();
+
     Action action = cmd.action();
     /* Box Movement */
     if (action == Action::PUSH || action == Action::PULL) {
@@ -164,10 +183,10 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
 void Master::computeGoalPriorities()
 {
     auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
-    for(BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
+    for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
         int goalIndex = -1;
         SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
-        goalEntry->setPriority(goalPriorities[goalIndex]);
+        static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities[goalIndex]);
         //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
         char letter;
         for (Goal g : masterState_.goals) {
@@ -176,7 +195,7 @@ void Master::computeGoalPriorities()
                 break;
             }
         }
-        std::cerr << "Goal with letter: " << letter <<  " had priority " << goalEntry->getPriority() << std::endl;
+        // std::cerr << "Goal with letter: " << letter <<  " had priority " << goalEntry->getPriority() << std::endl;
     }
 }
 
@@ -191,20 +210,22 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
     for (unsigned int i = 0; i < commands.size(); i++) {
         if (commands[i].action() != NOOP) {
             unsigned int sharedTime = SearchClient::Agent::sharedTime;
-            SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
+            Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
+
             if (agents_[i].isFirstMoveInPlan()) {
-                SearchClient::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
+                Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
             }
         }
         if (commands[i].action() == PUSH || commands[i].action() == PULL) {
             // pop the front of the positional entry vector 
-            masterBlackboard_.popBoxPosEntry(commands[i].targBoxId());
+            masterBlackboard_.erase_front(Communication::Blackboard::BoxPositionEntry, commands[i].targBoxId());
         }
     }
-    Agent::sharedTime++;
+
+    SearchClient::Agent::sharedTime++;
 }
 
-void Master::printBlackboard(SearchClient::Blackboard* b) {
+void Master::printBlackboard(Communication::Blackboard* b) {
     auto posEntries = b->getPositionEntries();
     std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";

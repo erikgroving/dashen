@@ -1,22 +1,24 @@
-#ifndef SEARCHENGINE_AGENT_H
-#define SEARCHENGINE_AGENT_H
+#ifndef SEARCHCLIENT_AGENT_H
+#define SEARCHCLIENT_AGENT_H
+
+#include "../searchengine/state.h"
+#include "../searchengine/typedefs.h"
+#include "../searchengine/command.h"
+#include "../searchengine/strategy.h"
+
+#include "../communication/blackboard.h"
 
 #include <algorithm>
 #include <climits>
 #include <vector>
-#include "../searchengine/searchengine"
-#include "blackboard.h"
-#include "blackboardentry.h"
-#include "client.h"
+
 
 namespace SearchClient {
     
-class Blackboard;
-class Client;
 class Agent {
 
 public:
-    Agent (Color color, char num, Coord loc, SearchEngine::Strategy *strategy = nullptr, SearchClient::Blackboard *blackboard = nullptr);
+    Agent (Color color, char num, Coord loc, Communication::Blackboard *blackboard = nullptr);
     ~Agent();
 
     bool operator<(const Agent& a) const { return num < a.num;  }
@@ -37,10 +39,10 @@ public:
 
     int getIndex() const { return num; }
 
-    void setBlackboard(SearchClient::Blackboard *blackboard) { blackboard_ = blackboard; }
+    void setBlackboard(Communication::Blackboard *blackboard) { blackboard_ = blackboard; }
     
-    const Blackboard* getBlackboard() const { return blackboard_; }
-    Blackboard* getBlackboard() { return blackboard_; }
+    const Communication::Blackboard* getBlackboard() const { return blackboard_; }
+    Communication::Blackboard* getBlackboard() { return blackboard_; }
 
     const SearchEngine::Strategy* getSearchStrategy() const { return searchStrategy_; }
     SearchEngine::Strategy* getSearchStrategy() { return searchStrategy_; }
@@ -48,6 +50,7 @@ public:
     const SearchEngine::State* getState() const { return sharedState; }
     SearchEngine::State* getState() { return sharedState; }
     
+    // void askForHelp(const std::string &helpType, const std::vector<State*> &path);
     
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
@@ -87,7 +90,7 @@ public: // Search methods
      * that the agent checks that there is a box with th same color as the
      * agent that has the same letter as the goal
      */
-    bool isEntryDoable(const SearchClient::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex = 0);
+    bool isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex = 0);
 
     
     bool positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned int timeStep);
@@ -124,7 +127,7 @@ private:
                                     // tile requests stay after completion
     std::vector<SearchEngine::Command> plan_;
 
-    SearchClient::Blackboard *blackboard_;
+    Communication::Blackboard *blackboard_;
     short correctGoals_;
     bool firstMoveInPlan_;
 };

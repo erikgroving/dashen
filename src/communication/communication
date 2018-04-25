@@ -1,0 +1,6 @@
+#include "blackboard.h"
+#include "blackboardentry.h"
+#include "positionentry.h"
+#include "boxpositionentry.h"
+#include "helpentry.h"
+#include "globalgoalentry.h"
