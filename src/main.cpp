@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -22,9 +23,8 @@ int main(int argc,  char **argv) {
 #ifndef SERVERLESS_MODE
     SearchEngine::State initialState = searchClient.initState();
 #else
-    std::ifstream input_stream("./environment/levels/MAchallenge.lvl");
+    std::ifstream input_stream("./environment/levels/MAsimple3.lvl");
     SearchEngine::State initialState = searchClient.initState(input_stream);
-    SearchEngine::Distance distance(&initialState);
 #endif
 
     SearchClient::Agent::setSharedState(&initialState);

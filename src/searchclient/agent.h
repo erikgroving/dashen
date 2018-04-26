@@ -11,20 +11,40 @@
 #include <algorithm>
 #include <climits>
 #include <vector>
-
+#include <iostream>
 
 namespace SearchClient {
-    
+
+struct HelpGoal {
+
+    enum HelpType {
+        None,
+        Agent,
+        Box
+    } type;
+
+    HelpGoal(HelpType htype = None, int idd = -1, const Coord& hposition = Coord(), std::vector<Coord> hforbiddenPath = std::vector<Coord>(), bool hover = true):
+        type(htype), id(idd), position(hposition), forbiddenPath(hforbiddenPath), over(hover){
+
+    }
+    HelpGoal(const HelpGoal &src):
+        type(src.type), id(src.id), position(src.position), forbiddenPath(src.forbiddenPath), over(src.over) {}
+
+
+    int id;
+    Coord position;
+    std::vector<Coord> forbiddenPath;
+    bool over;
+};
+
 class Agent {
 
 public:
     Agent (Color color, char num, Coord loc, Communication::Blackboard *blackboard = nullptr);
+    Agent(const Agent &src);
     ~Agent();
 
     bool operator<(const Agent& a) const { return num < a.num;  }
-
-    void updateGoalsList(const SearchEngine::State &initialState);
-    void updateBoxesList(const SearchEngine::State &initialState);
 
     const Coord& getLocation() const { return loc; }
     Coord& getLocation() { return loc; }
@@ -50,34 +70,33 @@ public:
     const SearchEngine::State* getState() const { return sharedState; }
     SearchEngine::State* getState() { return sharedState; }
     
-    // void askForHelp(const std::string &helpType, const std::vector<State*> &path);
+    void askForHelp(const std::vector<SearchEngine::State *> &path);
     
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
+    void initialStateRemovedAllBut(char agentIndex, char boxIndex);
     void clearPlan(SearchEngine::Command);
 
-    
 
-    /**
-     * Return the highest priority goal
-     */
-    Goal chooseGoal();
 
 public: // Search methods
     /**
      * Given a goal, return a sequence of action to accomplish it.
      */
-    std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy* strategy);
+    std::vector<SearchEngine::State*> searchGoal(const Goal &goal, SearchEngine::Strategy& strategy, bool ignoreOthers = false);
 
     /**
      * Given a box, agent returns a sequence of actions to get to the box
      */
-    std::vector<SearchEngine::State*> searchBox(const Box& box, SearchEngine::Strategy* strategy);
+    std::vector<SearchEngine::State*> searchBox(const Box& box, SearchEngine::Strategy& strategy, bool ignoreOthers = false);
     
     /**
      * Returns a sequence of action that accomplishes all the goals according to the given strategy.
      */
-    std::vector<SearchEngine::State*> searchAllGoals(SearchEngine::Strategy &strategy);
+    std::vector<SearchEngine::State*> searchAllGoals(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+    std::vector<SearchEngine::State*> searchHelpMoveAgent(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+    std::vector<SearchEngine::State*> searchHelpMoveBox(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+
 
     /**
      * Returns the next move in the plan if there is one. otherwise
@@ -93,16 +112,18 @@ public: // Search methods
     bool isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex = 0);
 
     
-    bool positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned int timeStep);
+    bool positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned int timeStep, std::string &errorDescription) const;
 
     /* Fetches a goal from the blackboard, used by determineNextGoal */
     Goal getGoalFromBlackboard();
 
     /* Determines the next goal for the agent */
-    Goal determineNextGoal();
+    bool determineNextGoal(bool *isHelpGoal);
 
     /* Conducts the search for a subgoal */
-    std::vector<SearchEngine::State*> conductSubgoalSearch();
+    std::vector<SearchEngine::State*> conductSubgoalSearch(bool *searchFailed);
+
+    std::vector<SearchEngine::State*> conductHelpSubgoalSearch();
 
     /* Extracts the plan from a subgoal search */
     void extractPlan(const std::vector<SearchEngine::State*>& ans);
@@ -119,6 +140,7 @@ public: // Static public methods
     static void setSharedTime(unsigned int timeStep);
     static unsigned int sharedTime;
     static SearchEngine::State *sharedState;
+
 private:
 
     Color color;
@@ -127,13 +149,16 @@ private:
 
 
     SearchEngine::Strategy *searchStrategy_;
-    std::vector<Goal> goalsToAchieve;
-    std::vector<Box> movableBoxes;
 
 
     SearchEngine::State *private_initialState;
 
     Goal currentSearchGoal_;
+
+    // Help
+    HelpGoal currentHelpGoal_;
+    Communication::BlackboardEntry* currentHelpEntry_;
+
     /* Added with master class update. */
     std::vector<Goal> takenGoals_;   // goals taken down from blackboard.
                                     // help requests delete upon completion,
@@ -143,6 +168,9 @@ private:
     Communication::Blackboard *blackboard_;
     short correctGoals_;
     bool firstMoveInPlan_;
+
+    bool isWaitingForHelp;
+    std::vector<Communication::BlackboardEntry*> helpEntriesToMonitor_;
 };
 
 }

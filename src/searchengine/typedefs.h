@@ -67,9 +67,9 @@ typedef struct Goal {
     char letter;
     unsigned int priority;
 
-    Goal () :  loc(-1, -1), assignedBoxID(-1), letter('-') {}
+    Goal () :  loc(-1, -1), assignedBoxID(-1), letter('-'), priority(0) {}
 
-    Goal (char letter, Coord loc) : loc(loc), assignedBoxID(-1), letter(letter) {}
+    Goal (char letter, Coord loc) : loc(loc), assignedBoxID(-1), letter(letter), priority(0) {}
 
     Goal(const Goal &src): loc(src.loc), assignedBoxID(src.assignedBoxID), letter(src.letter), priority(src.priority) {
 
@@ -83,6 +83,13 @@ typedef struct Goal {
         return *this;
     }
 
+    bool operator==(const Goal &src) {
+        if(loc != src.loc) return false;
+        if(assignedBoxID != src.assignedBoxID) return false;
+        if(letter != src.letter) return false;
+        if(priority != src.priority) return false;
+        return true;
+    }
 } Goal;
 
 typedef struct AgentDescription

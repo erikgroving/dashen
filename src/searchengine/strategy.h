@@ -76,7 +76,7 @@ class Strategy
      */
     virtual std::string name() const = 0;
 
-    void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; };
+    void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; }
     const std::function< bool(const State*) > additionalCheckPredicate() const { return additionalCheckPredicate_; }
 
   private:

@@ -146,3 +146,23 @@ size_t SearchEngine::Predicate::width(const SearchEngine::State *input, size_t r
         return input->walls[row].size();
     return -1;
 }
+
+bool SearchEngine::Predicate::isAgentNotOnForbiddenPath(const SearchEngine::State *input, int agentId, const std::vector<Coord> &forbiddenPath)
+{
+    Coord agentLoc = input->getAgents()[agentId].loc;
+    for(const Coord& tile: forbiddenPath) {
+        if(agentLoc == tile)
+            return false;
+    }
+    return true;
+}
+
+bool SearchEngine::Predicate::isBoxNotOnForbiddenPath(const SearchEngine::State *input, int boxId, const std::vector<Coord> &forbiddenPath)
+{
+    Coord boxLoc = input->getBoxes()[boxId].loc;
+    for(const Coord& tile: forbiddenPath) {
+        if(boxLoc == tile)
+            return false;
+    }
+    return true;
+}

@@ -242,10 +242,11 @@ void Master::printBlackboard(Communication::Blackboard* b) {
     std::cerr << "Timestep\t\tPosition\t\tBox\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
         auto boxEntries = b->getBoxEntries(boxID);
-        for (auto& entry : boxEntries) {
-            std::cerr << (int)entry->getTimeStep() << "\t\t\t(" <<
-                        entry->getLocation().x << "," << entry->getLocation().y <<
-                        ")\t\t\t" << entry->getAuthorId() << std::endl;
+        for (auto* entry : boxEntries) {
+            Communication::BoxPositionEntry *entry_casted = static_cast<Communication::BoxPositionEntry*>(entry);
+            std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t(" <<
+                        entry_casted->getLocation().x << "," << entry_casted->getLocation().y <<
+                        ")\t\t\t" << entry_casted->getBoxId() << std::endl;
         }
     }
 }

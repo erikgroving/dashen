@@ -76,6 +76,10 @@ namespace Predicate
     size_t height(const State *input);
 
     size_t width(const State *input, size_t row);
+
+    bool isAgentNotOnForbiddenPath(const State *input, int agentId, const std::vector<Coord> &forbiddenPath);
+
+    bool isBoxNotOnForbiddenPath(const State *input, int boxId, const std::vector<Coord> &forbiddenPath);
 };
 
 

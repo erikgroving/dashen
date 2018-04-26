@@ -51,6 +51,9 @@ class Blackboard {
         const std::vector<BlackboardEntry*>& getBoxEntries(int boxID) const { return boxPositionEntries_[boxID]; }
         std::vector<BlackboardEntry*>& getBoxEntries(int boxID) { return boxPositionEntries_[boxID]; }
 
+        const std::vector<BlackboardEntry*>& getHelpEntries() const { return helpEntries_; }
+        std::vector<BlackboardEntry*>& getHelpEntries() { return helpEntries_; }
+
         void setBoxEntryRegistrySize(size_t numBoxes);
 
         void removeEntry(const BlackboardEntry *entry, Registry registry);
