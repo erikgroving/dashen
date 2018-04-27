@@ -173,9 +173,10 @@ void Blackboard::clear(Registry registry, short id) {
 
         case BoxPositionEntry:
             if(id >= 0) {
-                for(Communication::BlackboardEntry *entry: boxPositionEntries_[id])
-                    delete entry;
-                boxPositionEntries_[id].resize(0);
+                for(auto ite = boxPositionEntries_[id].begin() + 1; ite != boxPositionEntries_[id].end(); ite++)
+                    delete *ite;
+                if( boxPositionEntries_[id].size() > 1)
+                    boxPositionEntries_[id].resize(1);
             }
             break;
     }
