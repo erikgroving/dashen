@@ -24,7 +24,7 @@ fi
 
 exec 3<> $logfilename
 for filename in "$dirlevels"*.lvl; do  
-    echo "LVL" $(basename $filename)
+    #echo "LVL" $(basename $filename)
     echo $(readlink -f $filename)
     >&3 echo "LVL" $(basename $filename)
     result=$( { time ./timeout3 -t $executiontime ./environment/client/main < $filename 1>&3 2>&3; } 2>&3 )
