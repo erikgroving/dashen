@@ -79,7 +79,7 @@ void Master::postBlackBoard() {
      * position values
      */
     for (Box& b : masterState_.getBoxes()) {
-        Communication::BoxPositionEntry::create(b.loc, 0, b.id, &masterBlackboard_);
+        Communication::BoxPositionEntry::create(b.loc, -1, b.id, &masterBlackboard_);
     }
 }
 

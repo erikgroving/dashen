@@ -5,6 +5,7 @@
 #include <vector>
 #include <iterator>
 
+#include "../searchengine/strategy.h"
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
@@ -289,9 +290,12 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
         }
     }
 
-    // check against boxes
+    // check against boxes except the ones that we are currently moving
+    int targetBoxIdx = currentSearchGoal_.assignedBoxID;
     for (size_t id = 0; id < private_initialState->getBoxes().size(); id++) {
         auto boxPositionEntries = blackboard_->getBoxEntries(id);
+        if(targetBoxIdx == id)
+            continue;
         for (auto ite = boxPositionEntries.begin(); ite != boxPositionEntries.end(); ite++) {
             bool isLastEntry = ite == boxPositionEntries.end() - 1;
             Communication::BlackboardEntry* entry = *ite;
@@ -543,7 +547,7 @@ std::vector<SearchEngine::State*> Agent::conductHelpSubgoalSearch()
 {   std::vector<SearchEngine::State*> ans;
 
     if(currentHelpGoal_.type == SearchClient::HelpGoal::Agent) {
-        Strat::StrategyBFS strat;
+        Strat::StrategyBFSMovePriority strat;
         ans = searchHelpMoveAgent(strat);
 
         currentHelpGoal_.over = true;

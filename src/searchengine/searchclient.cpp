@@ -73,9 +73,9 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         
         std::cerr << "===================" << std::endl;
         std::cerr << "getExpendedNodes" << std::endl;*/
-        auto expandedNodes = leaf->getExpandedNodes(agentIndex);
+
         /*std::cerr << "===================" << std::endl;*/
-        for(State *state: expandedNodes) {
+        for(State *state: strategy.expandState(leaf, agentIndex)) {
 
              //std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
             if(!strategy.isExplored(state) && !strategy.inFrontier(state) && strategy.additionalCheckPredicate()(state)) {           

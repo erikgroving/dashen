@@ -11,8 +11,7 @@
 #include <functional>
 
 #include "state_equal_to.h"
-#include "state.h"
-
+#include "predicate.h"
 
 namespace SearchEngine
 {
@@ -75,6 +74,9 @@ class Strategy
      * \return String representation of the Strategy.
      */
     virtual std::string name() const = 0;
+
+    virtual void doShufflePolicy(std::vector<SearchEngine::State*> &nodes);
+    std::vector<SearchEngine::State*> expandState(SearchEngine::State* state, int agentIndex);
 
     void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; }
     const std::function< bool(const State*) > additionalCheckPredicate() const { return additionalCheckPredicate_; }

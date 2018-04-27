@@ -4,7 +4,7 @@
 #include "../searchengine/state.h"
 #include "../searchengine/typedefs.h"
 #include "../searchengine/command.h"
-#include "../searchengine/strategy.h"
+
 
 #include "../communication/blackboard.h"
 
@@ -13,6 +13,9 @@
 #include <vector>
 #include <iostream>
 
+namespace SearchEngine {
+    class Strategy;
+}
 namespace SearchClient {
 
 struct HelpGoal {
