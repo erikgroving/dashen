@@ -17,6 +17,10 @@
 #include "../communication/helpentry.h"
 
 
+#ifndef __LONG_MAX__
+#define __LONG_MAX__    2147483647
+#endif
+
 using SearchClient::Agent;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
@@ -40,11 +44,11 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackboard) :
-            color(color), num(num), loc(loc),
+            color(color), num(num), loc(loc), searchStrategy_(),
             private_initialState(), currentSearchGoal_(),
             currentHelpGoal_(),
-            currentHelpEntry_(), blackboard_(blackboard),
-            correctGoals_(0), firstMoveInPlan_(false), helpEntriesToMonitor_(), isWaitingForHelp(false) {
+            currentHelpEntry_(), takenGoals_(), plan_(), blackboard_(blackboard),
+            correctGoals_(0), firstMoveInPlan_(false), isWaitingForHelp(false), helpEntriesToMonitor_() {
 
     std::cerr << "Agent initialized" << std::endl;
 }
@@ -52,7 +56,9 @@ Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackb
 Agent::Agent(const SearchClient::Agent &src): color(src.color), num(src.num), loc(src.loc),
     private_initialState(src.private_initialState), currentSearchGoal_(src.currentSearchGoal_),
     currentHelpGoal_(src.currentHelpGoal_), blackboard_(src.blackboard_), correctGoals_(src.correctGoals_),
-    firstMoveInPlan_(src.firstMoveInPlan_), helpEntriesToMonitor_(src.helpEntriesToMonitor_), isWaitingForHelp(src.isWaitingForHelp) {
+    firstMoveInPlan_(src.firstMoveInPlan_), isWaitingForHelp(src.isWaitingForHelp),
+    helpEntriesToMonitor_(src.helpEntriesToMonitor_)
+     {
 
     std::cerr << "Agent copied" << std::endl;
 }
@@ -294,7 +300,7 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
     int targetBoxIdx = currentSearchGoal_.assignedBoxID;
     for (size_t id = 0; id < private_initialState->getBoxes().size(); id++) {
         auto boxPositionEntries = blackboard_->getBoxEntries(id);
-        if(targetBoxIdx == id)
+        if((size_t)targetBoxIdx == id)
             continue;
         for (auto ite = boxPositionEntries.begin(); ite != boxPositionEntries.end(); ite++) {
             bool isLastEntry = ite == boxPositionEntries.end() - 1;
@@ -474,7 +480,6 @@ bool Agent::determineNextGoal(bool *isHelpGoal) {
     // See if we have any unsatisfied goals
     bool satisfied = true;
     Goal unsatGoal = Goal();
-    Goal search_goal = Goal();
 
     for (const Goal& g : takenGoals_) {
         if (!goalHasCorrectBox(sharedState, g)) {

@@ -28,7 +28,7 @@ State::~State() {
 }
 
 std::vector<State*> State::getExpandedNodes(int agentIndex) {
-
+    return std::vector<State*>();
 }
 
 std::vector<State*> State::extractPlan() {
