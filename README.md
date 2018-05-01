@@ -57,19 +57,20 @@ SA_06_HALnineK             -       0m14.994s
 SA_06_IamGreedy            -       0m14.212s   
 SA_07_DAT                  -       0m14.287s   
 SA_07_Omnics               -       0m15.011s   
-SA_09_tnrbts               -       0m14.727s   
-SA_10_Kalle                -       0m14.898s   
+SA_09_tnrbts               -       0m14.727s help, goal priorities, moving out of blocking areas, ?  
+SA_10_Kalle                -       0m14.898s self help  
 SA_10_MasAiArne            604     0m00.701s   
-SA_10_MASters              -       0m14.615s   
+SA_10_MASters              -       0m14.615s help system? 
 SA_10_TALK                 316     0m00.156s   
 SA_11_HiveMind             285     0m01.225s   
 SA_11_NeverMind            263     0m00.217s   
-SA_14_Lemmings             -       0m14.483s   
+SA_14_Lemmings             -       0m14.483s requires help, difficult  
 SA_17_Blinky               171     0m00.111s   
-SA_17_groupname            -       0m08.275s   
+SA_17_groupname            -       0m08.275s solvable in 4000 steps 
 SA_18_Beliebers            397     0m00.303s   
-SA_18_Liquorice            -       0m09.658s   
+SA_18_Liquorice            -       0m09.658s solvable in 15+ seconds
 SA_21_DoDo                 253     0m00.176s   
 SA_25_Jomarki              60      0m00.028s   
+ 
 
 
