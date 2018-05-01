@@ -43,5 +43,17 @@ void printRegions(std::vector<std::vector<size_t> >  region){
     }
 }
 
+void printDeadends(std::vector<std::vector<bool> >  deadend){
+    for (const auto& inner : deadend) {
+        for (auto value : inner) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+
+
+
 
 #endif
