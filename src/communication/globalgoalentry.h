@@ -16,7 +16,7 @@ public:
     unsigned int getPriority() const { return priority_; }
     void setPriority(unsigned int priority) { priority_ = priority; }
 
-    static GlobalGoalEntry* create(const Coord &location, unsigned int timeStep, unsigned int priority, const SearchClient::Agent &author, Blackboard* parent);
+    static GlobalGoalEntry* create(const Coord &location, unsigned int timeStep, unsigned int priority, const Agent::SearchAgent *author, Blackboard* parent);
     static GlobalGoalEntry* create(const Coord &location, unsigned int timeStep, unsigned int priority, Blackboard* parent);
 
 private:

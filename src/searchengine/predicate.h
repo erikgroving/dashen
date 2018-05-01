@@ -2,12 +2,12 @@
 #define SEARCHCLIENT_PREDICATE_H
 
 #include "state.h"
-#include "../searchclient/agent.h"
+#include "typedefs.h"
 #include <algorithm>
 #include <cmath>
 
-namespace SearchClient {
-    class Agent;
+namespace Agent {
+    class Level0Agent;
 }
 
 namespace SearchEngine {
@@ -63,7 +63,7 @@ namespace Predicate
 
     bool goalHasCorrectBox(const State* input, const Goal goal);
 
-    bool agentNextToBox(const State* input, const Box &box, const SearchClient::Agent* agentPtr);
+    bool agentNextToBox(const State* input, const Box &box, const Agent::Level0Agent *agentPtr);
 
     unsigned long distanceToClosestGoal(const State *input, const Box &box, int *goalIndex = nullptr);
     /**

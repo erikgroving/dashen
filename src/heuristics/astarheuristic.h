@@ -13,7 +13,7 @@ namespace Heur {
 class AStarHeuristic: public SearchEngine::Heuristic {
 
 public:
-    AStarHeuristic(SearchClient::Agent* agentPtr, unsigned int f_weight = 1);
+    AStarHeuristic(Agent::SearchAgent* agentPtr, unsigned int f_weight = 1);
     virtual unsigned long f(const SearchEngine::State *state) const = 0;
     unsigned long heuristic(const SearchEngine::State *state) const {
         return state->getPathCost() + f_weight_ * f(state);
@@ -36,7 +36,7 @@ class AgentToBoxAStarHeuristic: public AStarHeuristic
 {
 
 public:
-    AgentToBoxAStarHeuristic(SearchClient::Agent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
+    AgentToBoxAStarHeuristic(Agent::SearchAgent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
         setHeuristicWeight(2);
     }
 
@@ -52,10 +52,8 @@ public:
  */
 class BoxToGoalAStarHeuristic: public AStarHeuristic
 {
-private:
-    const SearchClient::Agent* agentPtr_;
 public:
-    BoxToGoalAStarHeuristic(SearchClient::Agent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
+    BoxToGoalAStarHeuristic(Agent::SearchAgent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
         setHeuristicWeight(2);
     }
     unsigned long f(const SearchEngine::State *state) const;

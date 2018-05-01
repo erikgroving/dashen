@@ -1,4 +1,5 @@
 #include "predicate.h"
+#include "../agent/level0agent.h"
 
 using SearchEngine::State;
 using namespace SearchEngine::Predicate;
@@ -90,7 +91,7 @@ bool SearchEngine::Predicate::goalHasCorrectBox(const State* input, const Goal g
 }
 
 bool SearchEngine::Predicate::agentNextToBox(
-       const State* input, const Box &box, const SearchClient::Agent* agentPtr) {
+       const State* input, const Box &box, const Agent::Level0Agent* agentPtr) {
     
     /* can simply subtract the absolute value of the coordinates of the box and agent */
     AgentDescription agent = input->getAgents()[agentPtr->getIndex()];

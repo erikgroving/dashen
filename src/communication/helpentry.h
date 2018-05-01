@@ -4,7 +4,6 @@
 #include <vector>
 #include "blackboardentry.h"
 #include "../searchengine/typedefs.h"
-#include "../searchclient/searchclient"
 
 namespace Communication {
 
@@ -39,7 +38,7 @@ public:
     void setBlockingAgentId(char idx) { blockingAgentId_ = idx; }
 
     static HelpEntry* create(const Coord &location, ProblemType pType, const std::vector<Coord> &forbiddenPath,
-                             unsigned int timeStep, const SearchClient::Agent &author, Blackboard* parent);
+                             unsigned int timeStep, const Agent::Level0Agent *author, Blackboard* parent);
 
 private:
     unsigned int priority_;

@@ -5,7 +5,7 @@ using Heur::BoxToGoalAStarHeuristic;
 using Heur::DistanceOracle;
 using Heur::AStarHeuristic;
 
-AStarHeuristic::AStarHeuristic(SearchClient::Agent* agentPtr, unsigned int f_weight): SearchEngine::Heuristic(agentPtr),
+AStarHeuristic::AStarHeuristic(Agent::SearchAgent* agentPtr, unsigned int f_weight): SearchEngine::Heuristic(agentPtr),
     f_weight_(f_weight) {
 
 }

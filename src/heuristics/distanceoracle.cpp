@@ -14,7 +14,7 @@ unsigned long DistanceOracle::fetchDistFromCoord(const Coord &A, const Coord &B)
         return DistanceOracle::distances_[B][A.y][A.x];
     }
     else {
-        DistanceOracle::distances_[A] = calculateDistancesFromPoint(A, SearchClient::Agent::sharedState);
+        DistanceOracle::distances_[A] = calculateDistancesFromPoint(A, Agent::SearchAgent::sharedState);
         return DistanceOracle::distances_[A][B.y][B.x];
     }
 

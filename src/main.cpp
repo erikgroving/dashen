@@ -7,9 +7,8 @@
 
 #include "searchclient/searchclient"
 #include "searchengine/searchengine"
-#include "strategies/strategies"
-#include "heuristics/astarheuristic.h"
 #include "searchengine/master.h"
+#include "agent/searchagent.h"
 
 #define DEBUG_MODE true
 #define SERVERLESS_MODE
@@ -23,11 +22,11 @@ int main(int argc,  char **argv) {
 #ifndef SERVERLESS_MODE
     SearchEngine::State initialState = searchClient.initState();
 #else
-    std::ifstream input_stream("./environment/levels/MAsimple4.lvl");
+    std::ifstream input_stream("./environment/levels/MAchallenge.lvl");
     SearchEngine::State initialState = searchClient.initState(input_stream);
 #endif
 
-    SearchClient::Agent::setSharedState(&initialState);
+    Agent::SearchAgent::sharedState = &initialState;
     auto agents = searchClient.extractAgents();
     
     std::cerr << "Starting the search..." << std::endl;

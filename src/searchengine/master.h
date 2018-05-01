@@ -2,6 +2,7 @@
 #define MASTER_H
 
 #include "../searchclient/searchclient"
+#include "../communication/blackboard.h"
 #include "goalpriority.h"
 #include <vector>
 
@@ -10,7 +11,7 @@ class Master {
 
 public: // Constructors
     Master();
-    Master(const State& s1, const std::vector<SearchClient::Agent> &agents);
+    Master(const State& s1, const std::vector<Agent::SearchAgent*> &agents);
     Master(const Master& m);
 
 public:
@@ -37,7 +38,7 @@ private:
     std::vector<SearchClient::JointAction> jointActions_;
     State masterState_;
     State prevMasterState_;
-    std::vector<SearchClient::Agent> agents_;
+    std::vector<Agent::SearchAgent *> agents_;
     Communication::Blackboard masterBlackboard_;
 
 };

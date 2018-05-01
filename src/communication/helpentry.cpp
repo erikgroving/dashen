@@ -1,4 +1,5 @@
 #include "helpentry.h"
+#include "../agent/level0agent.h"
 
 using Communication::HelpEntry;
 
@@ -19,12 +20,12 @@ HelpEntry& HelpEntry::operator=(const Communication::HelpEntry &src)
     return *this;
 }
 
-HelpEntry* HelpEntry::create(const Coord &location, ProblemType pType, const std::vector<Coord> &forbiddenPath, unsigned int timeStep, const SearchClient::Agent &author, Communication::Blackboard *parent)
+HelpEntry* HelpEntry::create(const Coord &location, ProblemType pType, const std::vector<Coord> &forbiddenPath, unsigned int timeStep, const Agent::Level0Agent *author, Communication::Blackboard *parent)
 {
     HelpEntry *entry = new HelpEntry;
     entry->setLocation(location);
     entry->setTimeStep(timeStep);
-    entry->setAuthorId(author.getIndex());
+    entry->setAuthorId(author->getIndex());
     entry->setProblemType(pType);
     entry->setForbiddenPath(forbiddenPath);
 

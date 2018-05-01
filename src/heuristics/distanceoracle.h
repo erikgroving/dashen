@@ -7,6 +7,7 @@
 #include <queue>
 #include <unordered_map>
 
+#include "../agent/searchagent.h"
 #include "../searchengine/typedefs.h"
 #include "../searchengine/state.h"
 #include "../searchengine/predicate.h"

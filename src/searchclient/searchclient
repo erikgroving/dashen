@@ -1,3 +1,2 @@
-#include "agent.h"
 #include "client.h"
 #include "jointaction.h"

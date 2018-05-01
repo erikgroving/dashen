@@ -1,11 +1,12 @@
 #include "greedyheuristic.h"
 #include "../searchengine/distance.h"
+#include "../agent/searchagent.h"
 
 using Heur::GreedyHeuristic;
 using std::vector;
 
 
-GreedyHeuristic::GreedyHeuristic(SearchClient::Agent* agentPtr)  : SearchEngine::Heuristic(agentPtr) {
+GreedyHeuristic::GreedyHeuristic(Agent::SearchAgent* agentPtr)  : SearchEngine::Heuristic(agentPtr) {
 }
 
 

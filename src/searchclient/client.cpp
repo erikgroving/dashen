@@ -1,7 +1,8 @@
 #include "client.h"
+#include "../agent/searchagent.h"
 
 using SearchClient::Client;
-using SearchClient::Agent;
+using Agent::SearchAgent;
 using SearchClient::JointAction;
 
 using SearchEngine::State;
@@ -10,6 +11,11 @@ using SearchEngine::Command;
 Client::Client():
     type_(None), onGoingJointAction(), actionPlan_(), 
     agents(), actionsRecv(0)  {
+}
+
+Client::~Client() {
+    for(Agent::SearchAgent *agent: agents)
+        delete agent;
 }
 
 void Client::setAction(size_t agentId, const Command &command) {
@@ -98,7 +104,7 @@ State Client::initState(std::istream &inputstream) {
                     }
                     char num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
-                    agents.push_back( SearchClient::Agent(color, num, currCoord) );
+                    agents.push_back( new Agent::SearchAgent(color, num) );
                     numAgents++;
                 }
 
@@ -120,7 +126,10 @@ State Client::initState(std::istream &inputstream) {
     }
     
     /* Sort agents so agent idx is correct */
-    std::sort(agents.begin(), agents.end());
+    std::sort(agents.begin(), agents.end(), [](const Agent::SearchAgent *a, const Agent::SearchAgent *b){
+        return *a < *b;
+    });
+
     std::sort(agentsDescription.begin(), agentsDescription.end());
     State::numAgents = numAgents;
     State::goals = goals;

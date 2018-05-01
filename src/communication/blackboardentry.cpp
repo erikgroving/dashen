@@ -3,6 +3,7 @@
 #include "positionentry.h"
 #include "helpentry.h"
 #include "boxpositionentry.h"
+#include "../agent/searchagent.h"
 
 using Communication::BlackboardEntry;
 using Communication::Blackboard;
@@ -30,7 +31,7 @@ bool BlackboardEntry::operator==(const BlackboardEntry &compared) const {
     return true;
 }
 
-bool BlackboardEntry::accept(BlackboardEntry *entry, const SearchClient::Agent &receiver) {
+bool BlackboardEntry::accept(BlackboardEntry *entry, const Agent::Level0Agent *receiver) {
     if(entry->getParent() == nullptr)
         return true;
 
@@ -50,8 +51,8 @@ bool BlackboardEntry::accept(BlackboardEntry *entry, const SearchClient::Agent &
     return true;
 }
 
-bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &sender) {
-    if(sender.getIndex() != entry->getAuthorId()) // Only the author can erevoke a demand
+bool BlackboardEntry::revoke(BlackboardEntry *entry, const Agent::Level0Agent *sender) {
+    if(sender->getIndex() != entry->getAuthorId()) // Only the author can erevoke a demand
         return false;
 
 

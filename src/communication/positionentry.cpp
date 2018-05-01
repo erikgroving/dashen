@@ -1,4 +1,5 @@
 #include "positionentry.h"
+#include "../agent/level0agent.h"
 
 using Communication::PositionEntry;
 
@@ -11,7 +12,7 @@ Communication::PositionEntry &PositionEntry::operator=(const Communication::Posi
     return *this;
 }
 
-PositionEntry* PositionEntry::create(const Coord &location, unsigned int timeStep, const SearchClient::Agent &author, Communication::Blackboard *parent)
+PositionEntry* PositionEntry::create(const Coord &location, unsigned int timeStep, const Agent::Level0Agent &author, Communication::Blackboard *parent)
 {
     PositionEntry *entry = new PositionEntry;
     entry->setAuthorId(author.getIndex());

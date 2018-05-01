@@ -1,4 +1,5 @@
 #include "boxpositionentry.h"
+#include "../agent/level0agent.h"
 
 using Communication::BoxPositionEntry;
 
@@ -15,7 +16,7 @@ BoxPositionEntry& BoxPositionEntry::operator=(const BoxPositionEntry& src) {
 }
 
 
-BoxPositionEntry* BoxPositionEntry::create(const Coord &location, unsigned int timeStep, short boxId, const SearchClient::Agent &author, Communication::Blackboard *parent)
+BoxPositionEntry* BoxPositionEntry::create(const Coord &location, unsigned int timeStep, short boxId, const Agent::Level0Agent &author, Communication::Blackboard *parent)
 {
     BoxPositionEntry *entry = new BoxPositionEntry;
     entry->setLocation(location);

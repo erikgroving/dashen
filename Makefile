@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS= -std=c++14 -Wall -g
-SRC= $(wildcard src/searchclient/*.cpp src/searchengine/*.cpp src/heuristics/*.cpp src/strategies/*.cpp src/communication/*.cpp)
+SRC= $(wildcard src/searchclient/*.cpp src/searchengine/*.cpp src/heuristics/*.cpp src/strategies/*.cpp src/communication/*.cpp src/agent/*.cpp)
 
 OBJECTS= $(SRC:%.cpp=%.o)
 

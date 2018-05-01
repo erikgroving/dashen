@@ -4,7 +4,10 @@
 #include <string>
 #include <queue>
 #include "state.h"
-#include "../searchclient/searchclient"
+
+namespace Agent {
+    class SearchAgent;
+}
 
 namespace SearchEngine {
 
@@ -23,7 +26,7 @@ class State;
 class Heuristic {
 
 public:
-    Heuristic(SearchClient::Agent* agentPtr = nullptr);
+    Heuristic(Agent::SearchAgent* agentPtr = nullptr);
 
     /**
      * Compares the heuristic value of two nodes.
@@ -48,18 +51,18 @@ public:
     /**
      * \return the reference agent registered by the heuristic
      */
-    SearchClient::Agent* getReferenceAgent() { return agentPtr_; }
-    const SearchClient::Agent* getReferenceAgent() const { return agentPtr_; }
+    Agent::SearchAgent* getReferenceAgent() { return agentPtr_; }
+    const Agent::SearchAgent* getReferenceAgent() const { return agentPtr_; }
 
     /**
      * \brief Sets the reference agent so it can be used by the heuristic
      */
-    void setReferenceAgent(SearchClient::Agent *refAgent) { agentPtr_ = refAgent; }
+    void setReferenceAgent(Agent::SearchAgent* refAgent) { agentPtr_ = refAgent; }
 
 private:
-    SearchClient::Agent *agentPtr_;
+    Agent::SearchAgent *agentPtr_;
 };
 
-};
+}
 
 #endif

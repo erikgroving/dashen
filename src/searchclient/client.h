@@ -11,15 +11,15 @@
 #include <utility>
 
 #include "../searchengine/searchengine"
-#include "agent.h"
 #include "jointaction.h"
 
 Color stringToColor(std::string);
 
+namespace Agent {
+    class SearchAgent;
+}
 
 namespace SearchClient {
-
-class Agent;
 
 class Client {
     public:
@@ -27,6 +27,7 @@ class Client {
          * and is responsible for all the other elements.
          */
         Client();
+        ~Client();
 
     public:
         /**
@@ -56,8 +57,8 @@ class Client {
          * 
          * A const and not-const version of the method are available.
          */
-        std::vector<SearchClient::Agent>& extractAgents() { return agents; }
-        const std::vector<SearchClient::Agent>& extractAgents() const { return agents; }
+        std::vector<Agent::SearchAgent*>& extractAgents() { return agents; }
+        const std::vector<Agent::SearchAgent*>& extractAgents() const { return agents; }
 
         /**
          * Sets the next action of the agent at agentIndex to be command.
@@ -100,7 +101,7 @@ class Client {
         JointAction onGoingJointAction;
         std::vector<JointAction> actionPlan_;
 
-        std::vector<SearchClient::Agent> agents;
+        std::vector<Agent::SearchAgent*> agents;
         int actionsRecv;  
 };
 

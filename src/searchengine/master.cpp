@@ -1,6 +1,7 @@
 #include "master.h"
 #include "searchclient.h"
 #include "../communication/communication"
+#include "../agent/searchagent.h"
 
 using Communication::Blackboard;
 void printBlackboard(Communication::Blackboard* b);
@@ -14,11 +15,11 @@ Master::Master(): jointActions_(), masterState_(), prevMasterState_(), agents_()
 
 }
 
-Master::Master(const State &s1, const std::vector<SearchClient::Agent> &agents): jointActions_(), masterState_(s1),
+Master::Master(const State &s1, const std::vector<Agent::SearchAgent*> &agents): jointActions_(), masterState_(s1),
     prevMasterState_(), agents_(agents), masterBlackboard_() {
 
-    for(auto &agent: agents_)
-        agent.setBlackboard(&masterBlackboard_);
+    for(auto *agent: agents_)
+        agent->setBlackboard(&masterBlackboard_);
 
 }
 
@@ -41,7 +42,7 @@ void Master::conductSearch() {
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
-        SearchClient::Agent::setSharedState(&masterState_);
+        Agent::SearchAgent::sharedState = &masterState_;
         SearchClient::JointAction ja = callForActions();
         jointActions_.push_back(ja); 
 
@@ -88,7 +89,7 @@ SearchClient::JointAction Master::callForActions() {
     SearchClient::JointAction action = SearchClient::JointAction();
     action.initialize(agents_.size());
     for (size_t i = 0; i < agents_.size(); i++) {
-        action.setAction(i, agents_[i].nextMove());
+        action.setAction(i, agents_[i]->nextMove());
     } 
 
     return action;
@@ -106,7 +107,7 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
         } 
         else {
             ja->setAction(i, Command());
-            agents_[i].clearPlan(actions[i]);
+            agents_[i]->clearPlan(actions[i], agents_[i]->getCurrentPlan());
         }
     }
 }
@@ -213,10 +214,10 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
     auto commands = ja.getData();
     for (unsigned int i = 0; i < commands.size(); i++) {
         if (commands[i].action() != NOOP) {
-            unsigned int sharedTime = SearchClient::Agent::sharedTime;
+            unsigned int sharedTime = Agent::SearchAgent::sharedTime;
             Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
 
-            if (agents_[i].isFirstMoveInPlan()) {
+            if (agents_[i]->isFirstMoveInPlan()) {
                 Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
             }
         }
@@ -226,7 +227,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
         }
     }
 
-    SearchClient::Agent::sharedTime++;
+    Agent::SearchAgent::sharedTime++;
 }
 
 void Master::printBlackboard(Communication::Blackboard* b) {

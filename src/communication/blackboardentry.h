@@ -4,7 +4,10 @@
 #include <vector>
 #include "../communication/blackboard.h"
 #include "../searchengine/typedefs.h"
-#include "../searchclient/agent.h"
+
+namespace Agent {
+    class Level0Agent;
+}
 
 namespace Communication {
 
@@ -66,12 +69,12 @@ class BlackboardEntry {
         /**
          * \brief Agent receiver accepts the entry, thus it can be removed from the parent parent
          */
-        static bool accept(BlackboardEntry *entry, const SearchClient::Agent &receiver);
+        static bool accept(BlackboardEntry *entry, const Agent::Level0Agent *receiver);
 
         /**
          * \brief Agent sender revokes the entry that it has previously created
          */
-        static bool revoke(BlackboardEntry *entry, const SearchClient::Agent &sender);
+        static bool revoke(BlackboardEntry *entry, const Agent::Level0Agent *sender);
 
 private:
         Blackboard *parent_;
