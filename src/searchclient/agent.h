@@ -56,9 +56,13 @@ public:
     short getCorrectGoals() { return correctGoals_; }
     
     bool isFirstMoveInPlan() { return firstMoveInPlan_; }
+    const bool isHelpGoal() const { return currGoalIsHelpGoal_; }
     
     const Goal getCurrentSearchGoal() const { return currentSearchGoal_; }
     Goal getCurrentSearchGoal() { return currentSearchGoal_; }
+    
+    const HelpGoal getCurrentHelpGoal() const { return currentHelpGoal_; }
+    HelpGoal getCurrentHelpGoal() { return currentHelpGoal_; }
 
     int getIndex() const { return num; }
 
@@ -150,7 +154,7 @@ private:
     char num;
     Coord loc; // is it still useful ? not if we are using state
 
-
+    bool currGoalIsHelpGoal_;
     SearchEngine::Strategy *searchStrategy_;
 
 

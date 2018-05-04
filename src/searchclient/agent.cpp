@@ -101,6 +101,9 @@ std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngi
     else
         initialStateRemovedAllBut(num, goal.assignedBoxID);
 
+    if (private_initialState->getBoxes()[goal.assignedBoxID].loc.x == -1) {
+        return std::vector<SearchEngine::State*>();
+    }
     SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([&goal](const SearchEngine::State *currentState) {
         return goalHasCorrectBox(currentState, goal);
@@ -114,6 +117,10 @@ std::vector<SearchEngine::State*> Agent::searchBox(const Box& box, SearchEngine:
         configurePrivateInitialState();
     else
         initialStateRemovedAllBut(num, box.id);
+
+    if (private_initialState->getBoxes()[box.id].loc.x == -1) {
+        return std::vector<SearchEngine::State*>();
+    }
 
     SearchEngine::SearchCli searcher(private_initialState);
     searcher.setGoalStatePredicate([&box, this](const SearchEngine::State *currentState) {
@@ -136,7 +143,6 @@ std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &
 
 std::vector<SearchEngine::State *> Agent::searchHelpMoveAgent(SearchEngine::Strategy &strategy, bool ignoreOthers)
 {
-
     configurePrivateInitialState();
 
     SearchEngine::SearchCli searcher(private_initialState);
@@ -191,8 +197,11 @@ SearchEngine::Command Agent::nextMove() {
         bool isHelpGoal;
         // If the search goal is '-', there are no goals available
         if (!determineNextGoal(&isHelpGoal)) {
+            currGoalIsHelpGoal_ = isHelpGoal;
             return SearchEngine::Command(); // no goals so send a NoOp back
         }
+        
+        currGoalIsHelpGoal_ = isHelpGoal;
 
         std::vector<SearchEngine::State*> ans;
         if(!isHelpGoal) {
@@ -202,10 +211,10 @@ SearchEngine::Command Agent::nextMove() {
             // Search to find the answer for the goal
             bool searchFailed = false;
             ans = conductSubgoalSearch(&searchFailed);
-            if(searchFailed) {
+           /* if(searchFailed) {
                 askForHelp(ans);
-               return SearchEngine::Command();
-            }
+                return SearchEngine::Command();
+            }*/
         }
         else {
             ans = conductHelpSubgoalSearch();
@@ -350,11 +359,9 @@ Goal Agent::getGoalFromBlackboard() {
 
     /* Find the goal for that position */
     int goalIndex;
-        goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
+    goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
 
     Goal &result = SearchEngine::State::goals[goalIndex];
-
-
 
     State::takenBoxes[closestBoxIndex] = true;
     result.assignedBoxID = closestBoxIndex;
@@ -471,7 +478,6 @@ bool Agent::determineNextGoal(bool *isHelpGoal) {
                     *isHelpGoal = true;
                     return true;
                 }
-                // TODO
             }
         }
     }
@@ -520,7 +526,7 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
         ans = searchBox(targBox, strat); //TODO reflect proper strategy
     }
     else {
-        std::cerr << "Satisfying goal (" << currentSearchGoal_.loc.x << ", " << currentSearchGoal_.loc.y << ") with box " << targBox.id << std::endl;
+        std::cerr << "Agent " << (int)this->num << " will satisfy goal (" << currentSearchGoal_.loc.x << ", " << currentSearchGoal_.loc.y << ") with box " << targBox.id << std::endl;
         Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic> strat(this);
         strat.linkBlackboard(blackboard_);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
@@ -529,6 +535,12 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
                                 state->getAction(), state->getTimeStep(), errorDescription);
         });
         ans = searchGoal(currentSearchGoal_, strat);
+        std::cerr << "Solution of length: " << ans.size() << " found!\n";
+        if (ans.size() == 2) {
+            for (auto cmd : ans) {
+                std::cerr<<cmd->getAction().toActionString() << std::endl;
+            }
+        }
     }
 
     // Something went wrong, could not compute the path
@@ -547,8 +559,9 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
             ans = searchGoal(currentSearchGoal_, strat, true);
         }
     }
-    else
+    else {
         *searchFailed = false;
+    }
 
     return ans;
 }
@@ -558,6 +571,7 @@ std::vector<SearchEngine::State*> Agent::conductHelpSubgoalSearch()
 
     if(currentHelpGoal_.type == SearchClient::HelpGoal::Agent) {
         Strat::StrategyBFSMovePriority strat;
+        strat.linkBlackboard(blackboard_);
         ans = searchHelpMoveAgent(strat);
 
         currentHelpGoal_.over = true;
@@ -625,7 +639,7 @@ void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans)
             }
 
             Communication::BoxPositionEntry::create(
-                    Coord(newBoxCol, newBoxRow), a->getTimeStep(), targBox.id, blackboard_ );
+                    Coord(newBoxCol, newBoxRow), a->getTimeStep(), targBox.id, *this, blackboard_ );
         }
     }
 }

@@ -1,5 +1,9 @@
 #include "distanceoracle.h"
 
+#ifndef __LONG_MAX__
+#define __LONG_MAX__ 234881234
+#endif
+
 using Heur::DistanceOracle;
 
 std::unordered_map<Coord, DistanceOracle::DistanceMatrix, DistanceOracle::CoordHash > Heur::DistanceOracle::distances_ =

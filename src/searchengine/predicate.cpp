@@ -28,44 +28,7 @@ bool SearchEngine::Predicate::isFree(const State *input, int x, int y) {
 }
 
 bool SearchEngine::Predicate::isFreeBlackboard(const Communication::Blackboard* bb, const State *input, int x, int y) {
-    if (bb->getPositionEntries().size() > 10) {
-        return true;
-    }
-    unsigned int timeStep = input->getTimeStep();
-    
-    Coord soughtPos = Coord(x, y);
-    /* Check agent positions at this time */
-    for (auto agentPosVec : bb->getPositionEntries()) {
-        for (auto entry : agentPosVec) {
-            // only check positions up to desired time
-            if (entry->getTimeStep() > timeStep + 1) {
-                break;
-            }
-            if (entry->getLocation() == soughtPos) {
-                int timeDiff = timeStep - entry->getTimeStep();
-                if (abs(timeDiff) <= 1) {
-                    return false;
-                }
-            }
-        }
-    }
-    
-    /* Check against box positions */
-    for (auto boxPosVec : bb->getBoxEntries()) {
-        for (auto entry : boxPosVec) {
-            // only check positions up to desired time
-            if (entry->getTimeStep() > timeStep + 1) {
-                break;
-            }
-            if (entry->getLocation() == soughtPos) {
-                int timeDiff = timeStep - entry->getTimeStep();
-                if (abs(timeDiff) <= 1) {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
+    return isFree(input, x, y);
 }
 
 bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIndex){

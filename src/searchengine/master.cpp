@@ -47,7 +47,6 @@ void Master::conductSearch() {
 
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
-        revokeBlackboardEntries(ja);
         std::cerr << "Joint Action: " << ja.toActionString(); 
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
@@ -98,18 +97,41 @@ SearchClient::JointAction Master::callForActions() {
 /* This function updates the current state to reflect the previous joint actions */
 void Master::updateCurrentState(SearchClient::JointAction* ja) {
     std::vector<SearchEngine::Command> actions = ja->getData();
+    std::vector< std::pair<int, SearchEngine::Command> > agentsWithPlansToBeCleared;
     for (size_t i = 0; i < actions.size(); i++) {
-
         /* Move must be valid in the previous state and the in process state */
         if (isActionValid(&masterState_, actions[i], i) &&
             isActionValid(&prevMasterState_, actions[i], i)) {
             updateStateWithNewMove(actions[i], i);
         } 
         else {
-            ja->setAction(i, Command());
-            agents_[i].clearPlan(actions[i]);
+            /* We should probably do something better */
+            /* But it's kind of tricky */
+            agentsWithPlansToBeCleared.push_back(std::make_pair(i, actions[i]));
+            ja->setAction(i, SearchEngine::Command()); 
         }
     }
+    revokeBlackboardEntries(*ja);
+    for (size_t i = 0; i < agentsWithPlansToBeCleared.size(); i++) {
+        int id = agentsWithPlansToBeCleared[i].first;
+        auto cmd = agentsWithPlansToBeCleared[i].second;
+        agents_[id].clearPlan(cmd);
+    }
+
+    /* Check blackboard matches state*/
+    /*
+    for (int i = 0; i < masterBlackboard_.getBoxEntries().size(); i++) {
+        Coord boxLoc = masterBlackboard_.getBoxEntriesByID(i)[0]->getLocation();
+        if (masterState_.getBoxes()[i].loc != boxLoc) {
+            std::cerr << "Master state and blackboard differ... exiting\n";
+        }
+    }
+    for (int i = 0; i < masterBlackboard_.getPositionEntries().size(); i++) {
+        Coord agentLoc = masterBlackboard_.getPositionEntriesByID(i)[0]->getLocation();
+        if (masterState_.getAgents()[i].loc != agentLoc) {
+            std::cerr << "Master state and blackboard differ... exiting\n";
+        }
+    }*/
 }
 
 bool Master::isActionValid(SearchEngine::State* state, SearchEngine::Command cmd, char AgentID) {
@@ -239,14 +261,14 @@ void Master::printBlackboard(Communication::Blackboard* b) {
         }
     }
     std::cerr << "\n---------Box Blackboard--------\n";
-    std::cerr << "Timestep\t\tPosition\t\tBox\n";
+    std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
         auto boxEntries = b->getBoxEntriesByID(boxID);
         for (auto* entry : boxEntries) {
             Communication::BoxPositionEntry *entry_casted = static_cast<Communication::BoxPositionEntry*>(entry);
             std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t(" <<
                         entry_casted->getLocation().x << "," << entry_casted->getLocation().y <<
-                        ")\t\t\t" << entry_casted->getBoxId() << std::endl;
+                        ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
 }

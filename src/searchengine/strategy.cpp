@@ -76,7 +76,7 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
         if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Agent could move to (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
 
-            if( isFree(state, newAgentCol, newAgentRow) && isFreeBlackboard(blackboard_, state, newAgentCol, newAgentRow) ) {
+            if( /*isFree(state, newAgentCol, newAgentRow) && */isFreeBlackboard(blackboard_, state, newAgentCol, newAgentRow) ) {
 
                 SearchEngine::State *childNode = state->makeChild();
                 childNode->setAction(cmd);
@@ -100,7 +100,7 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
                     int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
                     int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
 
-                    if( isFree(state, newBoxCol, newBoxRow) && isFreeBlackboard(blackboard_, state, newBoxCol, newBoxRow)) {
+                    if(/* isFree(state, newBoxCol, newBoxRow) &&*/ isFreeBlackboard(blackboard_, state, newBoxCol, newBoxRow)) {
                         SearchEngine::State *childNode = state->makeChild();
 
                         cmd.setTargBoxId(boxIndex);
@@ -124,7 +124,7 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
         }
         else if( cmd.action() == Action::PULL ) {
             int boxIndex;
-            if( isFree(state, newAgentCol, newAgentRow)) {
+            if( /*isFree(state, newAgentCol, newAgentRow) &&*/ isFreeBlackboard(blackboard_, state, newAgentCol, newAgentRow)) {
                 int boxRow = agt.loc.y + Command::rowToInt(cmd.d2());
                 int boxCol = agt.loc.x + Command::colToInt(cmd.d2());
 

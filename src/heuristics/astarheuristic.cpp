@@ -15,7 +15,8 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
     unsigned long result = 0;
 
     Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
-    Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
+
+    bool isHelpGoal = getReferenceAgent()->isHelpGoal();
 
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = getReferenceAgent()->getCorrectGoals();
@@ -27,8 +28,20 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
 
     result += (1 + startSearchCorrectgoals - currCorrectGoals) * 10;
 
+
+
     /* Find the box assigned to the goal */
-    Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
+    Box closestBox;
+    if (isHelpGoal) {
+        closestBox = state->getBoxes()[getReferenceAgent()->getCurrentHelpGoal().id];
+    }
+    else {
+        Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
+        closestBox = state->getBoxes()[searchGoal.assignedBoxID];
+    }
+    //Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
+    
+    
     /* Add the agent distance to box */
     result += DistanceOracle::fetchDistFromCoord(closestBox.loc, agentLoc);
     //result += Coord::distance(closestBox.loc, agentLoc);
@@ -55,8 +68,6 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
-    //IMPORTANT. Use the goal as the FIRST ARGUMENT. This way distances do not
-    // need to be recalculated
     result += DistanceOracle::fetchDistFromCoord(searchGoal.loc, closestBox.loc);
     //result += abs(closestBox.loc.x - searchGoal.loc.x) + abs(closestBox.loc.y - searchGoal.loc.y);
     return result;
