@@ -7,6 +7,7 @@
 #include "../searchengine/strategy.h"
 #include "../searchengine/heuristic.h"
 #include "../searchclient/searchclient"
+#include "../communication/communication"
 namespace Strat {
 
 template<typename Heuristic>

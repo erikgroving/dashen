@@ -42,18 +42,25 @@ class Blackboard {
     public:
         void addEntry(BlackboardEntry *entry, Registry registry);
 
-        std::vector<BlackboardEntry*>& getPositionEntries() { return positionEntries_; } 
-        const std::vector<BlackboardEntry*>& getPositionEntries() const { return positionEntries_; }
+        std::vector< std::vector<BlackboardEntry*> >& getPositionEntries() { return positionEntries_; } 
+        const std::vector< std::vector<BlackboardEntry*> >& getPositionEntries() const { return positionEntries_; }
+        
+        std::vector<BlackboardEntry*>& getPositionEntriesByID(int agentID) { return positionEntries_[agentID]; } 
+        const std::vector<BlackboardEntry*>& getPositionEntriesByID(int agentID) const { return positionEntries_[agentID]; }
         
         const std::vector<BlackboardEntry*>& getGoalEntries() const { return goalEntries_; }
         std::vector<BlackboardEntry*>& getGoalEntries() { return goalEntries_; }
         
-        const std::vector<BlackboardEntry*>& getBoxEntries(int boxID) const { return boxPositionEntries_[boxID]; }
-        std::vector<BlackboardEntry*>& getBoxEntries(int boxID) { return boxPositionEntries_[boxID]; }
+        const std::vector< std::vector<BlackboardEntry*> >& getBoxEntries() const { return boxPositionEntries_; }
+        std::vector< std::vector<BlackboardEntry*> >& getBoxEntries() { return boxPositionEntries_; }
+       
+        const std::vector<BlackboardEntry*>& getBoxEntriesByID(int boxID) const { return boxPositionEntries_[boxID]; }
+        std::vector<BlackboardEntry*>& getBoxEntriesByID(int boxID) { return boxPositionEntries_[boxID]; }
 
         const std::vector<BlackboardEntry*>& getHelpEntries() const { return helpEntries_; }
         std::vector<BlackboardEntry*>& getHelpEntries() { return helpEntries_; }
 
+        void setAgentPositionEntryRegistrySize(size_t numAgents);
         void setBoxEntryRegistrySize(size_t numBoxes);
 
         void removeEntry(const BlackboardEntry *entry, Registry registry);
@@ -65,7 +72,7 @@ class Blackboard {
         BlackboardEntry* findPositionEntry(unsigned int timeStep, int authorId);
 
     private:
-        std::vector<BlackboardEntry*> positionEntries_;
+        std::vector<std::vector<BlackboardEntry*>> positionEntries_;
         std::vector<std::vector<BlackboardEntry*>> boxPositionEntries_;
         std::vector<BlackboardEntry*> goalEntries_;
         std::vector<BlackboardEntry*> helpEntries_;

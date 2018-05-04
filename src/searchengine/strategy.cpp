@@ -55,12 +55,15 @@ SearchEngine::State* Strategy::getAndRemoveLeaf() {
         frontierMap_.erase( nextState );
     return nextState;
 }
+    
+void Strategy::linkBlackboard(Communication::Blackboard* blackboard) {
+    blackboard_ = blackboard;
+}
 
 std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* state, int agentIndex) {
     std::vector<State*> result;
 
     AgentDescription &agt = state->getAgents()[agentIndex];
-
     for(Command cmd: Command::possibleActions) {
         // std::cerr << "--" << cmd.toString() << std::endl;
 
@@ -73,7 +76,7 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
         if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Agent could move to (" << newAgentCol << "," << newAgentRow << ") (Command " << cmd.toString() << ") ?";
 
-            if( isFree(state, newAgentCol, newAgentRow) ) {
+            if( isFree(state, newAgentCol, newAgentRow) && isFreeBlackboard(blackboard_, state, newAgentCol, newAgentRow) ) {
 
                 SearchEngine::State *childNode = state->makeChild();
                 childNode->setAction(cmd);
@@ -97,7 +100,7 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
                     int newBoxRow = newAgentRow + Command::rowToInt(cmd.d2());
                     int newBoxCol = newAgentCol + Command::colToInt(cmd.d2());
 
-                    if( isFree(state, newBoxCol, newBoxRow) ) {
+                    if( isFree(state, newBoxCol, newBoxRow) && isFreeBlackboard(blackboard_, state, newBoxCol, newBoxRow)) {
                         SearchEngine::State *childNode = state->makeChild();
 
                         cmd.setTargBoxId(boxIndex);

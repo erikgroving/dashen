@@ -13,6 +13,8 @@
 #include "state_equal_to.h"
 #include "predicate.h"
 
+#include "../communication/communication"
+
 namespace SearchEngine
 {
 class State;
@@ -42,7 +44,9 @@ class Strategy
      * Add leaf to the set of already explored states
      */
     void addToExplored(State *leaf );
-    
+
+    void linkBlackboard(Communication::Blackboard* blackboard);
+
     /**
      * \return number of leaves that have been already explored
      */ 
@@ -82,9 +86,10 @@ class Strategy
     const std::function< bool(const State*) > additionalCheckPredicate() const { return additionalCheckPredicate_; }
 
   private:
-     std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
-     std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
-     std::function< bool(const State*) > additionalCheckPredicate_;
+    Communication::Blackboard* blackboard_;
+    std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
+    std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
+    std::function< bool(const State*) > additionalCheckPredicate_;
 };
 
 }

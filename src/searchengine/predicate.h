@@ -3,6 +3,7 @@
 
 #include "state.h"
 #include "../searchclient/agent.h"
+#include "../communication/communication"
 #include <algorithm>
 #include <cmath>
 
@@ -21,6 +22,7 @@ namespace Predicate
      * \return true if tile at (x,y) is free in state input.
      */
     bool isFree(const State *input, int x, int y);
+    bool isFreeBlackboard(const Communication::Blackboard* bb, const State *input, int x, int y);
 
     /**
      * TODO: MODIFY THIS DESCRIPTION. GOAL STATE IS GOALS ARE MATCHED, NOT BOXES ALL MATCHED

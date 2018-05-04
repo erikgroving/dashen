@@ -14,7 +14,8 @@ Blackboard::Blackboard(): positionEntries_(), boxPositionEntries_(), goalEntries
 }
 
 Blackboard::~Blackboard() {
-    for(BlackboardEntry* entry: positionEntries_)
+    for (auto &vector: positionEntries_)
+        for(BlackboardEntry* entry: vector)
             delete entry;
 
     for(BlackboardEntry* entry: goalEntries_)
@@ -33,7 +34,7 @@ void Blackboard::addEntry(BlackboardEntry *entry, Registry registry) {
     switch(registry) {
         case PositionEntry:
             entry->setBlackboardParent(this);
-            positionEntries_.push_back(entry);
+            positionEntries_[entry->getAuthorId()].push_back(entry);
             break;
         case BoxPositionEntry:
             entry->setBlackboardParent(this);
@@ -51,6 +52,10 @@ void Blackboard::addEntry(BlackboardEntry *entry, Registry registry) {
     }
 }
 
+void Blackboard::setAgentPositionEntryRegistrySize(size_t numAgents) {
+    positionEntries_.resize(numAgents);
+}
+
 void Blackboard::setBoxEntryRegistrySize(size_t numBoxes) {
     boxPositionEntries_.resize(numBoxes);
 }
@@ -62,8 +67,9 @@ void Blackboard::removeEntry(const BlackboardEntry *entry, Registry registry) {
             std::cerr << "Remove entry not supported for registry of type BoxPositionEntry" << std::endl;
             break;
         case PositionEntry:
-            positionEntries_.erase(
-                std::remove(positionEntries_.begin(), positionEntries_.end(), entry)
+            positionEntries_[entry->getAuthorId()].erase(
+                std::remove(positionEntries_[entry->getAuthorId()].begin(), 
+                            positionEntries_[entry->getAuthorId()].end(), entry)
             );
             delete entry;
             break;
@@ -92,8 +98,8 @@ void Blackboard::removeEntriesByAuthor(char agentID, Registry registry) {
             container = &helpEntries_;
             break;
         case PositionEntry:
-            container = &positionEntries_;
-            break;
+            std::cerr << "Cannot use removeEntryiesByAuthor for registry PositionEntry" << std::endl;
+            return;
         case GoalEntry:
             container = &goalEntries_;
             break;
@@ -104,7 +110,6 @@ void Blackboard::removeEntriesByAuthor(char agentID, Registry registry) {
 
     for (size_t i = 0; i < container->size(); i++) {
         if ((*container)[i]->getAuthorId() == agentID) {
-
             delete (*container)[i];
             (*container)[i] = (*container).back();
             (*container).pop_back();
@@ -126,9 +131,9 @@ void Blackboard::erase_front(Registry registry, short id) {
             break;
 
         case PositionEntry:
-            if(positionEntries_.size() > 0) {
-                entry = *positionEntries_.begin();
-                positionEntries_.erase(positionEntries_.begin());
+            if(positionEntries_[id].size() > 1) {
+                entry = *positionEntries_[id].begin();
+                positionEntries_[id].erase(positionEntries_[id].begin());
                 delete entry;
             }
             break;
@@ -142,7 +147,7 @@ void Blackboard::erase_front(Registry registry, short id) {
             break;
 
         case BoxPositionEntry:
-            if(id >= 0 && boxPositionEntries_[id].size() > 0) {
+            if(boxPositionEntries_[id].size() > 1) {
                 entry = *boxPositionEntries_[id].begin();
                 boxPositionEntries_[id].erase(boxPositionEntries_[id].begin());
                 delete entry;
@@ -160,9 +165,11 @@ void Blackboard::clear(Registry registry, short id) {
             break;
 
         case PositionEntry:
-            for(Communication::BlackboardEntry *entry: positionEntries_)
-                delete entry;
-            positionEntries_.resize(0);
+            for(auto ite = positionEntries_[id].begin() + 1; ite != positionEntries_[id].end(); ite++)
+                delete *ite;
+            if (positionEntries_[id].size() > 1) {
+                positionEntries_[id].resize(1);
+            }
             break;
 
         case GoalEntry:
@@ -172,18 +179,16 @@ void Blackboard::clear(Registry registry, short id) {
             break;
 
         case BoxPositionEntry:
-            if(id >= 0) {
-                for(auto ite = boxPositionEntries_[id].begin() + 1; ite != boxPositionEntries_[id].end(); ite++)
-                    delete *ite;
-                if( boxPositionEntries_[id].size() > 1)
-                    boxPositionEntries_[id].resize(1);
-            }
+            for(auto ite = boxPositionEntries_[id].begin() + 1; ite != boxPositionEntries_[id].end(); ite++)
+                delete *ite;
+            if( boxPositionEntries_[id].size() > 1)
+                boxPositionEntries_[id].resize(1);
             break;
     }
 }
 
 BlackboardEntry* Blackboard::findPositionEntry(unsigned int timeStep, int authorId) {
-    return *std::find_if(positionEntries_.begin(), positionEntries_.end(), [timeStep, authorId](const BlackboardEntry *entry){
+    return *std::find_if(positionEntries_[authorId].begin(), positionEntries_[authorId].end(), [timeStep, authorId](const BlackboardEntry *entry){
         if(entry->getTimeStep() == timeStep && entry->getAuthorId() == authorId)
             return true;
         return false;

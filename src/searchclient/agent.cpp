@@ -50,7 +50,6 @@ Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackb
             currentHelpEntry_(), takenGoals_(), plan_(), blackboard_(blackboard),
             correctGoals_(0), firstMoveInPlan_(false), isWaitingForHelp(false), helpEntriesToMonitor_() {
 
-    std::cerr << "Agent initialized" << std::endl;
 }
 
 Agent::Agent(const SearchClient::Agent &src): color(src.color), num(src.num), loc(src.loc),
@@ -60,7 +59,6 @@ Agent::Agent(const SearchClient::Agent &src): color(src.color), num(src.num), lo
     helpEntriesToMonitor_(src.helpEntriesToMonitor_)
      {
 
-    std::cerr << "Agent copied" << std::endl;
 }
 
 Agent::~Agent() {
@@ -283,15 +281,18 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
 
     auto positionEntries = blackboard_->getPositionEntries();
 
+
     // check against agents
-    for(const Communication::BlackboardEntry *entry: positionEntries) {
-        Coord entryPos = entry->getLocation();
-        if(newAgentPos == entryPos || newBoxPos == entryPos) {
-            // Okay... so an agent/box will go to this entry. But.. WHEN?
-            int timeDiff = entry->getTimeStep() - timeStep;
-            if (abs(timeDiff) <= 1) {
-                errorDescription = "AGENT." + std::to_string(entry->getAuthorId());
-                return false;
+    for (auto posForAgent : positionEntries) {
+        for(const Communication::BlackboardEntry *entry: posForAgent) {
+            Coord entryPos = entry->getLocation();
+            if(newAgentPos == entryPos || newBoxPos == entryPos) {
+                // Okay... so an agent/box will go to this entry. But.. WHEN?
+                int timeDiff = entry->getTimeStep() - timeStep;
+                if (abs(timeDiff) <= 1) {
+                    errorDescription = "AGENT." + std::to_string(entry->getAuthorId());
+                    return false;
+                }
             }
         }
     }
@@ -299,7 +300,7 @@ bool Agent::positionFree(size_t x, size_t y, SearchEngine::Command cmd, unsigned
     // check against boxes except the ones that we are currently moving
     int targetBoxIdx = currentSearchGoal_.assignedBoxID;
     for (size_t id = 0; id < private_initialState->getBoxes().size(); id++) {
-        auto boxPositionEntries = blackboard_->getBoxEntries(id);
+        auto boxPositionEntries = blackboard_->getBoxEntriesByID(id);
         if((size_t)targetBoxIdx == id)
             continue;
         for (auto ite = boxPositionEntries.begin(); ite != boxPositionEntries.end(); ite++) {
@@ -375,7 +376,7 @@ void Agent::clearPlan(SearchEngine::Command cmd) {
         }
     }
     plan_.erase(plan_.begin(), plan_.end());
-    blackboard_->removeEntriesByAuthor(num, Communication::Blackboard::PositionEntry);
+    blackboard_->clear(Communication::Blackboard::PositionEntry, this->num);
 }
 
 void Agent::configurePrivateInitialState() {
@@ -390,17 +391,17 @@ void Agent::configurePrivateInitialState() {
 
 
     // Remove agents in motion. Will use blackboard instead 
-    for (auto& entry : bbPtr->getPositionEntries()) {
-        if (std::find(agentsInMotion.begin(), agentsInMotion.end(), entry->getAuthorId()) 
-                == agentsInMotion.end()) {
-            agentsInMotion.push_back(entry->getAuthorId());
+    auto posEntries = bbPtr->getPositionEntries();
+    for (size_t i = 0; i < bbPtr->getPositionEntries().size(); i++) {
+        if (posEntries[i].size() > 1) {
+            agentsInMotion.push_back(i);
         }
     }
 
     // Blackboard used for boxes that are in motion.
     auto boxes = private_initialState->getBoxes();
     for (Box& b : boxes) {
-        if (bbPtr->getBoxEntries(b.id).size() > 1) {
+        if (bbPtr->getBoxEntriesByID(b.id).size() > 1) {
             b.loc.x = -1;
         }
     }
@@ -509,6 +510,7 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
         // std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << std::endl;
 
         Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic> strat(this);
+        strat.linkBlackboard(blackboard_);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
@@ -520,6 +522,7 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
     else {
         std::cerr << "Satisfying goal (" << currentSearchGoal_.loc.x << ", " << currentSearchGoal_.loc.y << ") with box " << targBox.id << std::endl;
         Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic> strat(this);
+        strat.linkBlackboard(blackboard_);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
@@ -535,10 +538,12 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
 
         if(!agentNextToBox(sharedState, targBox, this)) {
             Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic> strat(this);
+            strat.linkBlackboard(blackboard_);
             ans = searchBox(targBox, strat, true);
         }
         else {
             Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic> strat(this);
+            strat.linkBlackboard(blackboard_);
             ans = searchGoal(currentSearchGoal_, strat, true);
         }
     }
@@ -570,6 +575,7 @@ std::vector<SearchEngine::State*> Agent::conductHelpSubgoalSearch()
         if(!agentNextToBox(sharedState, box, this)) {
 
             Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic> strat(this);
+            strat.linkBlackboard(blackboard_);
             strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
                 std::string errorDescription;
                 return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y,
@@ -579,6 +585,7 @@ std::vector<SearchEngine::State*> Agent::conductHelpSubgoalSearch()
         }
         else {
             Strat::StrategyBFS strat;
+            strat.linkBlackboard(blackboard_);
             ans = searchHelpMoveBox(strat);
             currentHelpGoal_.over = true; // TODO: check that it has indeed worked
             static_cast<Communication::HelpEntry*>(currentHelpEntry_)->setProblemType(Communication::HelpEntry::Done);
@@ -596,9 +603,6 @@ void Agent::extractPlan(const std::vector<SearchEngine::State*>& ans) {
 }
 
 void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans) {
-    if (!ans.empty())
-        Communication::PositionEntry::create(private_initialState->getAgents()[num].loc, sharedTime - 1, *this, blackboard_);
-
     // Construct a  plan for the answer
     for (auto *a : ans) {
         Communication::PositionEntry::create(a->getAgents()[num].loc, a->getTimeStep(), *this, blackboard_ );

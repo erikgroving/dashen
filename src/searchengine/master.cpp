@@ -45,10 +45,6 @@ void Master::conductSearch() {
         SearchClient::JointAction ja = callForActions();
         jointActions_.push_back(ja); 
 
-        /** TODO When updating the internal state, if a command from
-         * one of the agents was found to be invalid due to the action of another
-         * agent, send a signal to the agent to recompute his plan
-         */
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
         revokeBlackboardEntries(ja);
@@ -72,7 +68,12 @@ void Master::postBlackBoard() {
     }
     computeGoalPriorities();
     
+    masterBlackboard_.setAgentPositionEntryRegistrySize(masterState_.getAgents().size());
     masterBlackboard_.setBoxEntryRegistrySize(masterState_.getBoxes().size());
+    
+    for (auto a : masterState_.getAgents()) {
+        Communication::PositionEntry::create(a.loc, -1, agents_[a.num], &masterBlackboard_);
+    }
     /* 
      * Create box position entries, these entries do not get removed
      * Box position entries are updated by changing the time step and
@@ -213,12 +214,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
     auto commands = ja.getData();
     for (unsigned int i = 0; i < commands.size(); i++) {
         if (commands[i].action() != NOOP) {
-            unsigned int sharedTime = SearchClient::Agent::sharedTime;
-            Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime, i), agents_[i]);
-
-            if (agents_[i].isFirstMoveInPlan()) {
-                Communication::BlackboardEntry::revoke(masterBlackboard_.findPositionEntry(sharedTime - 1, i), agents_[i]);
-            }
+            masterBlackboard_.erase_front(Communication::Blackboard::PositionEntry, i);
         }
         if (commands[i].action() == PUSH || commands[i].action() == PULL) {
             // pop the front of the positional entry vector 
@@ -233,15 +229,19 @@ void Master::printBlackboard(Communication::Blackboard* b) {
     auto posEntries = b->getPositionEntries();
     std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
-    for (auto& entry : posEntries) {
-        std::cerr << (int)entry->getTimeStep() << "\t\t\t(" <<
-                    entry->getLocation().x << "," << entry->getLocation().y <<
-                    ")\t\t\t" << entry->getAuthorId() << std::endl;
+
+    for (size_t i = 0; i < posEntries.size(); i++) {
+        std::cerr << "\n----- AGENT " << i << " -----\n";
+        for (auto& entry : posEntries[i]) {
+            std::cerr << (int)entry->getTimeStep() << "\t\t\t(" <<
+                        entry->getLocation().x << "," << entry->getLocation().y <<
+                        ")\t\t\t" << entry->getAuthorId() << std::endl;
+        }
     }
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
-        auto boxEntries = b->getBoxEntries(boxID);
+        auto boxEntries = b->getBoxEntriesByID(boxID);
         for (auto* entry : boxEntries) {
             Communication::BoxPositionEntry *entry_casted = static_cast<Communication::BoxPositionEntry*>(entry);
             std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t(" <<
