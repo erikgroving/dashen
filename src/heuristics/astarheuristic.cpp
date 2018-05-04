@@ -44,8 +44,8 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
     
     /* Add the agent distance to box */
     result += DistanceOracle::fetchDistFromCoord(closestBox.loc, agentLoc);
+    //std::cerr << "This node was only: " << DistanceOracle::fetchDistFromCoord(closestBox.loc, agentLoc) << " away\n, result was: " << result << std::endl;
     //result += Coord::distance(closestBox.loc, agentLoc);
-
     return result;
 }
 

@@ -29,6 +29,51 @@ bool SearchEngine::Predicate::isFree(const State *input, int x, int y) {
 
 bool SearchEngine::Predicate::isFreeBlackboard(const Communication::Blackboard* bb, const State *input, int x, int y) {
     return isFree(input, x, y);
+    /*if (!inBound(input, x, y) || wallAt(input, x, y)) {
+        return false;
+    }
+    if (bb == nullptr) {
+        return true;
+    }
+
+    Coord check = Coord(x, y);
+    unsigned int timeStep = input->getTimeStep();
+    for (auto agentPosVec : bb->getPositionEntries()) {
+        if (agentPosVec.size() == 1) {
+            if (agentPosVec[0]->getLocation() == check) {
+                return false;
+            }       
+        }
+        else {
+            for (auto entry : agentPosVec) {
+                if (entry->getLocation() == check) {
+                    int timeDiff = timeStep - entry->getTimeStep();
+                    if (abs(timeDiff) <= 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    
+    for (auto boxPosVec : bb->getBoxEntries()) {
+        if (boxPosVec.size() == 1) {
+            if (boxPosVec[0]->getLocation() == check) {
+                return false;
+            }       
+        }
+        else {
+            for (auto entry : boxPosVec) {
+                if (entry->getLocation() == check) {
+                    int timeDiff = timeStep - entry->getTimeStep();
+                    if (abs(timeDiff) <= 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;*/
 }
 
 bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIndex){

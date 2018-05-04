@@ -77,6 +77,7 @@ public:
     const SearchEngine::State* getState() const { return sharedState; }
     SearchEngine::State* getState() { return sharedState; }
     
+    void identifyBlockingObjects(const std::vector<SearchEngine::State* > &path);
     void askForHelp(const std::vector<SearchEngine::State *> &path);
     
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
