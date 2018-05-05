@@ -68,22 +68,31 @@ Agent::~Agent() {
 
 void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &path) {
     std::vector<Coord> forbiddenCoords;
+
+    for(const SearchEngine::State* state: path) {
+        forbiddenCoords.push_back(state->getAgents()[num].loc);
+    }
+
     if (currentTaskInfo_.task.type == GOAL) {
-        forbiddenCoords.push_back(sharedState->getBoxes()[currentTaskInfo_.task.goal.assignedBoxID].loc);
         forbiddenCoords.push_back(currentTaskInfo_.task.goal.loc);
+        forbiddenCoords.push_back(sharedState->getBoxes()[currentTaskInfo_.task.goal.assignedBoxID].loc);
     }
     else if (currentTaskInfo_.task.type == CLEAR_BOX) {
         forbiddenCoords.push_back(sharedState->getBoxes()[currentTaskInfo_.task.clearBox.boxToMoveID].loc);
     }
 
-    for(const SearchEngine::State* state: path) {
-        forbiddenCoords.push_back(state->getAgents()[num].loc);
-    }
-    
-    for(const SearchEngine::State* state: path) {
+    auto revPath = path;
+    std::reverse(revPath.begin(), revPath.end());
+
+    for(const SearchEngine::State* state: revPath) {
         Coord agentLoc = state->getAgents()[num].loc;
+        forbiddenCoords.push_back(agentLoc);
+    }
+
+
+    for (auto c : forbiddenCoords) {
         int idx;
-        if (boxAt(sharedState, agentLoc.x, agentLoc.y, &idx)) {
+        if (boxAt(sharedState, c.x, c.y, &idx)) {
             if (currentTaskInfo_.task.type == GOAL && idx == currentTaskInfo_.task.goal.assignedBoxID) {
                 continue;
             }
@@ -91,7 +100,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
             // Only ask for help if the color is not the same as the agent.
             // Otherwise agent can move it.
             if (b.color != this->color) {
-                askForHelp(agentLoc, 'b', forbiddenCoords, idx);
+                askForHelp(c, 'b', forbiddenCoords, idx);
             }
             // We can only help ourselves if we can reach the same colored box in question
             else {
@@ -101,8 +110,8 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
                 return;
             }
         }
-        else if (agentAt(sharedState, agentLoc.x, agentLoc.y, &idx)) {
-            askForHelp(agentLoc, 'a', forbiddenCoords, idx);
+        else if (agentAt(sharedState, c.x, c.y, &idx)) {
+            askForHelp(c, 'a', forbiddenCoords, idx);
         }
     }
 }

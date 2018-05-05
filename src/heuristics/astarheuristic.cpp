@@ -24,9 +24,11 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
             currCorrectGoals += 1;
         }
     }
-
     result += (1 + startSearchCorrectgoals - currCorrectGoals) * 20;
 
+    if (state->getAction().action() != MOVE) {
+        result += 2;
+    }
 
 
     /* Find the box assigned to the goal */
