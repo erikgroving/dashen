@@ -49,9 +49,10 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
 
     int iterations = 0;
     strategy.addToFrontier(initialState_);
+    int maxIterations = strategy.getMaxIterations();
     while(true) {
         
-        if(strategy.frontierIsEmpty() || iterations > 1000) {
+        if(strategy.frontierIsEmpty() || iterations > maxIterations) {
             return std::vector<State*>();
         }
 

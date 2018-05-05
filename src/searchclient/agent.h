@@ -13,33 +13,26 @@
 #include <vector>
 #include <iostream>
 
+namespace Communication{
+    class HelpEntry;
+}
 namespace SearchEngine {
     class Strategy;
 }
 namespace SearchClient {
-
-struct HelpGoal {
-
-    enum HelpType {
-        None,
-        Agent,
-        Box
-    } type;
-
-    HelpGoal(HelpType htype = None, int idd = -1, const Coord& hposition = Coord(), std::vector<Coord> hforbiddenPath = std::vector<Coord>(), bool hover = true):
-        type(htype), id(idd), position(hposition), forbiddenPath(hforbiddenPath), over(hover){
-
-    }
-    HelpGoal(const HelpGoal &src):
-        type(src.type), id(src.id), position(src.position), forbiddenPath(src.forbiddenPath), over(src.over) {}
-
-
-    int id;
-    Coord position;
-    std::vector<Coord> forbiddenPath;
-    bool over;
-};
-
+    struct TaskInfo {
+        TaskInfo(){}
+        TaskInfo(TaskStackElement t, Communication::HelpEntry* e) {
+            task = t;
+            hEntry = e;
+        }
+        TaskInfo(const TaskInfo& src) {
+            task = src.task;
+            hEntry = src.hEntry;
+        }
+        TaskStackElement task;
+        Communication::HelpEntry* hEntry;
+    };
 class Agent {
 
 public:
@@ -49,20 +42,11 @@ public:
 
     bool operator<(const Agent& a) const { return num < a.num;  }
 
-    const Coord& getLocation() const { return loc; }
-    Coord& getLocation() { return loc; }
-
     const short getCorrectGoals() const { return correctGoals_; }
     short getCorrectGoals() { return correctGoals_; }
     
-    bool isFirstMoveInPlan() { return firstMoveInPlan_; }
-    const bool isHelpGoal() const { return currGoalIsHelpGoal_; }
-    
-    const Goal getCurrentSearchGoal() const { return currentSearchGoal_; }
-    Goal getCurrentSearchGoal() { return currentSearchGoal_; }
-    
-    const HelpGoal getCurrentHelpGoal() const { return currentHelpGoal_; }
-    HelpGoal getCurrentHelpGoal() { return currentHelpGoal_; }
+    const TaskStackElement getCurrentTask() const { return currentTaskInfo_.task; }
+    TaskStackElement getCurrentTask() { return currentTaskInfo_.task; }
 
     int getIndex() const { return num; }
 
@@ -78,7 +62,7 @@ public:
     SearchEngine::State* getState() { return sharedState; }
     
     void identifyBlockingObjects(const std::vector<SearchEngine::State* > &path);
-    void askForHelp(const std::vector<SearchEngine::State *> &path);
+    void askForHelp(Coord agentLoc, char, std::vector<Coord> forbiddenCoords, int idx);
     
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
@@ -102,8 +86,9 @@ public: // Search methods
      * Returns a sequence of action that accomplishes all the goals according to the given strategy.
      */
     std::vector<SearchEngine::State*> searchAllGoals(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
-    std::vector<SearchEngine::State*> searchHelpMoveAgent(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
-    std::vector<SearchEngine::State*> searchHelpMoveBox(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+    std::vector<SearchEngine::State*> searchClearSelf(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+    std::vector<SearchEngine::State*> searchClearBox(SearchEngine::Strategy &strategy, bool ignoreOthers = false);
+    std::vector<SearchEngine::State *> searchClearAgent(SearchEngine::Strategy &strategy, bool ignoreOthers);
 
 
     /**
@@ -126,18 +111,23 @@ public: // Search methods
     Goal getGoalFromBlackboard();
 
     /* Determines the next goal for the agent */
-    bool determineNextGoal(bool *isHelpGoal);
+    bool determineNextGoal();
 
     /* Conducts the search for a subgoal */
     std::vector<SearchEngine::State*> conductSubgoalSearch(bool *searchFailed);
+    std::vector<SearchEngine::State*> conductGoalSearch(bool* searchFailed);
+    std::vector<SearchEngine::State*> conductClearBoxSearch(bool* searchFailed);
+    std::vector<SearchEngine::State*> conductClearSelfSearch(bool* searchFailed);
 
-    std::vector<SearchEngine::State*> conductHelpSubgoalSearch();
 
     /* Extracts the plan from a subgoal search */
     void extractPlan(const std::vector<SearchEngine::State*>& ans);
 
     /* Posts the position and box position entries */
     void postAllPositionEntries(const std::vector<SearchEngine::State*>& ans);
+
+    Coord findBoxTargetWithBFS(int boxID);
+    bool isTaskSatisfied(SearchEngine::State* state, TaskStackElement t);
 
 public: // Static public methods
     /**
@@ -153,32 +143,21 @@ private:
 
     Color color;
     char num;
-    Coord loc; // is it still useful ? not if we are using state
-
-    bool currGoalIsHelpGoal_;
     SearchEngine::Strategy *searchStrategy_;
-
-
     SearchEngine::State *private_initialState;
 
-    Goal currentSearchGoal_;
+    /* Tasks can be Goal, Clear self (out of way), clear box, or clear box and self. */
+    /* Clear box and self devolves into two tasks, clear self, and then clear box */
+    TaskInfo currentTaskInfo_;
+    std::vector<TaskInfo> takenTasks_;
 
-    // Help
-    HelpGoal currentHelpGoal_;
-    Communication::BlackboardEntry* currentHelpEntry_;
+    /* If we have pending help entries, check status of them here */
+    std::vector<Communication::HelpEntry*> helpEntriesToMonitor_;
 
-    /* Added with master class update. */
-    std::vector<Goal> takenGoals_;   // goals taken down from blackboard.
-                                    // help requests delete upon completion,
-                                    // tile requests stay after completion
     std::vector<SearchEngine::Command> plan_;
-
     Communication::Blackboard *blackboard_;
     short correctGoals_;
-    bool firstMoveInPlan_;
-
-    bool isWaitingForHelp;
-    std::vector<Communication::BlackboardEntry*> helpEntriesToMonitor_;
+    bool isWaitingForHelp_;
 };
 
 }

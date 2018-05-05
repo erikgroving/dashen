@@ -6,7 +6,7 @@ using SearchEngine::Strategy;
 using SearchEngine::Command;
 using namespace SearchEngine::Predicate;
 
-Strategy::Strategy(): exploredMap_(), frontierMap_() {
+Strategy::Strategy(): maxIterations_(1000), exploredMap_(), frontierMap_() {
     additionalCheckPredicate_ = [ ](const SearchEngine::State* /*input */) {
         return true;
     };
@@ -58,6 +58,10 @@ SearchEngine::State* Strategy::getAndRemoveLeaf() {
     
 void Strategy::linkBlackboard(Communication::Blackboard* blackboard) {
     blackboard_ = blackboard;
+}
+
+void Strategy::setMaxIterations(unsigned int it) {
+    maxIterations_ = it;
 }
 
 std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* state, int agentIndex) {

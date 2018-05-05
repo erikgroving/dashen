@@ -15,7 +15,8 @@ public:
         Agent,
         Box,
         TakenCareOf,
-        Done
+        Done,
+        AckDone
     };
 
 public:

@@ -46,7 +46,8 @@ class Strategy
     void addToExplored(State *leaf );
 
     void linkBlackboard(Communication::Blackboard* blackboard);
-
+    void setMaxIterations(unsigned int it);
+    int getMaxIterations() { return maxIterations_;}
     /**
      * \return number of leaves that have been already explored
      */ 
@@ -87,6 +88,7 @@ class Strategy
 
   private:
     Communication::Blackboard* blackboard_;
+    unsigned int maxIterations_;
     std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
     std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
     std::function< bool(const State*) > additionalCheckPredicate_;

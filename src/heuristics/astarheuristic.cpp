@@ -1,6 +1,7 @@
 #include "astarheuristic.h"
 
 using Heur::AgentToBoxAStarHeuristic;
+using Heur::BoxToTargetAStarHeuristic;
 using Heur::BoxToGoalAStarHeuristic;
 using Heur::DistanceOracle;
 using Heur::AStarHeuristic;
@@ -16,8 +17,6 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
 
     Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
 
-    bool isHelpGoal = getReferenceAgent()->isHelpGoal();
-
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = getReferenceAgent()->getCorrectGoals();
     for (Goal& g : SearchEngine::State::goals) {
@@ -26,26 +25,45 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
         }
     }
 
-    result += (1 + startSearchCorrectgoals - currCorrectGoals) * 10;
+    result += (1 + startSearchCorrectgoals - currCorrectGoals) * 20;
 
 
 
     /* Find the box assigned to the goal */
-    Box closestBox;
-    if (isHelpGoal) {
-        closestBox = state->getBoxes()[getReferenceAgent()->getCurrentHelpGoal().id];
+    TaskStackElement task = getReferenceAgent()->getCurrentTask();
+    int targetBoxIdx;
+    Box targetBox;
+    if (task.type == GOAL) {
+        targetBoxIdx = task.goal.assignedBoxID;
     }
     else {
-        Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
-        closestBox = state->getBoxes()[searchGoal.assignedBoxID];
+        targetBoxIdx = task.clearBox.boxToMoveID;
     }
-    //Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
-    
+
+    targetBox = state->getBoxes()[targetBoxIdx];
     
     /* Add the agent distance to box */
-    result += DistanceOracle::fetchDistFromCoord(closestBox.loc, agentLoc);
-    //std::cerr << "This node was only: " << DistanceOracle::fetchDistFromCoord(closestBox.loc, agentLoc) << " away\n, result was: " << result << std::endl;
-    //result += Coord::distance(closestBox.loc, agentLoc);
+    result += DistanceOracle::fetchDistFromCoord(targetBox.loc, agentLoc);
+    return result;
+}
+
+unsigned long BoxToTargetAStarHeuristic::f(const SearchEngine::State* state) const {
+    unsigned long result = 0;
+    
+    short currCorrectGoals = 0;
+    short startSearchCorrectgoals = getReferenceAgent()->getCorrectGoals();
+    for (Goal& g : SearchEngine::State::goals) {
+        if (SearchEngine::Predicate::goalHasCorrectBox(state, g)) {
+            currCorrectGoals += 1;
+        }
+    }
+
+    result += 1 + startSearchCorrectgoals - currCorrectGoals;
+
+    /* Find the box assigned to the goal */
+    Coord target = getReferenceAgent()->getCurrentTask().clearBox.target;
+    Coord boxLoc = state->getBoxes()[getReferenceAgent()->getCurrentTask().clearBox.boxToMoveID].loc;
+    result += DistanceOracle::fetchDistFromCoord(target, boxLoc);
     return result;
 }
 
@@ -54,7 +72,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
       * Very simple heuristic. Closest box to goal tile plus distance of agent to that box 
       */
     unsigned long result = 0;
-    Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
+    Goal searchGoal = getReferenceAgent()->getCurrentTask().goal;
 
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = getReferenceAgent()->getCorrectGoals();

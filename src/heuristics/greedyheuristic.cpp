@@ -16,7 +16,7 @@ unsigned long GreedyHeuristic::f(const SearchEngine::State* state) const {
     unsigned long result = 0;
     char agtIdx = getReferenceAgent()->getIndex();
     Coord agentLoc = state->getAgents()[agtIdx].loc;    
-    Goal searchGoal = getReferenceAgent()->getCurrentSearchGoal();
+    Goal searchGoal = getReferenceAgent()->getCurrentTask().goal;
 
 
     for (Goal& g : SearchEngine::State::goals) {

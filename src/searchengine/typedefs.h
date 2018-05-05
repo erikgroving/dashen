@@ -2,10 +2,12 @@
 #define TYPEDEFS_H
 
 #include <cmath>
+#include <vector>
 
 enum Color { NOCOLOR, BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
 enum Direction { N, E, S, W, NONE};
 enum Action { MOVE, PUSH, PULL, NOOP };
+enum TaskType { NIL, CLEAR_BOX, CLEAR_SELF, CLEAR_BOX_AND_SELF, GOAL };
 
 typedef struct Coord {
     int x;
@@ -99,5 +101,69 @@ typedef struct AgentDescription
     char num;
     Coord loc;
 } AgentDescription;
+
+typedef struct ClearBoxSelf {
+    int boxToMoveID;
+    std::vector<Coord> forbiddenPath;
+    ClearBoxSelf(){}
+    ClearBoxSelf(int bID, std::vector<Coord> path) {
+        boxToMoveID = bID;
+        forbiddenPath = path;
+    }
+} ClearBoxSelf;
+
+typedef struct ClearBox {
+    int boxToMoveID;
+    Coord target;
+    std::vector<Coord> forbiddenPath;
+    ClearBox(){}
+    ClearBox(int bID, std::vector<Coord> path) {
+        boxToMoveID = bID;
+        forbiddenPath = path;
+    }
+
+} ClearBox;
+
+typedef struct ClearSelf {
+    std::vector<Coord> forbiddenPath;
+    ClearSelf(){}
+    ClearSelf(std::vector<Coord> path) {
+        forbiddenPath = path;
+    }
+} ClearSelf;
+
+typedef struct TaskStackElement {
+    TaskType type;
+    Goal goal;
+    ClearBoxSelf clearBoxSelf;
+    ClearBox clearBox;
+    ClearSelf clearSelf;
+
+    TaskStackElement() {type = NIL;}
+
+    TaskStackElement(Goal g) {
+        type = GOAL;
+        goal = g;
+    }
+    TaskStackElement(ClearBoxSelf g) {
+        type = CLEAR_BOX_AND_SELF;
+        clearBoxSelf = g;
+    }
+    TaskStackElement(ClearBox g) {
+        type = CLEAR_BOX;
+        clearBox = g;
+    }
+    TaskStackElement(ClearSelf g) {
+        type = CLEAR_SELF;
+        clearSelf = g;
+    }
+
+    TaskStackElement(const TaskStackElement &src):
+        type(src.type),
+        goal(src.goal),
+        clearBoxSelf(src.clearBoxSelf),
+        clearBox(src.clearBox),
+        clearSelf(src.clearSelf) {}
+} TaskStackElement;
 
 #endif 

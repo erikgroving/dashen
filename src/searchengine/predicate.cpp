@@ -206,6 +206,19 @@ bool SearchEngine::Predicate::isAgentNotOnForbiddenPath(const SearchEngine::Stat
     return true;
 }
 
+bool SearchEngine::Predicate::boxIsAtDestination(const SearchEngine::State* input, int boxID, Coord target) {
+    return input->getBoxes()[boxID].loc == target;
+}
+    
+bool SearchEngine::Predicate::isCoordNotOnForbiddenPath(const State *input, Coord coord, const std::vector<Coord> &forbiddenPath) {
+    for (const Coord& c : forbiddenPath) {
+        if (c == coord) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool SearchEngine::Predicate::isBoxNotOnForbiddenPath(const SearchEngine::State *input, int boxId, const std::vector<Coord> &forbiddenPath)
 {
     Coord boxLoc = input->getBoxes()[boxId].loc;

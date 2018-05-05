@@ -117,21 +117,6 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
         auto cmd = agentsWithPlansToBeCleared[i].second;
         agents_[id].clearPlan(cmd);
     }
-
-    /* Check blackboard matches state*/
-    /*
-    for (int i = 0; i < masterBlackboard_.getBoxEntries().size(); i++) {
-        Coord boxLoc = masterBlackboard_.getBoxEntriesByID(i)[0]->getLocation();
-        if (masterState_.getBoxes()[i].loc != boxLoc) {
-            std::cerr << "Master state and blackboard differ... exiting\n";
-        }
-    }
-    for (int i = 0; i < masterBlackboard_.getPositionEntries().size(); i++) {
-        Coord agentLoc = masterBlackboard_.getPositionEntriesByID(i)[0]->getLocation();
-        if (masterState_.getAgents()[i].loc != agentLoc) {
-            std::cerr << "Master state and blackboard differ... exiting\n";
-        }
-    }*/
 }
 
 bool Master::isActionValid(SearchEngine::State* state, SearchEngine::Command cmd, char AgentID) {

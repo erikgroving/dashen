@@ -82,6 +82,10 @@ namespace Predicate
     bool isAgentNotOnForbiddenPath(const State *input, int agentId, const std::vector<Coord> &forbiddenPath);
 
     bool isBoxNotOnForbiddenPath(const State *input, int boxId, const std::vector<Coord> &forbiddenPath);
+    
+    bool isCoordNotOnForbiddenPath(const State *input, Coord coord, const std::vector<Coord> &forbiddenPath);
+    
+    bool boxIsAtDestination(const State* input, int boxID, Coord target);
 };
 
 
