@@ -3,6 +3,7 @@
 
 #include "state.h"
 #include "../searchclient/agent.h"
+#include "../communication/communication"
 #include <algorithm>
 #include <cmath>
 
@@ -21,6 +22,7 @@ namespace Predicate
      * \return true if tile at (x,y) is free in state input.
      */
     bool isFree(const State *input, int x, int y);
+    bool isFreeBlackboard(const Communication::Blackboard* bb, const State *input, int x, int y);
 
     /**
      * TODO: MODIFY THIS DESCRIPTION. GOAL STATE IS GOALS ARE MATCHED, NOT BOXES ALL MATCHED
@@ -76,6 +78,14 @@ namespace Predicate
     size_t height(const State *input);
 
     size_t width(const State *input, size_t row);
+
+    bool isAgentNotOnForbiddenPath(const State *input, int agentId, const std::vector<Coord> &forbiddenPath);
+
+    bool isBoxNotOnForbiddenPath(const State *input, int boxId, const std::vector<Coord> &forbiddenPath);
+    
+    bool isCoordNotOnForbiddenPath(const State *input, Coord coord, const std::vector<Coord> &forbiddenPath);
+    
+    bool boxIsAtDestination(const State* input, int boxID, Coord target);
 };
 
 

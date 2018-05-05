@@ -51,8 +51,8 @@ bool BlackboardEntry::accept(BlackboardEntry *entry, const SearchClient::Agent &
 }
 
 bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &sender) {
-    if(sender.getIndex() != entry->getAuthorId()) // Only the author can erevoke a demand
-        return false;
+//    if(sender.getIndex() != entry->getAuthorId()) // Only the author can revoke a demand
+//        return false;
 
 
     // Veeeeeeeeeeery bad practise, don't reproduce at home

@@ -49,9 +49,10 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
 
     int iterations = 0;
     strategy.addToFrontier(initialState_);
+    int maxIterations = strategy.getMaxIterations();
     while(true) {
         
-        if(strategy.frontierIsEmpty() || iterations > 1000) {
+        if(strategy.frontierIsEmpty() || iterations > maxIterations) {
             return std::vector<State*>();
         }
 
@@ -68,21 +69,11 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         }
         
         strategy.addToExplored(leaf);
-        
-  /*      std::cerr << "Expanded actions:" << std::endl;
-        
-        std::cerr << "===================" << std::endl;
-        std::cerr << "getExpendedNodes" << std::endl;*/
-        auto expandedNodes = leaf->getExpandedNodes(agentIndex);
-        /*std::cerr << "===================" << std::endl;*/
-        for(State *state: expandedNodes) {
 
-             //std::cerr << state->getAction().toString() << "(parent action = " << state->getParent()->getAction().toString() << ")";
+        for(State *state: strategy.expandState(leaf, agentIndex)) {
             if(!strategy.isExplored(state) && !strategy.inFrontier(state) && strategy.additionalCheckPredicate()(state)) {           
-               //  std::cerr << "(Valid)";
                 strategy.addToFrontier(state);
             }
-             //std::cerr << std::endl;
         } 
 
         iterations++;

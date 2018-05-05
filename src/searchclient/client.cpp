@@ -98,7 +98,7 @@ State Client::initState(std::istream &inputstream) {
                     }
                     char num = s[i] - '0';
                     agentsDescription.push_back( {color, num, currCoord} );
-                    agents.push_back( Agent(color, num, currCoord) );
+                    agents.push_back( SearchClient::Agent(color, num, currCoord) );
                     numAgents++;
                 }
 

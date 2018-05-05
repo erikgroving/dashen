@@ -45,6 +45,21 @@ public:
 };
 
 /**
+ * \brief Heuristic used to clear a box by moving it to a target.
+ */
+class BoxToTargetAStarHeuristic: public AStarHeuristic
+{
+
+public:
+    BoxToTargetAStarHeuristic(SearchClient::Agent *agentPtr, unsigned int f_weight = 1): AStarHeuristic(agentPtr, f_weight) {
+        setHeuristicWeight(2);
+    }
+
+    unsigned long f(const SearchEngine::State *state) const;
+    std::string name() const { return "AStar Box to Target"; }
+};
+
+/**
  * \brief Heuristic used to compute the path from a agent with a box to a goal.
  *
  * Computation:

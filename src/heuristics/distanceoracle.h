@@ -4,6 +4,9 @@
 #include <utility>
 #include <vector>
 #include <climits>
+#include <queue>
+#include <unordered_map>
+
 #include "../searchengine/typedefs.h"
 #include "../searchengine/state.h"
 #include "../searchengine/predicate.h"

@@ -17,5 +17,11 @@ public:
       std::vector<SearchEngine::State*> queue; // TODO: Hash map to speed up the proess
 };
 
+
+class StrategyBFSMovePriority : public StrategyBFS {
+    std::string name() const { return "BFS with Move priority"; }
+
+    void doShufflePolicy(std::vector<SearchEngine::State*> &nodes);
+};
 }
 #endif // STRATEGYBFS_H

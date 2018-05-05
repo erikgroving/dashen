@@ -27,6 +27,55 @@ bool SearchEngine::Predicate::isFree(const State *input, int x, int y) {
            !wallAt(input, x, y);
 }
 
+bool SearchEngine::Predicate::isFreeBlackboard(const Communication::Blackboard* bb, const State *input, int x, int y) {
+    return isFree(input, x, y);
+    /*if (!inBound(input, x, y) || wallAt(input, x, y)) {
+        return false;
+    }
+    if (bb == nullptr) {
+        return true;
+    }
+
+    Coord check = Coord(x, y);
+    unsigned int timeStep = input->getTimeStep();
+    for (auto agentPosVec : bb->getPositionEntries()) {
+        if (agentPosVec.size() == 1) {
+            if (agentPosVec[0]->getLocation() == check) {
+                return false;
+            }       
+        }
+        else {
+            for (auto entry : agentPosVec) {
+                if (entry->getLocation() == check) {
+                    int timeDiff = timeStep - entry->getTimeStep();
+                    if (abs(timeDiff) <= 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    
+    for (auto boxPosVec : bb->getBoxEntries()) {
+        if (boxPosVec.size() == 1) {
+            if (boxPosVec[0]->getLocation() == check) {
+                return false;
+            }       
+        }
+        else {
+            for (auto entry : boxPosVec) {
+                if (entry->getLocation() == check) {
+                    int timeDiff = timeStep - entry->getTimeStep();
+                    if (abs(timeDiff) <= 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;*/
+}
+
 bool SearchEngine::Predicate::boxAt(const State *input, int x, int y, int *boxIndex){
 
     for(size_t i = 0; i < input->getBoxes().size(); i++ ){
@@ -145,4 +194,37 @@ size_t SearchEngine::Predicate::width(const SearchEngine::State *input, size_t r
     if(inBound(input, 0, row))
         return input->walls[row].size();
     return -1;
+}
+
+bool SearchEngine::Predicate::isAgentNotOnForbiddenPath(const SearchEngine::State *input, int agentId, const std::vector<Coord> &forbiddenPath)
+{
+    Coord agentLoc = input->getAgents()[agentId].loc;
+    for(const Coord& tile: forbiddenPath) {
+        if(agentLoc == tile)
+            return false;
+    }
+    return true;
+}
+
+bool SearchEngine::Predicate::boxIsAtDestination(const SearchEngine::State* input, int boxID, Coord target) {
+    return input->getBoxes()[boxID].loc == target;
+}
+    
+bool SearchEngine::Predicate::isCoordNotOnForbiddenPath(const State *input, Coord coord, const std::vector<Coord> &forbiddenPath) {
+    for (const Coord& c : forbiddenPath) {
+        if (c == coord) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool SearchEngine::Predicate::isBoxNotOnForbiddenPath(const SearchEngine::State *input, int boxId, const std::vector<Coord> &forbiddenPath)
+{
+    Coord boxLoc = input->getBoxes()[boxId].loc;
+    for(const Coord& tile: forbiddenPath) {
+        if(boxLoc == tile)
+            return false;
+    }
+    return true;
 }

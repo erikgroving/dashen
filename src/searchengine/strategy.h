@@ -11,8 +11,9 @@
 #include <functional>
 
 #include "state_equal_to.h"
-#include "state.h"
+#include "predicate.h"
 
+#include "../communication/communication"
 
 namespace SearchEngine
 {
@@ -43,7 +44,10 @@ class Strategy
      * Add leaf to the set of already explored states
      */
     void addToExplored(State *leaf );
-    
+
+    void linkBlackboard(Communication::Blackboard* blackboard);
+    void setMaxIterations(unsigned int it);
+    int getMaxIterations() { return maxIterations_;}
     /**
      * \return number of leaves that have been already explored
      */ 
@@ -76,13 +80,18 @@ class Strategy
      */
     virtual std::string name() const = 0;
 
-    void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; };
+    virtual void doShufflePolicy(std::vector<SearchEngine::State*> &nodes);
+    std::vector<SearchEngine::State*> expandState(SearchEngine::State* state, int agentIndex);
+
+    void setAdditionalCheckPredicate(const std::function< bool(const State*) > &func) { additionalCheckPredicate_ = func; }
     const std::function< bool(const State*) > additionalCheckPredicate() const { return additionalCheckPredicate_; }
 
   private:
-     std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
-     std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
-     std::function< bool(const State*) > additionalCheckPredicate_;
+    Communication::Blackboard* blackboard_;
+    unsigned int maxIterations_;
+    std::unordered_map<State*, int, hashState, StateCompare > exploredMap_;
+    std::unordered_map<State*, int, hashState, StateCompare > frontierMap_;
+    std::function< bool(const State*) > additionalCheckPredicate_;
 };
 
 }
