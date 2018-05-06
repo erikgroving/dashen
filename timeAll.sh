@@ -40,4 +40,4 @@ grep -oe 'LVL.*' -e 'Length.*' -e 'user.*' $logfilename > tmp.log
 
 curdate=$(date '+%Y%m%d_%H%M_%S')".txt"
 echo $curdate
-python makePretty.py > $curdate 
+python3.6 makePretty.py > $curdate 
