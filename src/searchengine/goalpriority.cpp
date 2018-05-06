@@ -59,11 +59,12 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
         Goal g = goalsRemaining[i];
 
         // If goal is free standing (using isFieldBlockable)
-        bool isBlockable = Predicate::isFieldBlockable(s, g.loc.x, g.loc.y);
+        bool isBlockable = Predicate::isFieldBlockable(&s, g.loc.x, g.loc.y);
         if (isBlockable) {
             priorities[i] = goalsRemaining.size();
             s.walls[g.loc.y][g.loc.x] = true;
             goalsRemaining.erase(goalsRemaining.begin() + i, goalsRemaining.begin() + i + 1);
+            std::cerr << "Goal blockable, id = " << i << std::endl;
         }
     } 
 

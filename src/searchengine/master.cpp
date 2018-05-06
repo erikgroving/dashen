@@ -40,7 +40,7 @@ void Master::conductSearch() {
     postBlackBoard();
 
     int round = 0;
-    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3) {
+    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
@@ -202,7 +202,7 @@ void Master::computeGoalPriorities()
     for (size_t i = 0; i < goalPriorities.size(); i++) {
         std::cerr << i << " value: " << goalPriorities[i] << std::endl;
     }
-    goalPriorities[2] = 100;
+    //goalPriorities[2] = 100;
 
 
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
