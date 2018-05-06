@@ -1,6 +1,7 @@
 #include "master.h"
 #include "searchclient.h"
 #include "../communication/communication"
+#include <cassert>
 
 using Communication::Blackboard;
 void printBlackboard(Communication::Blackboard* b);
@@ -39,7 +40,7 @@ void Master::conductSearch() {
     postBlackBoard();
 
     int round = 0;
-    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
+    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3) {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
@@ -191,13 +192,24 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
 void Master::computeGoalPriorities()
 {
     auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
+    std::cerr << "goalPriorities: " << std::endl;
+    assert(goalPriorities.size() == masterState_.goals.size());
+    for (Goal currentGoal : masterState_.goals) {
+        std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
+        std::cerr << ", letter: " << currentGoal.letter;
+        std::cerr << ", priority: " << currentGoal.priority << std::endl;
+    }
+    for (size_t i = 0; i < goalPriorities.size(); i++) {
+        std::cerr << i << " value: " << goalPriorities[i] << std::endl;
+    }
+    goalPriorities[2] = 100;
+
+
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
         int goalIndex = -1;
         SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
         static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities[goalIndex]);
         //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
-
-        /*
 
         char letter;
         for (Goal g : masterState_.goals) {
@@ -206,8 +218,9 @@ void Master::computeGoalPriorities()
                 break;
             }
         }
-        */
-        // std::cerr << "Goal with letter: " << letter <<  " had priority " << goalEntry->getPriority() << std::endl;
+        unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
+        std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
+        
     }
 }
 
