@@ -4,7 +4,7 @@ using SearchEngine::State;
 using namespace SearchEngine::Predicate;
 
 bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y) {
-    int wallCount = 0;
+    int wallAndGoalCount = 0;
     Coord coordN = Coord(c.x - 1, c.y);
     Coord coordE = Coord(c.x, c.y + 1);
     Coord coordS = Coord(c.x + 1, c.y);
@@ -20,47 +20,61 @@ bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y)
     std::vector< Coord > vecS = {coordNW, coordNE};
     std::vector< Coord > vecW = {coordNE, coordSE};
 
+    std::vector< Coord > vecAll = {coordN, coordNE, coordE, coordSE, coordS, coordSW, coordW, coordNW};
+
     Coord c;
     
     c = coordN;
     if (wallAt(&input, c.x, c.y)) {
-        wallCount++;
+        wallAndGoalCount++;
         for (Coord diagCoord : vecN) {
-            if (wallAt(&input, diagCoord.x, diagCoord.y)) {
+            if (wallAt(&input, diagCoord.x, diagCoord.y) || goalAt(&input, diagCoord.x, diagCoord.y)) {
                 return false;
             }
         }
     } 
     c = coordE;
     if (wallAt(&input, c.x, c.y)) {
-        wallCount++;
+        wallAndGoalCount++;
         for (Coord diagCoord : vecE) {
-            if (wallAt(&input, diagCoord.x, diagCoord.y)) {
+            if (wallAt(&input, diagCoord.x, diagCoord.y) || goalAt(&input, diagCoord.x, diagCoord.y)) {
                 return false;
             }
         }
     }
     c = coordS;
     if (wallAt(&input, c.x, c.y)) {
-        wallCount++;
+        wallAndGoalCount++;
         for (Coord diagCoord : vecS) {
-            if (wallAt(&input, diagCoord.x, diagCoord.y)) {
+            if (wallAt(&input, diagCoord.x, diagCoord.y) || goalAt(&input, diagCoord.x, diagCoord.y)) {
                 return false;
             }
         }
     }
     c = coordW;
     if (wallAt(&input, c.x, c.y)) {
-        wallCount++;
+        wallAndGoalCount++;
         for (Coord diagCoord : vecW) {
-            if (wallAt(&input, diagCoord.x, diagCoord.y)) {
+            if (wallAt(&input, diagCoord.x, diagCoord.y) || goalAt(&input, diagCoord.x, diagCoord.y)) {
                 return false;
             }
         }
     }
 
-    if (wallCount > 1) {
+    if (wallAndGoalCount > 1) {
         return false;
+    } 
+    // check diagonal fields
+    else if (wallAndGoalCount == 0) {
+        for (Coord anyCoord : vecAll) {
+            if (wallAt(&input, anyCoord.x, anyCoord.y) || goalAt(&input, anyCoord.x, anyCoord.y)) {
+                wallAndGoalCount++;
+            }
+        }
+        // return false if more than one diagonal field is blocked off
+        if (wallAndGoalCount > 1) {
+            return false;
+        }
     }
     return true;
 }
