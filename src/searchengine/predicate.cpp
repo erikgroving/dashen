@@ -25,7 +25,7 @@ bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y)
     std::vector< Coord > vecAll = {coordN, coordNE, coordE, coordSE, coordS, coordSW, coordW, coordNW};
     
     c = coordN;
-    if (wallAt(input, c.x, c.y)) {
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
         wallAndGoalCount++;
         for (Coord diagCoord : vecN) {
             if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
@@ -34,7 +34,7 @@ bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y)
         }
     } 
     c = coordE;
-    if (wallAt(input, c.x, c.y)) {
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
         wallAndGoalCount++;
         for (Coord diagCoord : vecE) {
             if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
@@ -43,7 +43,7 @@ bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y)
         }
     }
     c = coordS;
-    if (wallAt(input, c.x, c.y)) {
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
         wallAndGoalCount++;
         for (Coord diagCoord : vecS) {
             if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
@@ -52,7 +52,7 @@ bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y)
         }
     }
     c = coordW;
-    if (wallAt(input, c.x, c.y)) {
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
         wallAndGoalCount++;
         for (Coord diagCoord : vecW) {
             if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {

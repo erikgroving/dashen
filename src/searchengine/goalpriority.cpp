@@ -54,6 +54,7 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
     // Greedy first:
     // If a box can be placed without hindering anything, it shall be placed first
 
+    size_t indexInPriorities = 0;
     for (size_t i=0; i<goalsRemaining.size(); i++) {
         
         Goal g = goalsRemaining[i];
@@ -61,11 +62,15 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
         // If goal is free standing (using isFieldBlockable)
         bool isBlockable = Predicate::isFieldBlockable(&s, g.loc.x, g.loc.y);
         if (isBlockable) {
-            priorities[i] = goalsRemaining.size();
+            std::cerr << " goalsRemaining size = " << goalsRemaining.size() << std::endl;
+            priorities[indexInPriorities] = goalsRemaining.size();
             s.walls[g.loc.y][g.loc.x] = true;
             goalsRemaining.erase(goalsRemaining.begin() + i, goalsRemaining.begin() + i + 1);
-            std::cerr << "Goal blockable, id = " << i << std::endl;
+            i--;
+            std::cerr << "Goal blockable, id = " << indexInPriorities << std::endl;
+            std::cerr << " goalsRemaining size = " << goalsRemaining.size() << std::endl;
         }
+        indexInPriorities++;
     } 
 
 
@@ -87,9 +92,6 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
             }
         }
 
-        // I think the following is always true:
-        // goalID == minGoalIdx
-        // ?!
         Goal priorityGoal = goalsRemaining[minGoalIdx];
         int goalID = -1;
         for (size_t j = 0; j < s.goals.size(); j++) {
