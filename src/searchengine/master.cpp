@@ -256,4 +256,21 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
+    
+    std::cerr << "\n---------Help Blackboard--------\n";
+    std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\n";
+    auto helpEntries = b->getHelpEntries();
+    for (auto* entry : helpEntries) {
+        Communication::HelpEntry *entry_casted = static_cast<Communication::HelpEntry*>(entry);
+        if (entry_casted->getBlockingBoxId() == -1) {
+            std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t" <<
+                        entry_casted->getAuthorId() << "\t\t\t" << "AGENT" <<
+                        "\t\t" << entry_casted->getBlockingAgentId() << std::endl;
+        }
+        else if (entry_casted->getBlockingAgentId() == -1) {
+            std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t" <<
+                        entry_casted->getAuthorId() << "\t\t\t" << "BOX" <<
+                        "\t\t" << entry_casted->getBlockingBoxId() << std::endl;
+        }
+    }
 }

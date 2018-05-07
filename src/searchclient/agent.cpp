@@ -118,17 +118,15 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
 
 void Agent::askForHelp(Coord agentLoc, char hEntry, std::vector<Coord> forbiddenCoords, int idx) {
     Communication::HelpEntry* entry;
-    if (!isWaitingForHelp_) {
-        if (hEntry == 'b') {
-            entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
-            entry->setBlockingBoxId(idx);
-        }
-        else {
-            entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
-            entry->setBlockingAgentId(idx);
-        } 
-        helpEntriesToMonitor_.push_back(entry);
+    if (hEntry == 'b') {
+        entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
+        entry->setBlockingBoxId(idx);
     }
+    else {
+        entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
+        entry->setBlockingAgentId(idx);
+    } 
+    helpEntriesToMonitor_.push_back(entry);
     isWaitingForHelp_ = true;
 }
 
@@ -180,25 +178,42 @@ std::vector<SearchEngine::State*> Agent::searchAllGoals(SearchEngine::Strategy &
 
 std::vector<SearchEngine::State *> Agent::searchClearSelf(SearchEngine::Strategy &strategy, bool ignoreOthers)
 {
+    if(!ignoreOthers)
+        configurePrivateInitialState();
+    else
+        initialStateRemovedAllBut(num, -1);
     std::cerr << "Performining clear self search!\n";
-    configurePrivateInitialState();
     SearchEngine::SearchCli searcher(private_initialState);
 
-    searcher.setGoalStatePredicate([this](const SearchEngine::State *currentState){
-        return isAgentNotOnForbiddenPath(currentState, num, currentTaskInfo_.task.clearSelf.forbiddenPath);
-    });
+    if (currentTaskInfo_.hEntry != nullptr) {
+        int boxId = currentTaskInfo_.hEntry->getBlockingBoxId(); 
+        searcher.setGoalStatePredicate([this, boxId](const SearchEngine::State *currentState){
+            return isAgentNotOnForbiddenPath(currentState, num, currentTaskInfo_.task.clearSelf.forbiddenPath) &&
+                isBoxNotOnForbiddenPath(currentState, boxId, currentTaskInfo_.task.clearSelf.forbiddenPath);
+        });
+    
+    }
+    else {
+        searcher.setGoalStatePredicate([this](const SearchEngine::State *currentState){
+            return isAgentNotOnForbiddenPath(currentState, num, currentTaskInfo_.task.clearSelf.forbiddenPath);
+        });
+    }
 
     return searcher.search(strategy, (int) num);
 }
 
 std::vector<SearchEngine::State *> Agent::searchClearBox(SearchEngine::Strategy &strategy, bool ignoreOthers)
 {
-    configurePrivateInitialState();
+    int boxID = currentTaskInfo_.task.clearBox.boxToMoveID;
+    if(!ignoreOthers)
+        configurePrivateInitialState();
+    else
+        initialStateRemovedAllBut(num, boxID);
+    
     SearchEngine::SearchCli searcher(private_initialState);
 
     // This takes forever if we don't have a way of saying how far box is from a good spot. 
     // BFS for the target and do a move box to target heuristic
-    int boxID = currentTaskInfo_.task.clearBox.boxToMoveID;
     searcher.setGoalStatePredicate([this, boxID](const SearchEngine::State *currentState){
         return isBoxNotOnForbiddenPath(currentState, boxID, this->currentTaskInfo_.task.clearBox.forbiddenPath);
     });
@@ -685,15 +700,32 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     }
     if (ans.size() == 0) {
         *searchFailed = true;
+        if(!agentNextToBox(sharedState, targBox, this)) {
+            Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic> strat(this);
+            strat.linkBlackboard(nullptr);
+            strat.setMaxIterations(1000);
+            ans = searchBox(targBox, strat, true);
+        }
+        else {
+            Strat::StrategyBFS strat;
+            strat.linkBlackboard(nullptr);
+            strat.setMaxIterations(1000);
+            ans = searchGoal(currentTaskInfo_.task.goal, strat, true);
+        }
     }
     return ans;
 }
 
 std::vector<SearchEngine::State*> Agent::conductClearSelfSearch(bool* searchFailed) {
-    std::vector<SearchEngine::State*> ans = std::vector<SearchEngine::State*>();
+    std::vector<SearchEngine::State*> ans;
     Strat::StrategyBFSMovePriority strat;
     strat.linkBlackboard(blackboard_);
     ans = searchClearSelf(strat);
+    if (ans.size() == 0) {
+        Strat::StrategyBFSMovePriority strat;
+        strat.linkBlackboard(nullptr);
+        ans = searchClearSelf(strat, true);
+    }
     return ans;
 }
 
