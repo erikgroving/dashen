@@ -3,6 +3,83 @@
 using SearchEngine::State;
 using namespace SearchEngine::Predicate;
 
+bool SearchEngine::Predicate::isFieldBlockable(const State *input, int x, int y) {
+    int wallAndGoalCount = 0;
+    
+    Coord c = Coord(x, y);
+    Coord coordN = Coord(c.x - 1, c.y);
+    Coord coordE = Coord(c.x, c.y + 1);
+    Coord coordS = Coord(c.x + 1, c.y);
+    Coord coordW = Coord(c.x, c.y - 1);
+
+    Coord coordNE = Coord(c.x - 1, c.y + 1);
+    Coord coordSE = Coord(c.x + 1, c.y + 1);
+    Coord coordSW = Coord(c.x + 1, c.y - 1);
+    Coord coordNW = Coord(c.x - 1, c.y - 1);
+    
+    std::vector< Coord > vecN = {coordSW, coordSE};
+    std::vector< Coord > vecE = {coordNW, coordSW};
+    std::vector< Coord > vecS = {coordNW, coordNE};
+    std::vector< Coord > vecW = {coordNE, coordSE};
+
+    std::vector< Coord > vecAll = {coordN, coordNE, coordE, coordSE, coordS, coordSW, coordW, coordNW};
+    
+    c = coordN;
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
+        wallAndGoalCount++;
+        for (Coord diagCoord : vecN) {
+            if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
+                return false;
+            }
+        }
+    } 
+    c = coordE;
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
+        wallAndGoalCount++;
+        for (Coord diagCoord : vecE) {
+            if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
+                return false;
+            }
+        }
+    }
+    c = coordS;
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
+        wallAndGoalCount++;
+        for (Coord diagCoord : vecS) {
+            if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
+                return false;
+            }
+        }
+    }
+    c = coordW;
+    if (wallAt(input, c.x, c.y) || goalAt(input, c.x, c.y)) {
+        wallAndGoalCount++;
+        for (Coord diagCoord : vecW) {
+            if (wallAt(input, diagCoord.x, diagCoord.y) || goalAt(input, diagCoord.x, diagCoord.y)) {
+                return false;
+            }
+        }
+    }
+
+    if (wallAndGoalCount > 1) {
+        return false;
+    } 
+    // check diagonal fields
+    else if (wallAndGoalCount == 0) {
+        for (Coord anyCoord : vecAll) {
+            if (wallAt(input, anyCoord.x, anyCoord.y) || goalAt(input, anyCoord.x, anyCoord.y)) {
+                wallAndGoalCount++;
+            }
+        }
+        // return false if more than one diagonal field is blocked off
+        if (wallAndGoalCount > 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 bool SearchEngine::Predicate::isGoalState(const State *input) {
     for (const Goal& g : State::goals) {
         bool satisfied = false;

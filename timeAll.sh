@@ -36,8 +36,13 @@ done
 
 exec 3>&-
 
-grep -oe 'LVL.*' -e 'Length.*' -e 'user.*' $logfilename > tmp.log
+tmpfile="tmp.log"
+grep -oe 'LVL.*' -e 'Length.*' -e 'user.*' $logfilename > $tmpfile
 
 curdate=$(date '+%Y%m%d_%H%M_%S')".txt"
 echo $curdate
 python3.6 makePretty.py > $curdate 
+
+if [ -f $tmpfile ] ; then
+    rm $tmpfile
+fi

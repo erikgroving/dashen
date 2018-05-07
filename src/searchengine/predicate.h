@@ -16,6 +16,14 @@ class State;
 // Namespace SearchEngine::Predicate
 namespace Predicate
 {
+
+    /**
+    * Check if one can block this field (e.g. goal field, by putting a goal box on it).
+    * \return true if one can walk around it freely.
+    * 
+    * Box is allowed to be at most in contact to one wall and no other goal tiles.
+    */
+    bool isFieldBlockable(const State *input, int x, int y);
     /**
      * Check if the tile at coordinates (x, y) is free.
      * A tile is free if neither an agent, a box nor a wall is on it.
