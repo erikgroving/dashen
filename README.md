@@ -20,6 +20,8 @@ Don't forget to add comments in your code !!
 [Doxygen](http://www.stack.nl/~dimitri/doxygen/) documentation, just like JavaDoc !
 
 ## Latest results
+Timeout of 15 seconds:  21 passed levels.
+
 
 MA_00_HALnineK             -       0m14.965s   
 MA_00_TALK                 3000    0m02.812s   
