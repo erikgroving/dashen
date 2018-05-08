@@ -250,6 +250,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 }
 
 void Master::printBlackboard(Communication::Blackboard* b) {
+
     auto posEntries = b->getPositionEntries();
     std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";

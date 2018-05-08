@@ -28,7 +28,7 @@ public:
     std::vector<std::vector<bool> > getDeadendMatrix() const {
         return deadendMatrix_;
     }
-        std::vector<std::vector<bool> > getDEMatrix() const {
+    std::vector<std::vector<bool> > getDEMatrix() const {
         return deadendMatrix_;
     }
 

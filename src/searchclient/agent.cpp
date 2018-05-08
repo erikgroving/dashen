@@ -16,6 +16,7 @@
 #include "../communication/positionentry.h"
 #include "../communication/helpentry.h"
 
+#include "../searchengine/master.h"
 
 #ifndef __LONG_MAX__
 #define __LONG_MAX__    2147483647
@@ -69,9 +70,9 @@ Agent::~Agent() {
 void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &path) {
     std::vector<Coord> forbiddenCoords;
 
-    for(const SearchEngine::State* state: path) {
+    /* for(const SearchEngine::State* state: path) {
         forbiddenCoords.push_back(state->getAgents()[num].loc);
-    }
+    } */
 
     if (currentTaskInfo_.task.type == GOAL) {
         forbiddenCoords.push_back(currentTaskInfo_.task.goal.loc);
@@ -253,6 +254,8 @@ SearchEngine::Command Agent::nextMove() {
                 i--;
             }
         }
+        if(isWaitingForHelp_)
+            return SearchEngine::Command();
     }
 
     if (plan_.empty()) {

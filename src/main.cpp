@@ -12,7 +12,7 @@
 #include "searchengine/master.h"
 
 #define DEBUG_MODE true
-//#define SERVERLESS_MODE
+// #define SERVERLESS_MODE
 
 int main(int argc,  char **argv) {
 
@@ -23,7 +23,7 @@ int main(int argc,  char **argv) {
 #ifndef SERVERLESS_MODE
     SearchEngine::State initialState = searchClient.initState();
 #else
-    std::ifstream input_stream("./environment/levels/MAsimple4.lvl");
+    std::ifstream input_stream("./environment/competition_levels17/MATALK.lvl");
     SearchEngine::State initialState = searchClient.initState(input_stream);
 #endif
 
