@@ -108,11 +108,12 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
                 ClearBox clearBoxTask = ClearBox(b.id, forbiddenCoords);
                 currentTaskInfo_ = TaskInfo(TaskStackElement(clearBoxTask), nullptr);
                 takenTasks_.push_back(currentTaskInfo_);
-                return;
+                // return;
             }
         }
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
-            askForHelp(c, 'a', forbiddenCoords, idx);
+            if(idx != num)
+                askForHelp(c, 'a', forbiddenCoords, idx);
         }
     }
 }
@@ -279,6 +280,10 @@ SearchEngine::Command Agent::nextMove() {
             identifyBlockingObjects(ans);
             return SearchEngine::Command();
         }
+
+        if(isTaskSatisfied(sharedState, currentTaskInfo_.task) &&
+           (currentTaskInfo_.task.type == CLEAR_BOX || currentTaskInfo_.task.type == CLEAR_SELF || currentTaskInfo_.task.type == CLEAR_BOX_AND_SELF))
+            currentTaskInfo_.hEntry->setProblemType(Communication::HelpEntry::Done);
 
         // Extract the plan from the search
         extractPlan(ans);
