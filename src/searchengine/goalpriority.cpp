@@ -238,7 +238,10 @@ void SearchEngine::GoalPriorityComputation::computeGoalDependencies(const Search
 
         // path of box -> goal
         // custom a-star
-        
+        // returns vector of goals that are passed
+
+        // for all goals passed:
+        //  add dependency
 
     }
 }

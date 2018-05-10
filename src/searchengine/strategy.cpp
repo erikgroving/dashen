@@ -154,3 +154,41 @@ std::vector<SearchEngine::State*> Strategy::expandState(SearchEngine::State* sta
     doShufflePolicy(result);
     return result;
 }
+
+
+
+
+std::vector<SearchEngine::State*> Strategy::expandStateDependencies(SearchEngine::State* state, int boxIndex) {
+    std::vector<State*> result;
+
+    Box &box = state->boxes[boxIndex];
+    for(Command cmd: Command::possibleActions) {
+        // std::cerr << "--" << cmd.toString() << std::endl;
+
+        int newBoxRow = agt.loc.y + Command::rowToInt(cmd.d1());
+        int newBoxCol = agt.loc.x + Command::colToInt(cmd.d1());
+
+        if(!inBound(state, newBoxCol, newBoxRow))
+            continue;
+
+        if(cmd.action() == Action::MOVE) {
+//             std::cerr << "Box could move to (" << newBoxCol << "," << newBoxRow << ") (Command " << cmd.toString() << ") ?";
+
+            if( /*isFree(state, newBoxCol, newBoxRow) && */isFreeBlackboard(blackboard_, state, newBoxCol, newBoxRow) ) {
+
+                SearchEngine::State *childNode = state->makeChild();
+                childNode->setAction(cmd);
+                childNode->boxes[boxIndex].loc.x = newBoxCol;
+                childNode->boxes[boxIndex].loc.y = newBoxRow;
+
+                result.push_back(childNode);
+                // std::cerr << "YES";
+            }
+            /* else
+                std::cerr << "NO";
+            std::cerr << std::endl; */
+        }
+    }
+    doShufflePolicy(result);
+    return result;
+}

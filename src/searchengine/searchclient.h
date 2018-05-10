@@ -30,6 +30,9 @@ public:
      *         otherwise an empty vector of State.
      */
     std::vector<SearchEngine::State*> search(Strategy &strategy, int agentIndex);
+
+    std::vector<State*> searchDependencies(SearchEngine::Strategy &strategy);
+
     void setGoalStatePredicate(const std::function< bool(SearchEngine::State*) > &newPredicate) {
         goalStatePredicate = newPredicate;
     }

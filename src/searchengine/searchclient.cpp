@@ -79,3 +79,39 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         iterations++;
     } 
 }
+
+
+
+std::vector<State*> SearchCli::searchDependencies(SearchEngine::Strategy &strategy) {
+    
+    int iterations = 0;
+    strategy.addToFrontier(initialState_);
+    int maxIterations = strategy.getMaxIterations();
+    while(true) {
+        
+        if(strategy.frontierIsEmpty() || iterations > maxIterations) {
+            return std::vector<State*>();
+        }
+
+        State *leaf = strategy.getAndRemoveLeaf();
+        
+        if(iterations % 10000 == 0) {
+            std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
+            printMap(leaf);
+        }
+        
+        if(goalStatePredicate(leaf)) {
+            return leaf->extractPlan();
+        }
+        
+        strategy.addToExplored(leaf);
+
+        for(State *state: strategy.expandState(leaf, agentIndex)) {
+            if(!strategy.isExplored(state) && !strategy.inFrontier(state) && strategy.additionalCheckPredicate()(state)) {           
+                strategy.addToFrontier(state);
+            }
+        } 
+
+        iterations++;
+    } 
+}
