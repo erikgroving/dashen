@@ -165,8 +165,8 @@ std::vector<SearchEngine::State*> Strategy::expandStateDependencies(SearchEngine
     for(Command cmd: Command::possibleActions) {
         // std::cerr << "--" << cmd.toString() << std::endl;
 
-        int newBoxRow = agt.loc.y + Command::rowToInt(cmd.d1());
-        int newBoxCol = agt.loc.x + Command::colToInt(cmd.d1());
+        int newBoxRow = box.loc.y + Command::rowToInt(cmd.d1());
+        int newBoxCol = box.loc.x + Command::colToInt(cmd.d1());
 
         if(!inBound(state, newBoxCol, newBoxRow))
             continue;
@@ -174,7 +174,7 @@ std::vector<SearchEngine::State*> Strategy::expandStateDependencies(SearchEngine
         if(cmd.action() == Action::MOVE) {
 //             std::cerr << "Box could move to (" << newBoxCol << "," << newBoxRow << ") (Command " << cmd.toString() << ") ?";
 
-            if( /*isFree(state, newBoxCol, newBoxRow) && */isFreeBlackboard(blackboard_, state, newBoxCol, newBoxRow) ) {
+            if( inBound(state, newBoxCol, newBoxRow) && !wallAt(state, newBoxCol, newBoxRow) ) {
 
                 SearchEngine::State *childNode = state->makeChild();
                 childNode->setAction(cmd);
