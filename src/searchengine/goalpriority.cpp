@@ -213,3 +213,32 @@ int SearchEngine::GoalPriorityComputation::getSurroundingWalls(const SearchEngin
 
     return res;
 }
+
+
+void SearchEngine::GoalPriorityComputation::computeGoalDependencies(const SearchEngine::State& state) {
+
+    std::vector<bool> boxesTaken(state.getBoxes().size, false);
+
+    for (const Goal g: state.goals) {
+
+        // find box using distance oracle
+        unsigned long minDist = ULONG_MAX;
+        Box closestBox = Box();
+        for (const Box &b : state.getBoxes()) {
+            if (b.color == color && b.letter == g.letter && !boxesTaken[b.id]) {
+                unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(g.loc, b.loc);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestBox = b;
+                }
+            }
+        }
+        // set box taken
+        boxesTaken[closestBox.id] = true; // hoping that IDs are formatted 0..n-1
+
+        // path of box -> goal
+        // custom a-star
+        
+
+    }
+}

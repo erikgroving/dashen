@@ -56,7 +56,7 @@ void Master::conductSearch() {
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
-        printBlackboard(&masterBlackboard_);
+        //printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
     }
 

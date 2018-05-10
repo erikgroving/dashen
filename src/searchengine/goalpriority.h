@@ -19,6 +19,8 @@ namespace SearchEngine {
         bool goalsStillAccessible(const SearchEngine::State& s, std::vector<Goal> remGoals, Goal prospectiveGoal);
         bool canReach(const SearchEngine::State& state, Coord box, Coord goal);
         int getSurroundingWalls(const SearchEngine::State& state, Coord c);
+
+        void computeGoalDependencies(const SearchEngine::State *state);
     }
 }
 #endif // GOALPRIORITY_H
