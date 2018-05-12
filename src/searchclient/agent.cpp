@@ -69,31 +69,32 @@ Agent::~Agent() {
 void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &path) {
     std::vector<Coord> forbiddenCoords;
 
-    for(const SearchEngine::State* state: path) {
-        forbiddenCoords.push_back(state->getAgents()[num].loc);
-    }
+    auto revPath = path;
+    std::reverse(revPath.begin(), revPath.end());
 
     if (currentTaskInfo_.task.type == GOAL) {
         forbiddenCoords.push_back(currentTaskInfo_.task.goal.loc);
-        forbiddenCoords.push_back(sharedState->getBoxes()[currentTaskInfo_.task.goal.assignedBoxID].loc);
     }
-    else if (currentTaskInfo_.task.type == CLEAR_BOX) {
-        forbiddenCoords.push_back(sharedState->getBoxes()[currentTaskInfo_.task.clearBox.boxToMoveID].loc);
-    }
-
-    auto revPath = path;
-    std::reverse(revPath.begin(), revPath.end());
 
     for(const SearchEngine::State* state: revPath) {
         Coord agentLoc = state->getAgents()[num].loc;
         forbiddenCoords.push_back(agentLoc);
     }
-
+    if (path.size() > 0) {
+    auto cmdStart = path[0]->getAction();
+    Coord agtSecond = path[0]->getAgents()[num].loc;
+    Coord agentStart = Coord(agtSecond.x - SearchEngine::Command::colToInt(cmdStart.d1()),
+                            agtSecond.y - SearchEngine::Command::rowToInt(cmdStart.d1()));
+    forbiddenCoords.push_back(agentStart);
+    }
 
     for (auto c : forbiddenCoords) {
         int idx;
         if (boxAt(sharedState, c.x, c.y, &idx)) {
             if (currentTaskInfo_.task.type == GOAL && idx == currentTaskInfo_.task.goal.assignedBoxID) {
+                continue;
+            }
+            else if (currentTaskInfo_.task.type == CLEAR_BOX && idx == currentTaskInfo_.task.clearBox.boxToMoveID) {
                 continue;
             }
             Box b = sharedState->getBoxes()[idx];
@@ -111,22 +112,26 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
             }
         }
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
-            askForHelp(c, 'a', forbiddenCoords, idx);
+            if (idx != num) {
+                askForHelp(c, 'a', forbiddenCoords, idx);
+            }
         }
     }
 }
 
 void Agent::askForHelp(Coord agentLoc, char hEntry, std::vector<Coord> forbiddenCoords, int idx) {
     Communication::HelpEntry* entry;
-    if (hEntry == 'b') {
-        entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
-        entry->setBlockingBoxId(idx);
+    if (!isWaitingForHelp_) {    
+        if (hEntry == 'b') {
+            entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
+            entry->setBlockingBoxId(idx);
+        }
+        else {
+            entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
+            entry->setBlockingAgentId(idx);
+        } 
+        helpEntriesToMonitor_.push_back(entry);
     }
-    else {
-        entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
-        entry->setBlockingAgentId(idx);
-    } 
-    helpEntriesToMonitor_.push_back(entry);
     isWaitingForHelp_ = true;
 }
 
@@ -690,7 +695,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
-        strat.setMaxIterations(1000);
+        strat.setMaxIterations(20000);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
