@@ -24,14 +24,20 @@ namespace SearchClient {
         TaskInfo(){}
         TaskInfo(TaskStackElement t, Communication::HelpEntry* e) {
             task = t;
-            hEntry = e;
+            hEntryToPerform = e;
+            waitingForHelp = false;
+            hEntryToMonitor = nullptr;
         }
         TaskInfo(const TaskInfo& src) {
             task = src.task;
-            hEntry = src.hEntry;
+            hEntryToPerform = src.hEntryToPerform;
+            waitingForHelp = src.waitingForHelp;
+            hEntryToMonitor = src.hEntryToMonitor;
         }
         TaskStackElement task;
-        Communication::HelpEntry* hEntry;
+        Communication::HelpEntry* hEntryToPerform;
+        bool waitingForHelp;
+        Communication::HelpEntry* hEntryToMonitor;
     };
 class Agent {
 
@@ -45,8 +51,8 @@ public:
     const short getCorrectGoals() const { return correctGoals_; }
     short getCorrectGoals() { return correctGoals_; }
     
-    const TaskStackElement getCurrentTask() const { return currentTaskInfo_.task; }
-    TaskStackElement getCurrentTask() { return currentTaskInfo_.task; }
+    const TaskStackElement getCurrentTask() const { return takenTasks_[ctIdx_].task; }
+    TaskStackElement getCurrentTask() { return takenTasks_[ctIdx_].task; }
 
     int getIndex() const { return num; }
 
@@ -63,7 +69,9 @@ public:
     
     void identifyBlockingObjects(const std::vector<SearchEngine::State* > &path);
     void askForHelp(Coord agentLoc, char, std::vector<Coord> forbiddenCoords, int idx);
-    
+
+    void updateTasks(); 
+    void checkHelpEntries();   
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
     void initialStateRemovedAllBut(char agentIndex, char boxIndex);
@@ -148,16 +156,12 @@ private:
 
     /* Tasks can be Goal, Clear self (out of way), clear box, or clear box and self. */
     /* Clear box and self devolves into two tasks, clear self, and then clear box */
-    TaskInfo currentTaskInfo_;
+    int ctIdx_; // current task index
     std::vector<TaskInfo> takenTasks_;
-
-    /* If we have pending help entries, check status of them here */
-    std::vector<Communication::HelpEntry*> helpEntriesToMonitor_;
 
     std::vector<SearchEngine::Command> plan_;
     Communication::Blackboard *blackboard_;
     short correctGoals_;
-    bool isWaitingForHelp_;
 };
 
 }
