@@ -16,6 +16,7 @@
 #include "../communication/positionentry.h"
 #include "../communication/helpentry.h"
 
+#include "../searchengine/master.h"
 
 #ifndef __LONG_MAX__
 #define __LONG_MAX__    2147483647
@@ -71,6 +72,9 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
 
     auto revPath = path;
     std::reverse(revPath.begin(), revPath.end());
+    /* for(const SearchEngine::State* state: path) {
+        forbiddenCoords.push_back(state->getAgents()[num].loc);
+    } */
 
     if (currentTaskInfo_.task.type == GOAL) {
         forbiddenCoords.push_back(currentTaskInfo_.task.goal.loc);
@@ -108,13 +112,12 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
                 ClearBox clearBoxTask = ClearBox(b.id, forbiddenCoords);
                 currentTaskInfo_ = TaskInfo(TaskStackElement(clearBoxTask), nullptr);
                 takenTasks_.push_back(currentTaskInfo_);
-                return;
+                // return;
             }
         }
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
-            if (idx != num) {
+            if(idx != num)
                 askForHelp(c, 'a', forbiddenCoords, idx);
-            }
         }
     }
 }
@@ -258,6 +261,8 @@ SearchEngine::Command Agent::nextMove() {
                 i--;
             }
         }
+        if(isWaitingForHelp_)
+            return SearchEngine::Command();
     }
 
     if (plan_.empty()) {
@@ -281,6 +286,10 @@ SearchEngine::Command Agent::nextMove() {
             identifyBlockingObjects(ans);
             return SearchEngine::Command();
         }
+
+        if(isTaskSatisfied(sharedState, currentTaskInfo_.task) &&
+           (currentTaskInfo_.task.type == CLEAR_BOX || currentTaskInfo_.task.type == CLEAR_SELF || currentTaskInfo_.task.type == CLEAR_BOX_AND_SELF))
+            currentTaskInfo_.hEntry->setProblemType(Communication::HelpEntry::Done);
 
         // Extract the plan from the search
         extractPlan(ans);

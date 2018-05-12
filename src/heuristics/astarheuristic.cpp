@@ -1,4 +1,6 @@
 #include "astarheuristic.h"
+#include "../searchengine/master.h"
+#include "../searchengine/typedefs.h"
 
 using Heur::AgentToBoxAStarHeuristic;
 using Heur::BoxToTargetAStarHeuristic;
@@ -43,7 +45,7 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
     }
 
     targetBox = state->getBoxes()[targetBoxIdx];
-    
+
     /* Add the agent distance to box */
     result += DistanceOracle::fetchDistFromCoord(targetBox.loc, agentLoc);
     return result;
@@ -51,7 +53,7 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
 
 unsigned long BoxToTargetAStarHeuristic::f(const SearchEngine::State* state) const {
     unsigned long result = 0;
-    
+
     short currCorrectGoals = 0;
     short startSearchCorrectgoals = getReferenceAgent()->getCorrectGoals();
     for (Goal& g : SearchEngine::State::goals) {
@@ -65,13 +67,14 @@ unsigned long BoxToTargetAStarHeuristic::f(const SearchEngine::State* state) con
     /* Find the box assigned to the goal */
     Coord target = getReferenceAgent()->getCurrentTask().clearBox.target;
     Coord boxLoc = state->getBoxes()[getReferenceAgent()->getCurrentTask().clearBox.boxToMoveID].loc;
+
     result += DistanceOracle::fetchDistFromCoord(target, boxLoc);
     return result;
 }
 
 unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const {
      /*
-      * Very simple heuristic. Closest box to goal tile plus distance of agent to that box 
+      * Very simple heuristic. Closest box to goal tile plus distance of agent to that box
       */
     unsigned long result = 0;
     Goal searchGoal = getReferenceAgent()->getCurrentTask().goal;
@@ -85,6 +88,16 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
     }
 
     result += 1 + startSearchCorrectgoals - currCorrectGoals;
+
+    Coord boxLoc = state->getBoxes()[searchGoal.assignedBoxID].loc;
+    Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
+
+    if(SearchEngine::Master::deadends.isDeadend(searchGoal.loc) &&
+       state->getAction().action() == PULL              &&
+       SearchEngine::Master::deadends.isDeadend(agentLoc) &&
+       SearchEngine::Master::deadends.isDeadend(boxLoc)   ) {
+        result += 1;
+    }
 
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];

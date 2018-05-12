@@ -7,10 +7,13 @@ using Communication::Blackboard;
 void printBlackboard(Communication::Blackboard* b);
 using namespace SearchEngine;
 
-/* 
+/*
  * This is the primary function of the master class, that
  * conducts the main search
  */
+
+SearchEngine::Deadend Master::deadends = SearchEngine::Deadend();
+
 Master::Master(): jointActions_(), masterState_(), prevMasterState_(), agents_(), masterBlackboard_() {
 
 }
@@ -18,6 +21,7 @@ Master::Master(): jointActions_(), masterState_(), prevMasterState_(), agents_()
 Master::Master(const State &s1, const std::vector<SearchClient::Agent> &agents): jointActions_(), masterState_(s1),
     prevMasterState_(), agents_(agents), masterBlackboard_() {
 
+    Master::deadends = SearchEngine::Deadend(s1);
     for(auto &agent: agents_)
         agent.setBlackboard(&masterBlackboard_);
 
@@ -44,11 +48,11 @@ void Master::conductSearch() {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
-        jointActions_.push_back(ja); 
+        jointActions_.push_back(ja);
 
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
-        std::cerr << "Joint Action: " << ja.toActionString(); 
+        std::cerr << "Joint Action: " << ja.toActionString();
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
@@ -56,7 +60,7 @@ void Master::conductSearch() {
         std::cerr<<std::endl;
     }
 
-    std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl; 
+    std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl;
     // Send the solution
     //sendSolution();
 }
@@ -67,14 +71,14 @@ void Master::postBlackBoard() {
         Communication::GlobalGoalEntry::create(g.loc, -1, 0, &masterBlackboard_);
     }
     computeGoalPriorities();
-    
+
     masterBlackboard_.setAgentPositionEntryRegistrySize(masterState_.getAgents().size());
     masterBlackboard_.setBoxEntryRegistrySize(masterState_.getBoxes().size());
-    
+
     for (auto a : masterState_.getAgents()) {
         Communication::PositionEntry::create(a.loc, -1, agents_[a.num], &masterBlackboard_);
     }
-    /* 
+    /*
      * Create box position entries, these entries do not get removed
      * Box position entries are updated by changing the time step and
      * position values
@@ -90,7 +94,7 @@ SearchClient::JointAction Master::callForActions() {
     action.initialize(agents_.size());
     for (size_t i = 0; i < agents_.size(); i++) {
         action.setAction(i, agents_[i].nextMove());
-    } 
+    }
 
     return action;
 }
@@ -104,12 +108,12 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
         if (isActionValid(&masterState_, actions[i], i) &&
             isActionValid(&prevMasterState_, actions[i], i)) {
             updateStateWithNewMove(actions[i], i);
-        } 
+        }
         else {
             /* We should probably do something better */
             /* But it's kind of tricky */
             agentsWithPlansToBeCleared.push_back(std::make_pair(i, actions[i]));
-            ja->setAction(i, SearchEngine::Command()); 
+            ja->setAction(i, SearchEngine::Command());
         }
     }
     revokeBlackboardEntries(*ja);
@@ -142,7 +146,7 @@ bool Master::isActionValid(SearchEngine::State* state, SearchEngine::Command cmd
     return true; //NoOp
 }
 
-void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {    
+void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
     int newAgentRow = masterState_.getAgents()[AgentID].loc.y + Command::rowToInt(cmd.d1());
     int newAgentCol = masterState_.getAgents()[AgentID].loc.x + Command::colToInt(cmd.d1());
 
@@ -158,7 +162,7 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
         /* Get the current and new box positions */
         if (action == Action::PUSH) {
             currBoxPos = Coord(newAgentCol, newAgentRow);
-            newBoxPos = Coord(newAgentCol + Command::colToInt(cmd.d2()), 
+            newBoxPos = Coord(newAgentCol + Command::colToInt(cmd.d2()),
                                 newAgentRow + Command::rowToInt(cmd.d2()));
         }
         else {
@@ -168,7 +172,7 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
             newBoxPos = agentPos;
         }
 
-        
+
         /* Find the box index, box is where the agent will be in a push */
         int boxID;
         for (size_t i = 0; i < boxes.size(); i++) {
@@ -220,7 +224,7 @@ void Master::computeGoalPriorities()
         }
         unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
         std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
-        
+
     }
 }
 
@@ -237,7 +241,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
             masterBlackboard_.erase_front(Communication::Blackboard::PositionEntry, i);
         }
         if (commands[i].action() == PUSH || commands[i].action() == PULL) {
-            // pop the front of the positional entry vector 
+            // pop the front of the positional entry vector
             masterBlackboard_.erase_front(Communication::Blackboard::BoxPositionEntry, commands[i].targBoxId());
         }
     }
@@ -246,6 +250,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 }
 
 void Master::printBlackboard(Communication::Blackboard* b) {
+
     auto posEntries = b->getPositionEntries();
     std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
@@ -269,7 +274,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
-    
+
     std::cerr << "\n---------Help Blackboard--------\n";
     std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\n";
     auto helpEntries = b->getHelpEntries();

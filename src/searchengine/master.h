@@ -2,6 +2,7 @@
 #define MASTER_H
 
 #include "../searchclient/searchclient"
+#include "deadend.h"
 #include "goalpriority.h"
 #include <vector>
 
@@ -12,6 +13,9 @@ public: // Constructors
     Master();
     Master(const State& s1, const std::vector<SearchClient::Agent> &agents);
     Master(const Master& m);
+
+public:
+    static Deadend deadends;
 
 public:
     /* Conduct a search */

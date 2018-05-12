@@ -19,26 +19,28 @@ public:
 
     /* Constructors */
     Deadend() {};
-    Deadend(State* input);
+    Deadend(const State& input);
+    Deadend& operator=(const Deadend& src);
+    Deadend(const Deadend &src);
     ~Deadend();
     //Deadend(const State &state);
 
     std::vector<std::vector<bool> > getDeadendMatrix() const {
         return deadendMatrix_;
     }
-        std::vector<std::vector<bool> > getDEMatrix() const {
+    std::vector<std::vector<bool> > getDEMatrix() const {
         return deadendMatrix_;
     }
 
     short int isDeadend(size_t x, size_t y) const;
     short int isDeadend(Coord coord) const;
-    
-    static void
-        computeDeadendFromPositionRecursive(const State *state, std::vector<std::vector<bool> > *result, size_t x, size_t y);
 
-    static std::vector<std::vector<bool> > computeDeadend(const State *state);
+    static void
+        computeDeadendFromPositionRecursive(const State &state, std::vector<std::vector<bool> > *result, size_t x, size_t y);
+
+    static std::vector<std::vector<bool> > computeDeadend(const State &state);
 private:
-    State *inputState_;
+    State inputState_;
     std::vector<std::vector<bool> > deadendMatrix_;
 
 };
