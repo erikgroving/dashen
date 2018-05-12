@@ -4,7 +4,7 @@ using SearchEngine::State;
 using SearchEngine::Region;
 using namespace SearchEngine::Predicate;
 
-Region::Region(State *input): inputState_(input), regionMatrix_() {
+Region::Region(State *input): numRegions_(0), inputState_(input), regionMatrix_() {
     regionMatrix_ = Region::getRegionMatrix(input);    
 }
 
@@ -85,5 +85,6 @@ std::vector<std::vector<size_t> > Region::getRegionMatrix(const State *state) {
             }
         }
     }
+    numRegions_ = regionCounter;
     return result;
 }

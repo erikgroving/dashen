@@ -22,6 +22,8 @@ public:
     void conductSearch();
     /* Post the goals identified to the blackboard */
     void postBlackBoard();
+    /* Assigns boxes to all goals */
+    void assignBoxesToGoals();
     /* Calls for joint actions from the agents, returns a joint action */
     SearchClient::JointAction callForActions();
     /* Update the current state to reflect the previous actions */

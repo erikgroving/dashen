@@ -301,38 +301,20 @@ SearchEngine::Command Agent::nextMove() {
 
 bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
 
-    Box closestBox = Box();
     int goalIndex = -1;
-        SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
+    SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
     Goal entryGoal = SearchEngine::State::goals[goalIndex];
 
-    if (Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
+    Box b = sharedState->getBoxes()[entryGoal.assignedBoxID];
+
+    if (b.color != color || 
+            Heur::DistanceOracle::fetchDistFromCoord(
+            b.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
         return false;
     }
-
-    unsigned long minDist = ULONG_MAX;
-    for (const Box &b : state->getBoxes()) {
-
-        if (b.color == color && b.letter == entryGoal.letter && !State::takenBoxes[b.id]) {
-            //unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
-            unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, b.loc);
-            if (dist < minDist) {
-                minDist = dist;
-                closestBox = b;
-            }
-        }
-
+    else {
+        return true;
     }
-
-    if (closestBox.id == -1) {
-        return false;
-    }
-
-    if(boxIndex != nullptr) {
-        *boxIndex = closestBox.id;
-    }
-
-    return true;
 }
     
 
@@ -425,9 +407,6 @@ Goal Agent::getGoalFromBlackboard() {
     SearchEngine::Predicate::goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
 
     Goal &result = SearchEngine::State::goals[goalIndex];
-
-    State::takenBoxes[closestBoxIndex] = true;
-    result.assignedBoxID = closestBoxIndex;
 
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);

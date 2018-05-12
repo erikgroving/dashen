@@ -1,6 +1,7 @@
 #include "master.h"
 #include "searchclient.h"
 #include "../communication/communication"
+#include "../heuristics/distanceoracle.h"
 #include <cassert>
 
 using Communication::Blackboard;
@@ -42,6 +43,8 @@ void Master::conductSearch() {
 
     std::cerr << "--- Posting goals for the state onto the blackboard ---\n";
     postBlackBoard();
+    std::cerr << "--- Assigning boxes to goals---\n";
+    assignBoxesToGoals();
 
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
@@ -56,7 +59,7 @@ void Master::conductSearch() {
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
-        printBlackboard(&masterBlackboard_);
+        //printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
     }
 
@@ -97,6 +100,24 @@ SearchClient::JointAction Master::callForActions() {
     }
 
     return action;
+}
+
+void Master::assignBoxesToGoals() {
+    Box closestBox;
+    for (Goal& g : SearchEngine::State::goals) {
+        unsigned long minDist = ULONG_MAX;
+        for (const Box &b : masterState_.getBoxes()) {
+            if (!State::takenBoxes[b.id] && g.letter == b.letter) {
+                unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(g.loc, b.loc);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestBox = b;
+                }
+            }
+        }
+        g.assignedBoxID = closestBox.id;
+        State::takenBoxes[closestBox.id] = true;
+    }
 }
 
 /* This function updates the current state to reflect the previous joint actions */
