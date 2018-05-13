@@ -61,9 +61,7 @@ bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &
         entry->getParent()->removeEntry(entry, Blackboard::PositionEntry);
     }
     else if (dynamic_cast<Communication::HelpEntry*>(entry) != nullptr) {
-        size_t start = entry->getParent()->getHelpEntries().size();
         entry->getParent()->removeEntry(entry, Blackboard::HelpEntry);
-        size_t end = entry->getParent()->getHelpEntries().size();
     }
     else if(dynamic_cast<Communication::GlobalGoalEntry*>(entry) != nullptr) {
         entry->getParent()->removeEntry(entry, Blackboard::GoalEntry);

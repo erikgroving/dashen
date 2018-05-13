@@ -43,7 +43,6 @@ void Master::conductSearch() {
 
     std::cerr << "--- Posting goals for the state onto the blackboard ---\n";
     postBlackBoard();
-    std::cerr << "--- Assigning boxes to goals---\n";
     assignBoxesToGoals();
 
     int round = 0;
@@ -74,6 +73,7 @@ void Master::postBlackBoard() {
         Communication::GlobalGoalEntry::create(g.loc, -1, 0, &masterBlackboard_);
     }
     computeGoalPriorities();
+    
 
     masterBlackboard_.setAgentPositionEntryRegistrySize(masterState_.getAgents().size());
     masterBlackboard_.setBoxEntryRegistrySize(masterState_.getBoxes().size());
@@ -103,6 +103,7 @@ SearchClient::JointAction Master::callForActions() {
 }
 
 void Master::assignBoxesToGoals() {
+    SearchClient::Agent::setSharedState(&masterState_);
     Box closestBox;
     for (Goal& g : SearchEngine::State::goals) {
         unsigned long minDist = ULONG_MAX;
@@ -218,7 +219,6 @@ void Master::computeGoalPriorities()
 {
     auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
     std::cerr << "goalPriorities: " << std::endl;
-    //assert(goalPriorities.size() == masterState_.goals.size());
     for (Goal currentGoal : masterState_.goals) {
         std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
         std::cerr << ", letter: " << currentGoal.letter;
@@ -227,7 +227,6 @@ void Master::computeGoalPriorities()
     for (size_t i = 0; i < goalPriorities.size(); i++) {
         std::cerr << i << " value: " << goalPriorities[i] << std::endl;
     }
-    //goalPriorities[2] = 100;
 
 
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
@@ -245,8 +244,10 @@ void Master::computeGoalPriorities()
         }
         unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
         std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
-
     }
+
+    SearchEngine::StrictOrdering sO = SearchEngine::StrictOrdering();
+    sO.calculateStrictOrderings(masterState_);
 }
 
 void Master::sendSolution () {
@@ -271,9 +272,9 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 }
 
 void Master::printBlackboard(Communication::Blackboard* b) {
-/*
+
     auto posEntries = b->getPositionEntries();
-/*    std::cerr << "\n---------Position Blackboard--------\n";
+ /*   std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
 
     for (size_t i = 0; i < posEntries.size(); i++) {
@@ -283,7 +284,8 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         entry->getLocation().x << "," << entry->getLocation().y <<
                         ")\t\t\t" << entry->getAuthorId() << std::endl;
         }
-    }*/
+    }
+    */
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
@@ -295,7 +297,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
-*/
+
     std::cerr << "\n---------Help Blackboard--------\n";
     std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\n";
     auto helpEntries = b->getHelpEntries();

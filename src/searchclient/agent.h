@@ -26,7 +26,7 @@ namespace SearchClient {
             task = t;
             hEntryToPerform = e;
             waitingForHelp = false;
-            hEntryToMonitor = nullptr;
+            hEntryToMonitor = std::vector<Communication::HelpEntry*>();
         }
         TaskInfo(const TaskInfo& src) {
             task = src.task;
@@ -37,7 +37,7 @@ namespace SearchClient {
         TaskStackElement task;
         Communication::HelpEntry* hEntryToPerform;
         bool waitingForHelp;
-        Communication::HelpEntry* hEntryToMonitor;
+        std::vector<Communication::HelpEntry*> hEntryToMonitor;
     };
 class Agent {
 

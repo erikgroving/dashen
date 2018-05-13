@@ -32,7 +32,7 @@ bool StateCompare::operator()(SearchEngine::State* const& source, SearchEngine::
 std::size_t hashState::operator()(SearchEngine::State* const& source) const {
     std::size_t result = 0;
 
-    std::size_t prime = 31;
+    std::size_t prime = 37;
     for( const Box &box: source->getBoxes() ) {
         result = prime * result + hashBox()(box);
     }

@@ -6,6 +6,7 @@
 #include <iterator>
 
 #include "../searchengine/strategy.h"
+#include "../searchengine/goalpriority.h"
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
@@ -71,7 +72,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
     std::vector<Coord> forbiddenCoords;
 
     auto revPath = path;
-    //std::reverse(revPath.begin(), revPath.end());
+    std::reverse(revPath.begin(), revPath.end());
 
     if (takenTasks_[ctIdx_].task.type == GOAL) {
         forbiddenCoords.push_back(takenTasks_[ctIdx_].task.goal.loc);
@@ -88,7 +89,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
                             agtSecond.y - SearchEngine::Command::rowToInt(cmdStart.d1()));
     forbiddenCoords.push_back(agentStart);
     }
-
+    bool taskWillWaitForHelp = false;
     for (auto c : forbiddenCoords) {
         int idx;
         if (boxAt(sharedState, c.x, c.y, &idx)) {
@@ -103,6 +104,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
             // Otherwise agent can move it.
             if (b.color != this->color) {
                 askForHelp(c, 'b', forbiddenCoords, idx);
+                taskWillWaitForHelp = true;
             }
             // We can only help ourselves if we can reach the same colored box in question
             else {
@@ -114,8 +116,12 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
             if(idx != num) { 
                 askForHelp(c, 'a', forbiddenCoords, idx);
+                taskWillWaitForHelp = true;;
             }
         }
+    }
+    if (taskWillWaitForHelp) {
+        takenTasks_[ctIdx_].waitingForHelp = true;
     }
 }
 
@@ -123,17 +129,31 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
     Communication::HelpEntry* entry;
     if (!takenTasks_[ctIdx_].waitingForHelp) {
         if (hEntryToPerform == 'b') {
+            if (blackboard_->getHelpEntries().size() > 0) {
+                for(auto* entry: blackboard_->getHelpEntries()) {
+                    Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+                    if (entry_casted->getBlockingBoxId() == idx) {
+                        return;
+                    }
+                }
+            }
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingBoxId(idx);
-            takenTasks_[ctIdx_].waitingForHelp = true;
-            takenTasks_[ctIdx_].hEntryToMonitor = entry;
+            takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         }
         else {
+            if (blackboard_->getHelpEntries().size() > 0) {
+                for(auto* entry: blackboard_->getHelpEntries()) {
+                    Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+                    if (entry_casted->getBlockingAgentId() == idx) {
+                        return;
+                    }
+                }
+            }
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingAgentId(idx);
             entry->setBlockingBoxId(-1);
-            takenTasks_[ctIdx_].waitingForHelp = true;
-            takenTasks_[ctIdx_].hEntryToMonitor = entry;
+            takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         } 
     }
 }
@@ -248,21 +268,19 @@ SearchEngine::Command Agent::nextMove() {
     std::cerr << "AGENT "  <<  (int)num << std::endl;
     updateTasks();
 
-    bool waitingForHelp = false;
     for (size_t i = 0; i < takenTasks_.size(); i++) {
         TaskInfo t = takenTasks_[i];
-        if (t.hEntryToMonitor != nullptr) {
-            if (t.hEntryToMonitor->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
-                takenTasks_[i].waitingForHelp = false;
-                t.hEntryToMonitor->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
+        for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
+            if (t.hEntryToMonitor[j]->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
+                t.hEntryToMonitor[j]->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
+                t.hEntryToMonitor[j] = t.hEntryToMonitor.back();
+                t.hEntryToMonitor.pop_back();
+                j--;
             }
         }
-        if (t.waitingForHelp) {
-            waitingForHelp = true;
+        if (t.hEntryToMonitor.size() == 0) {
+            t.waitingForHelp = false;
         }
-    }
-    if (waitingForHelp){
-        return SearchEngine::Command();
     }
     
     /* If plan is empty, need to construct a new plan */
@@ -309,7 +327,6 @@ SearchEngine::Command Agent::nextMove() {
 }
 
 bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
-
     int goalIndex = -1;
     SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
     Goal entryGoal = SearchEngine::State::goals[goalIndex];
@@ -321,35 +338,15 @@ bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const Sea
             b.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
         return false;
     }
-    else {
-        /* Check if satisfying the goal would split up the level into more than one region! 
-            This would happen if there are only two walls surrounding and on opposite ends*/
-        for (Goal& g : State::goals) {
-            if (goalHasCorrectBox(sharedState, g)) {
-                SearchEngine::State::walls[g.loc.y][g.loc.x] = true;
-            }
+
+    auto& sOrder = SearchEngine::StrictOrdering::strictOrderings;
+    for (int gIdx : sOrder[goalIndex]) {
+        if (!goalHasCorrectBox(sharedState, SearchEngine::State::goals[gIdx])) {
+            return false;
         }
-        if (wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) && 
-              wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
-            if (!wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
-                !wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
-                return false;
-            }
-        }
-        else if (wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
-            wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
-            if (!wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) &&
-                !wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
-                return false;
-            }
-        }
-        for (Goal& g : State::goals) {
-            if (goalHasCorrectBox(sharedState, g)) {
-                SearchEngine::State::walls[g.loc.y][g.loc.x] = false;
-            }
-        }
-        return true;
     }
+
+    return true;
 }
     
 
@@ -429,7 +426,6 @@ Goal Agent::getGoalFromBlackboard() {
             selectedEntry = entry_casted ;
             priority = entry_casted ->getPriority();
         }
-
     }
 
     // If no entry is doable, return an empty goal
@@ -585,6 +581,10 @@ bool Agent::determineNextGoal() {
         }
     }
 
+    if (takenTasks_.size() > 1) {
+        std::rotate(takenTasks_.begin(), takenTasks_.begin() + 1, takenTasks_.end());
+    }
+
     // Does anyone need help ? We firstly solve any HelpEntry before doing any goal
     int idx = 0;
     for (TaskInfo& t : takenTasks_) {
@@ -713,7 +713,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
-        strat.setMaxIterations(10000);
+        strat.setMaxIterations(50000);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 

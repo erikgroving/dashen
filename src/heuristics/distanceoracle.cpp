@@ -48,6 +48,7 @@ DistanceOracle::DistanceMatrix DistanceOracle::calculateDistancesFromPoint(const
             Coord(currCoord.x + 1, currCoord.y), Coord(currCoord.x, currCoord.y - 1)
         };
 
+
         for (const Coord &c : coords) {
             if (SearchEngine::Predicate::inBound(s, c.x, c.y) &&
                 !SearchEngine::Predicate::wallAt(s, c.x, c.y) &&
@@ -65,6 +66,6 @@ DistanceOracle::DistanceMatrix DistanceOracle::calculateDistancesFromPoint(const
 size_t DistanceOracle::CoordHash::operator()(const Coord &A) const {
     auto h1 = std::hash<int>{}(A.x);
     auto h2 = std::hash<int>{}(A.y);
-    return (h1 ^ h2) * 11;
+    return (h1 ^ h2);
 }
 
