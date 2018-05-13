@@ -17,12 +17,14 @@
 #include "../communication/helpentry.h"
 
 #include "../searchengine/master.h"
+#include "../searchengine/region.h"
 
 #ifndef __LONG_MAX__
 #define __LONG_MAX__    2147483647
 #endif
 
 using SearchClient::Agent;
+using SearchEngine::Region;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
 
@@ -69,7 +71,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
     std::vector<Coord> forbiddenCoords;
 
     auto revPath = path;
-    std::reverse(revPath.begin(), revPath.end());
+    //std::reverse(revPath.begin(), revPath.end());
 
     if (takenTasks_[ctIdx_].task.type == GOAL) {
         forbiddenCoords.push_back(takenTasks_[ctIdx_].task.goal.loc);
@@ -193,7 +195,7 @@ std::vector<SearchEngine::State *> Agent::searchClearSelf(SearchEngine::Strategy
     if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
         int boxId = takenTasks_[ctIdx_].hEntryToPerform->getBlockingBoxId(); 
         searcher.setGoalStatePredicate([this, boxId](const SearchEngine::State *currentState){
-            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath) &&
+            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath); //&&
                 isBoxNotOnForbiddenPath(currentState, boxId, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath);
         });
     
@@ -243,7 +245,7 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 }
 
 SearchEngine::Command Agent::nextMove() {
-
+    std::cerr << "AGENT "  <<  (int)num << std::endl;
     updateTasks();
 
     bool waitingForHelp = false;
@@ -308,38 +310,46 @@ SearchEngine::Command Agent::nextMove() {
 
 bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
 
-    Box closestBox = Box();
     int goalIndex = -1;
-        SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
+    SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
     Goal entryGoal = SearchEngine::State::goals[goalIndex];
 
-    if (Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
+    Box b = sharedState->getBoxes()[entryGoal.assignedBoxID];
+
+    if (b.color != color || 
+            Heur::DistanceOracle::fetchDistFromCoord(
+            b.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
         return false;
     }
-
-    unsigned long minDist = ULONG_MAX;
-    for (const Box &b : state->getBoxes()) {
-
-        if (b.color == color && b.letter == entryGoal.letter && !State::takenBoxes[b.id]) {
-            //unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
-            unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, b.loc);
-            if (dist < minDist) {
-                minDist = dist;
-                closestBox = b;
+    else {
+        /* Check if satisfying the goal would split up the level into more than one region! 
+            This would happen if there are only two walls surrounding and on opposite ends*/
+        for (Goal& g : State::goals) {
+            if (goalHasCorrectBox(sharedState, g)) {
+                SearchEngine::State::walls[g.loc.y][g.loc.x] = true;
             }
         }
-
+        if (wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) && 
+              wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
+            if (!wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
+                !wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
+                return false;
+            }
+        }
+        else if (wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
+            wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
+            if (!wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) &&
+                !wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
+                return false;
+            }
+        }
+        for (Goal& g : State::goals) {
+            if (goalHasCorrectBox(sharedState, g)) {
+                SearchEngine::State::walls[g.loc.y][g.loc.x] = false;
+            }
+        }
+        return true;
     }
-
-    if (closestBox.id == -1) {
-        return false;
-    }
-
-    if(boxIndex != nullptr) {
-        *boxIndex = closestBox.id;
-    }
-
-    return true;
 }
     
 
@@ -433,8 +443,6 @@ Goal Agent::getGoalFromBlackboard() {
 
     Goal &result = SearchEngine::State::goals[goalIndex];
 
-    State::takenBoxes[closestBoxIndex] = true;
-    result.assignedBoxID = closestBoxIndex;
 
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);
@@ -550,7 +558,7 @@ bool Agent::determineNextGoal() {
             Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
 
             if(entry_casted->getProblemType() == Communication::HelpEntry::Agent &&
-               entry_casted->getBlockingAgentId() == getIndex() ) {
+                entry_casted->getBlockingAgentId() == getIndex() ) {
 
                 entry_casted->setProblemType(Communication::HelpEntry::TakenCareOf);
                 TaskStackElement newTask = ClearSelf(entry_casted->getForbiddenPath());

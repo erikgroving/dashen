@@ -54,7 +54,6 @@ bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &
 //    if(sender.getIndex() != entry->getAuthorId()) // Only the author can revoke a demand
 //        return false;
 
-
     // Veeeeeeeeeeery bad practise, don't reproduce at home
     if(dynamic_cast<Communication::BoxPositionEntry*>(entry) != nullptr)
         entry->getParent()->removeEntry(entry, Blackboard::BoxPositionEntry);
@@ -62,7 +61,9 @@ bool BlackboardEntry::revoke(BlackboardEntry *entry, const SearchClient::Agent &
         entry->getParent()->removeEntry(entry, Blackboard::PositionEntry);
     }
     else if (dynamic_cast<Communication::HelpEntry*>(entry) != nullptr) {
+        size_t start = entry->getParent()->getHelpEntries().size();
         entry->getParent()->removeEntry(entry, Blackboard::HelpEntry);
+        size_t end = entry->getParent()->getHelpEntries().size();
     }
     else if(dynamic_cast<Communication::GlobalGoalEntry*>(entry) != nullptr) {
         entry->getParent()->removeEntry(entry, Blackboard::GoalEntry);
