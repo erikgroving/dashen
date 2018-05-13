@@ -28,8 +28,6 @@ void Region::computeRegionFromPositionRecursive(const State *state, std::vector<
     //  check if not out of bounds, is -1, is not wall, 
     //  then set to same counter 
     //  recursive call
-    std::cerr << "computeRegionFromPositionRecursive start" << std::endl;
-    std::cerr << x << " " << y << " " << regionCounter << " " << inBound(state, x, y) << std::endl;
     if(!inBound(state, x, y)) return;
     //std::cerr << (*result)[y][x] << std::endl;
 

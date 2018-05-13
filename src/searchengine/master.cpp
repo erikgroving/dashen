@@ -59,7 +59,7 @@ void Master::conductSearch() {
         std::cout << ja.toActionString() << std::endl;
         std::cerr << std::endl;
         printMap(&masterState_);
-        //printBlackboard(&masterBlackboard_);
+        printBlackboard(&masterBlackboard_);
         std::cerr<<std::endl;
     }
 
@@ -273,7 +273,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 void Master::printBlackboard(Communication::Blackboard* b) {
 
     auto posEntries = b->getPositionEntries();
-    std::cerr << "\n---------Position Blackboard--------\n";
+/*    std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
 
     for (size_t i = 0; i < posEntries.size(); i++) {
@@ -283,7 +283,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         entry->getLocation().x << "," << entry->getLocation().y <<
                         ")\t\t\t" << entry->getAuthorId() << std::endl;
         }
-    }
+    }*/
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {

@@ -17,12 +17,14 @@
 #include "../communication/helpentry.h"
 
 #include "../searchengine/master.h"
+#include "../searchengine/region.h"
 
 #ifndef __LONG_MAX__
 #define __LONG_MAX__    2147483647
 #endif
 
 using SearchClient::Agent;
+using SearchEngine::Region;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
 
@@ -69,7 +71,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
     std::vector<Coord> forbiddenCoords;
 
     auto revPath = path;
-    std::reverse(revPath.begin(), revPath.end());
+    //std::reverse(revPath.begin(), revPath.end());
 
     if (takenTasks_[ctIdx_].task.type == GOAL) {
         forbiddenCoords.push_back(takenTasks_[ctIdx_].task.goal.loc);
@@ -129,6 +131,7 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
         else {
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingAgentId(idx);
+            entry->setBlockingBoxId(-1);
             takenTasks_[ctIdx_].waitingForHelp = true;
             takenTasks_[ctIdx_].hEntryToMonitor = entry;
         } 
@@ -193,7 +196,7 @@ std::vector<SearchEngine::State *> Agent::searchClearSelf(SearchEngine::Strategy
     if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
         int boxId = takenTasks_[ctIdx_].hEntryToPerform->getBlockingBoxId(); 
         searcher.setGoalStatePredicate([this, boxId](const SearchEngine::State *currentState){
-            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath) &&
+            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath); //&&
                 isBoxNotOnForbiddenPath(currentState, boxId, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath);
         });
     
@@ -243,7 +246,7 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 }
 
 SearchEngine::Command Agent::nextMove() {
-
+    std::cerr << "AGENT "  <<  (int)num << std::endl;
     updateTasks();
 
     for (size_t i = 0; i < takenTasks_.size(); i++) {
@@ -313,6 +316,32 @@ bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const Sea
         return false;
     }
     else {
+        /* Check if satisfying the goal would split up the level into more than one region! 
+            This would happen if there are only two walls surrounding and on opposite ends*/
+        for (Goal& g : State::goals) {
+            if (goalHasCorrectBox(sharedState, g)) {
+                SearchEngine::State::walls[g.loc.y][g.loc.x] = true;
+            }
+        }
+        if (wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) && 
+              wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
+            if (!wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
+                !wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
+                return false;
+            }
+        }
+        else if (wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y + 1) &&
+            wallAt(sharedState, entryGoal.loc.x, entryGoal.loc.y - 1)) {
+            if (!wallAt(sharedState, entryGoal.loc.x + 1, entryGoal.loc.y) &&
+                !wallAt(sharedState, entryGoal.loc.x - 1, entryGoal.loc.y)) {
+                return false;
+            }
+        }
+        for (Goal& g : State::goals) {
+            if (goalHasCorrectBox(sharedState, g)) {
+                SearchEngine::State::walls[g.loc.y][g.loc.x] = false;
+            }
+        }
         return true;
     }
 }
@@ -407,6 +436,7 @@ Goal Agent::getGoalFromBlackboard() {
     SearchEngine::Predicate::goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
 
     Goal &result = SearchEngine::State::goals[goalIndex];
+
 
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);
@@ -532,7 +562,7 @@ bool Agent::determineNextGoal() {
             Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
 
             if(entry_casted->getProblemType() == Communication::HelpEntry::Agent &&
-               entry_casted->getBlockingAgentId() == getIndex() ) {
+                entry_casted->getBlockingAgentId() == getIndex() ) {
 
                 entry_casted->setProblemType(Communication::HelpEntry::TakenCareOf);
                 TaskStackElement newTask = ClearSelf(entry_casted->getForbiddenPath());
@@ -679,7 +709,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
-        strat.setMaxIterations(1000);
+        strat.setMaxIterations(10000);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
