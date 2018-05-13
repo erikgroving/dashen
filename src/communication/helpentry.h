@@ -22,6 +22,7 @@ public:
 public:
     HelpEntry();
     HelpEntry(const HelpEntry& src);
+    ~HelpEntry(){}
     HelpEntry& operator=(const HelpEntry& src);
 
     unsigned int getPriority() const { return priority_; }

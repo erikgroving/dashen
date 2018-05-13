@@ -266,13 +266,12 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 
 SearchEngine::Command Agent::nextMove() {
     std::cerr << "AGENT "  <<  (int)num << std::endl;
-    updateTasks();
 
     for (size_t i = 0; i < takenTasks_.size(); i++) {
-        TaskInfo t = takenTasks_[i];
+        TaskInfo& t = takenTasks_[i];
         for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
             if (t.hEntryToMonitor[j]->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
-                t.hEntryToMonitor[j]->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
+                Communication::BlackboardEntry::revoke(t.hEntryToMonitor[j], *this);
                 t.hEntryToMonitor[j] = t.hEntryToMonitor.back();
                 t.hEntryToMonitor.pop_back();
                 j--;
@@ -289,6 +288,9 @@ SearchEngine::Command Agent::nextMove() {
         if (ctIdx_ != -1 && isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) 
                 && takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
             takenTasks_[ctIdx_].hEntryToPerform->setProblemType(Communication::HelpEntry::ProblemType::Done);
+            takenTasks_[ctIdx_] = takenTasks_.back();
+            takenTasks_.pop_back();
+            ctIdx_ = -1;
         }
         // Find the next goal to complete
         if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) ||
@@ -517,34 +519,6 @@ void Agent::initialStateRemovedAllBut(char agentIndex, char boxIndex) {
 
 }
 
-void Agent::updateTasks() {
-    // Remove taken tasks that are complete and not goals
-    for (size_t i = 0; i < takenTasks_.size(); i++) {
-        TaskStackElement t = takenTasks_[i].task;
-        if (isTaskSatisfied(sharedState, t) && t.type != GOAL) {
-            if (takenTasks_[i].hEntryToPerform != nullptr) {
-                // We set to done and requester acknowledged. Can be deleted from blackboard
-                if (takenTasks_[i].hEntryToPerform->getProblemType() == Communication::HelpEntry::ProblemType::AckDone){
-                    Communication::BlackboardEntry::revoke(takenTasks_[i].hEntryToPerform, *this);
-                    takenTasks_[i] = takenTasks_.back();
-                    takenTasks_.pop_back();
-                    i--;
-                }
-            }
-            else {
-                takenTasks_[i] = takenTasks_.back();
-                takenTasks_.pop_back();
-                i--;
-            }
-        }
-        // if the element we popped is the back, we need to make sure
-        // ctidx is 0 to prevent out of boudns accesses
-        if (ctIdx_ > (int)takenTasks_.size()) {
-            ctIdx_ = 0;
-        }
-    }
-}
-
 bool Agent::determineNextGoal() {
 
     // No unsatisfied goals. Check the blackboard
@@ -599,7 +573,7 @@ bool Agent::determineNextGoal() {
     bool satisfied = true;
     int unsatIdx;
     for (size_t i = 0; i < takenTasks_.size(); i++) {
-        TaskStackElement t = takenTasks_[i].task;
+        TaskStackElement& t = takenTasks_[i].task;
         if (!isTaskSatisfied(sharedState, t)) {
             satisfied = false;
             unsatIdx = i;
@@ -733,7 +707,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
             Strat::StrategyBFS strat;
             strat.linkBlackboard(nullptr);
             strat.setMaxIterations(1000);
-            ans = searchGoal(takenTasks_[ctIdx_].task.goal, strat, true);
+            ans = searchClearBox(strat);
         }
     }
     return ans;
