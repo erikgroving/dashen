@@ -129,6 +129,7 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
         else {
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingAgentId(idx);
+            entry->setBlockingBoxId(-1);
             takenTasks_[ctIdx_].waitingForHelp = true;
             takenTasks_[ctIdx_].hEntryToMonitor = entry;
         } 
