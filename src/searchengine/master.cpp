@@ -1,6 +1,7 @@
 #include "master.h"
 #include "searchclient.h"
 #include "../communication/communication"
+#include "../heuristics/distanceoracle.h"
 #include <cassert>
 
 using Communication::Blackboard;
@@ -42,6 +43,7 @@ void Master::conductSearch() {
 
     std::cerr << "--- Posting goals for the state onto the blackboard ---\n";
     postBlackBoard();
+    assignBoxesToGoals();
 
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
@@ -71,6 +73,7 @@ void Master::postBlackBoard() {
         Communication::GlobalGoalEntry::create(g.loc, -1, 0, &masterBlackboard_);
     }
     computeGoalPriorities();
+    
 
     masterBlackboard_.setAgentPositionEntryRegistrySize(masterState_.getAgents().size());
     masterBlackboard_.setBoxEntryRegistrySize(masterState_.getBoxes().size());
@@ -97,6 +100,25 @@ SearchClient::JointAction Master::callForActions() {
     }
 
     return action;
+}
+
+void Master::assignBoxesToGoals() {
+    SearchClient::Agent::setSharedState(&masterState_);
+    Box closestBox;
+    for (Goal& g : SearchEngine::State::goals) {
+        unsigned long minDist = ULONG_MAX;
+        for (const Box &b : masterState_.getBoxes()) {
+            if (!State::takenBoxes[b.id] && g.letter == b.letter) {
+                unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(g.loc, b.loc);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestBox = b;
+                }
+            }
+        }
+        g.assignedBoxID = closestBox.id;
+        State::takenBoxes[closestBox.id] = true;
+    }
 }
 
 /* This function updates the current state to reflect the previous joint actions */
@@ -197,7 +219,6 @@ void Master::computeGoalPriorities()
 {
     auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
     std::cerr << "goalPriorities: " << std::endl;
-    //assert(goalPriorities.size() == masterState_.goals.size());
     for (Goal currentGoal : masterState_.goals) {
         std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
         std::cerr << ", letter: " << currentGoal.letter;
@@ -206,7 +227,6 @@ void Master::computeGoalPriorities()
     for (size_t i = 0; i < goalPriorities.size(); i++) {
         std::cerr << i << " value: " << goalPriorities[i] << std::endl;
     }
-    //goalPriorities[2] = 100;
 
 
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
@@ -224,8 +244,10 @@ void Master::computeGoalPriorities()
         }
         unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
         std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
-
     }
+
+    SearchEngine::StrictOrdering sO = SearchEngine::StrictOrdering();
+    sO.calculateStrictOrderings(masterState_);
 }
 
 void Master::sendSolution () {
@@ -252,7 +274,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 void Master::printBlackboard(Communication::Blackboard* b) {
 
     auto posEntries = b->getPositionEntries();
-    std::cerr << "\n---------Position Blackboard--------\n";
+ /*   std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
 
     for (size_t i = 0; i < posEntries.size(); i++) {
@@ -263,6 +285,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry->getAuthorId() << std::endl;
         }
     }
+    */
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {

@@ -16,7 +16,7 @@ class Region {
 public:
 
     /* Constructors */
-    Region() {};
+    Region() {numRegions_ = 0;};
     Region(State* input);
     ~Region();
 
@@ -35,6 +35,7 @@ public:
         size_t x, size_t y, size_t regionCounter);
 
 
+    size_t numRegions_;
 private:
     State *inputState_;
     std::vector<std::vector<size_t> > regionMatrix_;

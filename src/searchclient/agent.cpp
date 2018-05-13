@@ -6,6 +6,7 @@
 #include <iterator>
 
 #include "../searchengine/strategy.h"
+#include "../searchengine/goalpriority.h"
 #include "../strategies/strategies"
 #include "../heuristics/greedyheuristic.h"
 #include "../heuristics/astarheuristic.h"
@@ -17,12 +18,14 @@
 #include "../communication/helpentry.h"
 
 #include "../searchengine/master.h"
+#include "../searchengine/region.h"
 
 #ifndef __LONG_MAX__
 #define __LONG_MAX__    2147483647
 #endif
 
 using SearchClient::Agent;
+using SearchEngine::Region;
 using SearchClient::Client;
 using namespace SearchEngine::Predicate;
 
@@ -86,7 +89,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
                             agtSecond.y - SearchEngine::Command::rowToInt(cmdStart.d1()));
     forbiddenCoords.push_back(agentStart);
     }
-
+    bool taskWillWaitForHelp = false;
     for (auto c : forbiddenCoords) {
         int idx;
         if (boxAt(sharedState, c.x, c.y, &idx)) {
@@ -101,6 +104,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
             // Otherwise agent can move it.
             if (b.color != this->color) {
                 askForHelp(c, 'b', forbiddenCoords, idx);
+                taskWillWaitForHelp = true;
             }
             // We can only help ourselves if we can reach the same colored box in question
             else {
@@ -112,8 +116,12 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
             if(idx != num) { 
                 askForHelp(c, 'a', forbiddenCoords, idx);
+                taskWillWaitForHelp = true;;
             }
         }
+    }
+    if (taskWillWaitForHelp) {
+        takenTasks_[ctIdx_].waitingForHelp = true;
     }
 }
 
@@ -121,17 +129,31 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
     Communication::HelpEntry* entry;
     if (!takenTasks_[ctIdx_].waitingForHelp) {
         if (hEntryToPerform == 'b') {
+            if (blackboard_->getHelpEntries().size() > 0) {
+                for(auto* entry: blackboard_->getHelpEntries()) {
+                    Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+                    if (entry_casted->getBlockingBoxId() == idx) {
+                        return;
+                    }
+                }
+            }
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Box, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingBoxId(idx);
-            takenTasks_[ctIdx_].waitingForHelp = true;
-            takenTasks_[ctIdx_].hEntryToMonitor = entry;
+            takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         }
         else {
+            if (blackboard_->getHelpEntries().size() > 0) {
+                for(auto* entry: blackboard_->getHelpEntries()) {
+                    Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+                    if (entry_casted->getBlockingAgentId() == idx) {
+                        return;
+                    }
+                }
+            }
             entry = Communication::HelpEntry::create(agentLoc, Communication::HelpEntry::Agent, forbiddenCoords, sharedTime, *this, blackboard_);
             entry->setBlockingAgentId(idx);
             entry->setBlockingBoxId(-1);
-            takenTasks_[ctIdx_].waitingForHelp = true;
-            takenTasks_[ctIdx_].hEntryToMonitor = entry;
+            takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         } 
     }
 }
@@ -188,13 +210,12 @@ std::vector<SearchEngine::State *> Agent::searchClearSelf(SearchEngine::Strategy
         configurePrivateInitialState();
     else
         initialStateRemovedAllBut(num, -1);
-    std::cerr << "Performining clear self search!\n";
     SearchEngine::SearchCli searcher(private_initialState);
 
     if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
         int boxId = takenTasks_[ctIdx_].hEntryToPerform->getBlockingBoxId(); 
         searcher.setGoalStatePredicate([this, boxId](const SearchEngine::State *currentState){
-            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath) &&
+            return isAgentNotOnForbiddenPath(currentState, num, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath); //&&
                 isBoxNotOnForbiddenPath(currentState, boxId, takenTasks_[ctIdx_].task.clearSelf.forbiddenPath);
         });
     
@@ -244,16 +265,21 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 }
 
 SearchEngine::Command Agent::nextMove() {
-
+    std::cerr << "AGENT "  <<  (int)num << std::endl;
     updateTasks();
 
     for (size_t i = 0; i < takenTasks_.size(); i++) {
         TaskInfo t = takenTasks_[i];
-        if (t.hEntryToMonitor != nullptr) {
-            if (t.hEntryToMonitor->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
-                takenTasks_[i].waitingForHelp = false;
-                t.hEntryToMonitor->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
+        for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
+            if (t.hEntryToMonitor[j]->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
+                t.hEntryToMonitor[j]->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
+                t.hEntryToMonitor[j] = t.hEntryToMonitor.back();
+                t.hEntryToMonitor.pop_back();
+                j--;
             }
+        }
+        if (t.hEntryToMonitor.size() == 0) {
+            t.waitingForHelp = false;
         }
     }
     
@@ -301,36 +327,23 @@ SearchEngine::Command Agent::nextMove() {
 }
 
 bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const SearchEngine::State* state, int *boxIndex) {
-
-    Box closestBox = Box();
     int goalIndex = -1;
-        SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
+    SearchEngine::Predicate::goalAt(state, entry->getLocation().x, entry->getLocation().y, &goalIndex);
     Goal entryGoal = SearchEngine::State::goals[goalIndex];
 
-    if (Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
+    Box b = sharedState->getBoxes()[entryGoal.assignedBoxID];
+
+    if (b.color != color || 
+            Heur::DistanceOracle::fetchDistFromCoord(
+            b.loc, state->getAgents()[num].loc) == (unsigned long)-1) {
         return false;
     }
 
-    unsigned long minDist = ULONG_MAX;
-    for (const Box &b : state->getBoxes()) {
-
-        if (b.color == color && b.letter == entryGoal.letter && !State::takenBoxes[b.id]) {
-            //unsigned long dist = Coord::distance(b.loc, entryGoal.loc);
-            unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(entryGoal.loc, b.loc);
-            if (dist < minDist) {
-                minDist = dist;
-                closestBox = b;
-            }
+    auto& sOrder = SearchEngine::StrictOrdering::strictOrderings;
+    for (int gIdx : sOrder[goalIndex]) {
+        if (!goalHasCorrectBox(sharedState, SearchEngine::State::goals[gIdx])) {
+            return false;
         }
-
-    }
-
-    if (closestBox.id == -1) {
-        return false;
-    }
-
-    if(boxIndex != nullptr) {
-        *boxIndex = closestBox.id;
     }
 
     return true;
@@ -413,7 +426,6 @@ Goal Agent::getGoalFromBlackboard() {
             selectedEntry = entry_casted ;
             priority = entry_casted ->getPriority();
         }
-
     }
 
     // If no entry is doable, return an empty goal
@@ -427,8 +439,6 @@ Goal Agent::getGoalFromBlackboard() {
 
     Goal &result = SearchEngine::State::goals[goalIndex];
 
-    State::takenBoxes[closestBoxIndex] = true;
-    result.assignedBoxID = closestBoxIndex;
 
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);
@@ -537,16 +547,6 @@ void Agent::updateTasks() {
 
 bool Agent::determineNextGoal() {
 
-    // Does anyone need help ? We firstly solve any HelpEntry before doing any goal
-    int idx = 0;
-    for (TaskInfo& t : takenTasks_) {
-        if (!isTaskSatisfied(sharedState, t.task) && t.task.type != GOAL) {
-            ctIdx_ = idx;
-            return true;
-        }
-        idx++;
-    }
-
     // No unsatisfied goals. Check the blackboard
     if (blackboard_->getHelpEntries().size() > 0) {
 
@@ -554,7 +554,7 @@ bool Agent::determineNextGoal() {
             Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
 
             if(entry_casted->getProblemType() == Communication::HelpEntry::Agent &&
-               entry_casted->getBlockingAgentId() == getIndex() ) {
+                entry_casted->getBlockingAgentId() == getIndex() ) {
 
                 entry_casted->setProblemType(Communication::HelpEntry::TakenCareOf);
                 TaskStackElement newTask = ClearSelf(entry_casted->getForbiddenPath());
@@ -579,6 +579,20 @@ bool Agent::determineNextGoal() {
                 }
             }
         }
+    }
+
+    if (takenTasks_.size() > 1) {
+        std::rotate(takenTasks_.begin(), takenTasks_.begin() + 1, takenTasks_.end());
+    }
+
+    // Does anyone need help ? We firstly solve any HelpEntry before doing any goal
+    int idx = 0;
+    for (TaskInfo& t : takenTasks_) {
+        if (!isTaskSatisfied(sharedState, t.task) && t.task.type != GOAL) {
+            ctIdx_ = idx;
+            return true;
+        }
+        idx++;
     }
 
     // See if we have any unsatisfied goals that aren't waiting for help
@@ -650,7 +664,6 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
         });
 
         ans = searchBox(targBox, strat); //TODO reflect proper strategy
-        std::cerr << "Solution of length: " << ans.size() << " found!\n";
     }
     else {
         std::cerr << "Agent " << (int)this->num << " will satisfy goal (" << takenTasks_[ctIdx_].task.goal.loc.x << ", " << takenTasks_[ctIdx_].task.goal.loc.y << ") with box " << targBox.id << std::endl;
@@ -663,7 +676,6 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
                                 state->getAction(), state->getTimeStep(), errorDescription);
         });
         ans = searchGoal(takenTasks_[ctIdx_].task.goal, strat);
-        std::cerr << "Solution of length: " << ans.size() << " found!\n";
     }
 
     // Something went wrong, could not compute the path
@@ -701,7 +713,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
-        strat.setMaxIterations(1000);
+        strat.setMaxIterations(50000);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 

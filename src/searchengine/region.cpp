@@ -4,7 +4,7 @@ using SearchEngine::State;
 using SearchEngine::Region;
 using namespace SearchEngine::Predicate;
 
-Region::Region(State *input): inputState_(input), regionMatrix_() {
+Region::Region(State *input): numRegions_(0), inputState_(input), regionMatrix_() {
     regionMatrix_ = Region::getRegionMatrix(input);    
 }
 
@@ -28,8 +28,6 @@ void Region::computeRegionFromPositionRecursive(const State *state, std::vector<
     //  check if not out of bounds, is -1, is not wall, 
     //  then set to same counter 
     //  recursive call
-    std::cerr << "computeRegionFromPositionRecursive start" << std::endl;
-    std::cerr << x << " " << y << " " << regionCounter << " " << inBound(state, x, y) << std::endl;
     if(!inBound(state, x, y)) return;
     //std::cerr << (*result)[y][x] << std::endl;
 
@@ -85,5 +83,6 @@ std::vector<std::vector<size_t> > Region::getRegionMatrix(const State *state) {
             }
         }
     }
+    numRegions_ = regionCounter;
     return result;
 }

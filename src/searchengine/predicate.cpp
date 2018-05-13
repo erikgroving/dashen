@@ -298,7 +298,7 @@ bool SearchEngine::Predicate::isCoordNotOnForbiddenPath(const State *input, Coor
 
 bool SearchEngine::Predicate::isBoxNotOnForbiddenPath(const SearchEngine::State *input, int boxId, const std::vector<Coord> &forbiddenPath)
 {
-    if (boxId == -1) { return true;}
+    if (boxId == -1) { return true; }
     Coord boxLoc = input->getBoxes()[boxId].loc;
     for(const Coord& tile: forbiddenPath) {
         if(boxLoc == tile)

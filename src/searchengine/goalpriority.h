@@ -20,5 +20,13 @@ namespace SearchEngine {
         bool canReach(const SearchEngine::State& state, Coord box, Coord goal);
         int getSurroundingWalls(const SearchEngine::State& state, Coord c);
     }
+
+    class StrictOrdering { 
+        public:
+            StrictOrdering(){ strictOrderings = std::vector<std::vector<int>>(); }
+            void calculateStrictOrderings(SearchEngine::State state);
+            static std::vector<std::vector<int>> getStrictOrderings() { return strictOrderings; }
+            static std::vector<std::vector<int>> strictOrderings;
+    };
 }
-#endif // GOALPRIORITY_H
+#endif // SEARCHENGINE_GOALPRIORITY_H
