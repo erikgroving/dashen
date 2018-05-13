@@ -188,7 +188,6 @@ std::vector<SearchEngine::State *> Agent::searchClearSelf(SearchEngine::Strategy
         configurePrivateInitialState();
     else
         initialStateRemovedAllBut(num, -1);
-    std::cerr << "Performining clear self search!\n";
     SearchEngine::SearchCli searcher(private_initialState);
 
     if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
@@ -247,6 +246,7 @@ SearchEngine::Command Agent::nextMove() {
 
     updateTasks();
 
+    bool waitingForHelp = false;
     for (size_t i = 0; i < takenTasks_.size(); i++) {
         TaskInfo t = takenTasks_[i];
         if (t.hEntryToMonitor != nullptr) {
@@ -255,6 +255,12 @@ SearchEngine::Command Agent::nextMove() {
                 t.hEntryToMonitor->setProblemType(Communication::HelpEntry::ProblemType::AckDone);
             }
         }
+        if (t.waitingForHelp) {
+            waitingForHelp = true;
+        }
+    }
+    if (waitingForHelp){
+        return SearchEngine::Command();
     }
     
     /* If plan is empty, need to construct a new plan */
@@ -537,16 +543,6 @@ void Agent::updateTasks() {
 
 bool Agent::determineNextGoal() {
 
-    // Does anyone need help ? We firstly solve any HelpEntry before doing any goal
-    int idx = 0;
-    for (TaskInfo& t : takenTasks_) {
-        if (!isTaskSatisfied(sharedState, t.task) && t.task.type != GOAL) {
-            ctIdx_ = idx;
-            return true;
-        }
-        idx++;
-    }
-
     // No unsatisfied goals. Check the blackboard
     if (blackboard_->getHelpEntries().size() > 0) {
 
@@ -579,6 +575,16 @@ bool Agent::determineNextGoal() {
                 }
             }
         }
+    }
+
+    // Does anyone need help ? We firstly solve any HelpEntry before doing any goal
+    int idx = 0;
+    for (TaskInfo& t : takenTasks_) {
+        if (!isTaskSatisfied(sharedState, t.task) && t.task.type != GOAL) {
+            ctIdx_ = idx;
+            return true;
+        }
+        idx++;
     }
 
     // See if we have any unsatisfied goals that aren't waiting for help
@@ -650,7 +656,6 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
         });
 
         ans = searchBox(targBox, strat); //TODO reflect proper strategy
-        std::cerr << "Solution of length: " << ans.size() << " found!\n";
     }
     else {
         std::cerr << "Agent " << (int)this->num << " will satisfy goal (" << takenTasks_[ctIdx_].task.goal.loc.x << ", " << takenTasks_[ctIdx_].task.goal.loc.y << ") with box " << targBox.id << std::endl;
@@ -663,7 +668,6 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
                                 state->getAction(), state->getTimeStep(), errorDescription);
         });
         ans = searchGoal(takenTasks_[ctIdx_].task.goal, strat);
-        std::cerr << "Solution of length: " << ans.size() << " found!\n";
     }
 
     // Something went wrong, could not compute the path
@@ -701,7 +705,7 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
-        strat.setMaxIterations(1000);
+        strat.setMaxIterations(10000);
         strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
             std::string errorDescription;
             return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 

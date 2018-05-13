@@ -250,7 +250,7 @@ void Master::revokeBlackboardEntries(SearchClient::JointAction ja) {
 }
 
 void Master::printBlackboard(Communication::Blackboard* b) {
-
+/*
     auto posEntries = b->getPositionEntries();
     std::cerr << "\n---------Position Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tAuthor\n";
@@ -274,7 +274,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
-
+*/
     std::cerr << "\n---------Help Blackboard--------\n";
     std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\n";
     auto helpEntries = b->getHelpEntries();
