@@ -130,6 +130,7 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
     std::vector<Goal> goalsRemaining = s.goals;
     std::vector<unsigned int> priorities = std::vector<unsigned int>(s.goals.size());
 
+
     // Greedy first:
     // If a box can be placed without hindering anything, it shall be placed first
 

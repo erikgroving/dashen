@@ -70,7 +70,6 @@ public:
     void identifyBlockingObjects(const std::vector<SearchEngine::State* > &path);
     void askForHelp(Coord agentLoc, char, std::vector<Coord> forbiddenCoords, int idx);
 
-    void updateTasks(); 
     void checkHelpEntries();   
     void setSearchStrategy(SearchEngine::Strategy *strategy) { searchStrategy_ = strategy; }
     void configurePrivateInitialState();
