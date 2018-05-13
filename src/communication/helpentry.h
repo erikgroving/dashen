@@ -34,7 +34,7 @@ public:
     ProblemType getProblemType() const { return pType_; }
 
     int getBlockingBoxId() const { return blockingBoxId_; }
-    void setBlockingBoxId(char idx) { blockingBoxId_ = idx; }
+    void setBlockingBoxId(int idx) { blockingBoxId_ = idx; }
 
     int getBlockingAgentId() const { return blockingAgentId_; }
     void setBlockingAgentId(char idx) { blockingAgentId_ = idx; }
