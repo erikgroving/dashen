@@ -849,15 +849,28 @@ void Agent::leaveDeadend() {
             }
         }
     }
-    
-    configurePrivateInitialState();
-    std::vector<SearchEngine::State*> ans;
-    Strat::StrategyBFSMovePriority strat;
-    strat.linkBlackboard(blackboard_);
-    SearchEngine::SearchCli searcher(private_initialState);
-    searcher.setGoalStatePredicate([this, deadEndCoords](const SearchEngine::State *currentState){
-        return isAgentNotOnForbiddenPath(currentState, num, deadEndCoords);
-    });
-    auto stateSol = searcher.search(strat, (int) num);
-    extractPlan(stateSol);
+
+    bool deadEndIsSolved = true;
+    for (Coord& c : deadEndCoords) {
+        int gIdx;
+        if (goalAt(sharedState, c.x, c.y, &gIdx)) {
+            if (!goalHasCorrectBox(sharedState, SearchEngine::State::goals[gIdx])) {
+                deadEndIsSolved = false;
+                break;
+            }
+        }
+    }
+
+    if (!deadEndIsSolved) {
+        configurePrivateInitialState();
+        std::vector<SearchEngine::State*> ans;
+        Strat::StrategyBFSMovePriority strat;
+        strat.linkBlackboard(blackboard_);
+        SearchEngine::SearchCli searcher(private_initialState);
+        searcher.setGoalStatePredicate([this, deadEndCoords](const SearchEngine::State *currentState){
+            return isAgentNotOnForbiddenPath(currentState, num, deadEndCoords);
+        });
+        auto stateSol = searcher.search(strat, (int) num);
+        extractPlan(stateSol);
+    }
 }
