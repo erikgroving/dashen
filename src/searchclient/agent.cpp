@@ -127,7 +127,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
 
 void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> forbiddenCoords, int idx) {
     Communication::HelpEntry* entry;
-    if (!takenTasks_[ctIdx_].waitingForHelp) {
+    //if (!takenTasks_[ctIdx_].waitingForHelp) {
         if (hEntryToPerform == 'b') {
             if (blackboard_->getHelpEntries().size() > 0) {
                 for(auto* entry: blackboard_->getHelpEntries()) {
@@ -155,7 +155,7 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
             entry->setBlockingBoxId(-1);
             takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         } 
-    }
+    //}
 }
 
 std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngine::Strategy& strategy, bool ignoreOthers) {
@@ -269,12 +269,20 @@ SearchEngine::Command Agent::nextMove() {
 
     for (size_t i = 0; i < takenTasks_.size(); i++) {
         TaskInfo& t = takenTasks_[i];
-        for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
-            if (t.hEntryToMonitor[j]->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
+        if (isTaskSatisfied(sharedState, t.task)) {
+            for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
                 Communication::BlackboardEntry::revoke(t.hEntryToMonitor[j], *this);
-                t.hEntryToMonitor[j] = t.hEntryToMonitor.back();
-                t.hEntryToMonitor.pop_back();
-                j--;
+            }
+            t.hEntryToMonitor.clear();
+        }
+        else {
+            for (size_t j = 0; j < t.hEntryToMonitor.size(); j++) {
+                if (t.hEntryToMonitor[j]->getProblemType() == Communication::HelpEntry::ProblemType::Done) {
+                    Communication::BlackboardEntry::revoke(t.hEntryToMonitor[j], *this);
+                    t.hEntryToMonitor[j] = t.hEntryToMonitor.back();
+                    t.hEntryToMonitor.pop_back();
+                    j--;
+                }
             }
         }
         if (t.hEntryToMonitor.size() == 0) {
@@ -285,9 +293,10 @@ SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
 
-        if (ctIdx_ != -1 && isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) 
-                && takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
-            takenTasks_[ctIdx_].hEntryToPerform->setProblemType(Communication::HelpEntry::ProblemType::Done);
+        if (ctIdx_ != -1 && isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
+            if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
+                takenTasks_[ctIdx_].hEntryToPerform->setProblemType(Communication::HelpEntry::ProblemType::Done);
+            }
             takenTasks_[ctIdx_] = takenTasks_.back();
             takenTasks_.pop_back();
             ctIdx_ = -1;

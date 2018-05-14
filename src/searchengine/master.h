@@ -36,6 +36,7 @@ public:
     void updateStateWithNewMove(SearchEngine::Command, char);
 
     void computeGoalPriorities();
+    void clearCompleteUntakenHelpEntries();
     void revokeBlackboardEntries(SearchClient::JointAction);
     void printBlackboard(Communication::Blackboard* b);
 

@@ -48,6 +48,7 @@ void Master::conductSearch() {
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
         std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
+        clearCompleteUntakenHelpEntries();
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
         jointActions_.push_back(ja);
@@ -118,6 +119,34 @@ void Master::assignBoxesToGoals() {
         }
         g.assignedBoxID = closestBox.id;
         State::takenBoxes[closestBox.id] = true;
+    }
+}
+
+// Clears entries from help blackboard that are complete
+// but not because an agent helped
+void Master::clearCompleteUntakenHelpEntries() {
+    if (masterBlackboard_.getHelpEntries().size() > 0) {
+
+        for(auto* entry: masterBlackboard_.getHelpEntries()) {
+            Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+            if (entry_casted->getProblemType() == Communication::HelpEntry::Agent) {
+                const int& agentId = entry_casted->getBlockingAgentId();
+                if (SearchEngine::Predicate::isAgentNotOnForbiddenPath(
+                        &masterState_, agentId,
+                        entry_casted->getForbiddenPath())) {
+                    entry_casted->setProblemType(Communication::HelpEntry::Done);
+                }
+            }
+            else if (entry_casted->getProblemType() == Communication::HelpEntry::Box) {
+                const int& boxId = entry_casted->getBlockingBoxId();
+                if (SearchEngine::Predicate::isBoxNotOnForbiddenPath(
+                        &masterState_, boxId,
+                        entry_casted->getForbiddenPath())) {
+                    
+                    entry_casted->setProblemType(Communication::HelpEntry::Done);
+                }
+            }
+        }
     }
 }
 
