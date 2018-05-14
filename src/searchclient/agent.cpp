@@ -293,17 +293,23 @@ SearchEngine::Command Agent::nextMove() {
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
         for (size_t i = 0; i< takenTasks_.size(); i++) {
-            if (isTaskSatisfied(sharedState, takenTasks_[i].task)) {
+            if (isTaskSatisfied(sharedState, takenTasks_[i].task) && takenTasks_[i].task.type != GOAL) {
                 takenTasks_[i] = takenTasks_.back();
                 takenTasks_.pop_back();
                 ctIdx_ = -1;
             }
         }
         // Find the next goal to complete
-        if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) ||
-            takenTasks_[ctIdx_].waitingForHelp) {
+        if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
             if (!determineNextGoal()) {
-                return SearchEngine::Command(); // no goals so send a NoOp back
+                // no goal. if we are in a dead end, leave
+                if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc)) {
+                    leaveDeadend();
+                    return SearchEngine::Command();
+                }
+                else {
+                    return SearchEngine::Command(); // no goals so send a NoOp back
+                }
             }
         }
         std::vector<SearchEngine::State*> ans;
@@ -315,7 +321,13 @@ SearchEngine::Command Agent::nextMove() {
         ans = conductSubgoalSearch(&searchFailed);
         if(searchFailed) {
             identifyBlockingObjects(ans);
-            return SearchEngine::Command();
+            if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc)) {
+                leaveDeadend();
+                return SearchEngine::Command();
+            }
+            else {
+                return SearchEngine::Command(); // no goals so send a NoOp back
+            }
         }
 
         // Extract the plan from the search
@@ -326,7 +338,13 @@ SearchEngine::Command Agent::nextMove() {
     }
 
     if (plan_.empty()) {
-        return SearchEngine::Command();
+        if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc)) {
+            leaveDeadend();
+            return SearchEngine::Command();
+        }
+        else {
+            return SearchEngine::Command(); // no goals so send a NoOp back
+        }
     }
 
     SearchEngine::Command ret = plan_[0];
@@ -785,4 +803,51 @@ bool Agent::isTaskSatisfied(SearchEngine::State* state, TaskStackElement t) {
         return false; // Clear box and self tasks are always false because they split into
                         // two different tasks, clear box and then clear self. This should never be run
     }
+}
+
+void Agent::leaveDeadend() {
+
+    std::queue<Coord> q;
+    std::vector<Coord> deadEndCoords;
+    std::vector<std::vector<bool>> seen = std::vector<std::vector<bool>> (height(sharedState), std::vector<bool>());
+
+    for (size_t i = 0; i < height(sharedState); i++) {
+        seen[i] = std::vector<bool>(width(sharedState, i), false);
+    }
+
+    Coord currCoord = sharedState->getAgents()[num].loc;
+    q.push(currCoord);
+
+    while (!q.empty()) {
+        currCoord = q.front();
+        q.pop();
+
+        std::vector< Coord > coords = {
+            Coord(currCoord.x - 1, currCoord.y), Coord(currCoord.x, currCoord.y + 1),
+            Coord(currCoord.x + 1, currCoord.y), Coord(currCoord.x, currCoord.y - 1)
+        };
+
+
+        for (const Coord &c : coords) {
+            if (SearchEngine::Predicate::inBound(sharedState, c.x, c.y) &&
+                !SearchEngine::Predicate::wallAt(sharedState, c.x, c.y) &&
+                SearchEngine::Master::deadends.isDeadend(c) &&
+                !seen[c.y][c.x] ){
+                seen[c.y][c.x] = true;
+                deadEndCoords.push_back(c);
+                q.push(c);
+            }
+        }
+    }
+    
+    configurePrivateInitialState();
+    std::vector<SearchEngine::State*> ans;
+    Strat::StrategyBFSMovePriority strat;
+    strat.linkBlackboard(blackboard_);
+    SearchEngine::SearchCli searcher(private_initialState);
+    searcher.setGoalStatePredicate([this, deadEndCoords](const SearchEngine::State *currentState){
+        return isAgentNotOnForbiddenPath(currentState, num, deadEndCoords);
+    });
+    auto stateSol = searcher.search(strat, (int) num);
+    extractPlan(stateSol);
 }

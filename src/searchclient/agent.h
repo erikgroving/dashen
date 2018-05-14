@@ -134,6 +134,7 @@ public: // Search methods
     void postAllPositionEntries(const std::vector<SearchEngine::State*>& ans);
 
     Coord findBoxTargetWithBFS(int boxID);
+    void leaveDeadend();
     bool isTaskSatisfied(SearchEngine::State* state, TaskStackElement t);
 
 public: // Static public methods
