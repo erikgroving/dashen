@@ -102,7 +102,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
        state->getAction().action() == PULL              &&
        SearchEngine::Master::deadends.isDeadend(agentLoc) &&
        SearchEngine::Master::deadends.isDeadend(boxLoc)   ) {
-        result += 1;
+        result += 3;
     }
 
     /* Find the box assigned to the goal */

@@ -1,7 +1,7 @@
 red: 0,A
 green: 1,2,3,4,5
 blue: 6,B
-yellow: 7,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W
+magenta: 7,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W
 +++++++++++
 +6       a+
 +++++B+++++

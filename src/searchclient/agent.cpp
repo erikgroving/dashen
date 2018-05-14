@@ -754,6 +754,7 @@ std::vector<SearchEngine::State*> Agent::conductClearSelfSearch(bool* searchFail
     strat.linkBlackboard(blackboard_);
     ans = searchClearSelf(strat);
     if (ans.size() == 0) {
+        *searchFailed = true;
         Strat::StrategyBFSMovePriority strat;
         strat.linkBlackboard(nullptr);
         ans = searchClearSelf(strat, true);
