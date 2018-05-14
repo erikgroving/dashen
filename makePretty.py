@@ -23,7 +23,7 @@ def main():
             cur_string += '{0:8}'.format(line[9:])
             try:
                 steps = int(line[9:])
-                if steps < 3000:
+                if steps < 1000000:
                     pass_counter += 1
             except:
                 pass

@@ -292,7 +292,7 @@ SearchEngine::Command Agent::nextMove() {
     
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
-        for (size_t i = 0; i< takenTasks_.size(); i++) {
+        for (size_t i = 0; i < takenTasks_.size(); i++) {
             if (isTaskSatisfied(sharedState, takenTasks_[i].task) && takenTasks_[i].task.type != GOAL) {
                 takenTasks_[i] = takenTasks_.back();
                 takenTasks_.pop_back();
@@ -627,11 +627,14 @@ bool Agent::determineNextGoal() {
     
 std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed) {
     if (takenTasks_[ctIdx_].task.type == CLEAR_BOX) {
-        //std::cerr << "Conducting clear box search on box: " << sharedState->getBoxes()[takenTasks_[ctIdx_].task.clearBox.boxToMoveID].letter <<std::endl;
-        return conductClearBoxSearch(searchFailed);
+        if (!isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
+            return conductClearBoxSearch(searchFailed);
+        }
     }
     else if (takenTasks_[ctIdx_].task.type == CLEAR_SELF) {
-        return conductClearSelfSearch(searchFailed);
+        if (!isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
+            return conductClearSelfSearch(searchFailed);
+        }
     }
     else if (takenTasks_[ctIdx_].task.type == CLEAR_BOX_AND_SELF) {
         /* Split the task into a CLEAR_BOX then a CLEAR_SELF */
@@ -640,7 +643,9 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
         exit(1);
     }
     else if (takenTasks_[ctIdx_].task.type == GOAL) {
-        return conductGoalSearch(searchFailed);
+        if (!isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
+            return conductGoalSearch(searchFailed);
+        }
     }
     else {
         *searchFailed = false;
@@ -791,7 +796,7 @@ void Agent::postAllPositionEntries(const std::vector<SearchEngine::State*>& ans)
     }
 }
 
-bool Agent::isTaskSatisfied(SearchEngine::State* state, TaskStackElement t) {
+bool Agent::isTaskSatisfied(SearchEngine::State* state, TaskStackElement& t) {
     if (t.type == GOAL) {
         return goalHasCorrectBox(sharedState, t.goal);
     }

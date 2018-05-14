@@ -26,7 +26,9 @@ unsigned long AgentToBoxAStarHeuristic::f(const SearchEngine::State* state) cons
             currCorrectGoals += 1;
         }
     }
-    result += (1 + startSearchCorrectgoals - currCorrectGoals) * 20;
+    if (startSearchCorrectgoals >= currCorrectGoals) {
+        result += (startSearchCorrectgoals - currCorrectGoals) * 20;
+    }
 
     if (state->getAction().action() != MOVE) {
         result += 2;
@@ -62,7 +64,9 @@ unsigned long BoxToTargetAStarHeuristic::f(const SearchEngine::State* state) con
         }
     }
 
-    result += 1 + startSearchCorrectgoals - currCorrectGoals;
+    if (startSearchCorrectgoals >= currCorrectGoals) {
+        result += (startSearchCorrectgoals - currCorrectGoals) * 2;
+    }
 
     /* Find the box assigned to the goal */
     Coord target = getReferenceAgent()->getCurrentTask().clearBox.target;
@@ -87,7 +91,9 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
         }
     }
 
-    result += 1 + startSearchCorrectgoals - currCorrectGoals;
+    if (startSearchCorrectgoals >= currCorrectGoals) {
+        result += (startSearchCorrectgoals - currCorrectGoals) * 2;
+    }
 
     Coord boxLoc = state->getBoxes()[searchGoal.assignedBoxID].loc;
     Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
