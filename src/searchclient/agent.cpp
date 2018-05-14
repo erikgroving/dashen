@@ -859,6 +859,10 @@ void Agent::leaveDeadend() {
                 break;
             }
         }
+        else if (boxAt(sharedState, c.x, c.y)) {
+            deadEndIsSolved= false;
+            break;
+        }
     }
 
     if (!deadEndIsSolved) {
