@@ -16,9 +16,9 @@ yellow: 7,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W
 +    A    +
 +++++++++++
 ++++++++++++++++++++++++++
-+wucdef PHOJKL          7+
-++++++++++++++           +
-+phojkl MNQRST           +
-++++++++++++++           +
-+mnqrst WUCDEF           +
++wucdef PHOJKL      c   7+
+++++++++++++++          c+
+++++++++++++++       e   +
+++++++++++++++          d+
++WUCDEF CECDF      f     +
 ++++++++++++++++++++++++++
