@@ -45,7 +45,7 @@ SearchCli::SearchCli(State *initialState, bool printInitialState): initialState_
 
 std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agentIndex) {
     
-    std::cerr << "The search is conducted with the Strategy " << strategy.name() << std::endl;
+    //std::cerr << "The search is conducted with the Strategy " << strategy.name() << std::endl;
 
     int iterations = 0;
     strategy.addToFrontier(initialState_);
@@ -59,7 +59,7 @@ std::vector<State*> SearchCli::search(SearchEngine::Strategy &strategy, int agen
         State *leaf = strategy.getAndRemoveLeaf();
         
         if(iterations % 10000 == 0) {
-            std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
+            //std::cerr << "Iteration " << iterations + 1 << ", Explored: " << strategy.countExplored() << ", Frontier: " << strategy.countFrontier() << std::endl;
             //printMap(leaf);
         }
         

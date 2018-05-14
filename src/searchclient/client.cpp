@@ -16,7 +16,7 @@ void Client::setAction(size_t agentId, const Command &command) {
     
     // Check bound to prevent any out-of-bounds exception
     if( agentId >= agents.size() ) {
-        std::cerr << "Wrong agentId " << agentId << "was passed when setting up action" << std::endl;
+        //std::cerr << "Wrong agentId " << agentId << "was passed when setting up action" << std::endl;
         return;
     }
 
@@ -31,7 +31,7 @@ void Client::setAction(size_t agentId, const Command &command) {
         }
     }
     else {
-        std::cerr << "Cannot set a move in a invalid problem" << std::endl;
+        //std::cerr << "Cannot set a move in a invalid problem" << std::endl;
     }
     actionsRecv++;
 }
@@ -86,7 +86,7 @@ State Client::initState(std::istream &inputstream) {
 
                 // set Goal
                 if (s[i]>= 'a' && s[i]<='z') {
-                    std::cerr << "Added goal" << std::endl;
+                  //  std::cerr << "Added goal" << std::endl;
                     goals.push_back( Goal( toupper(s[i]), currCoord) );
                 }
 
@@ -129,8 +129,8 @@ State Client::initState(std::istream &inputstream) {
 
     resetJointAction();
 
-    std::cerr << "Constructing..." << std::endl;
-    std::cerr << "Done constructing..." << std::endl;
+    //std::cerr << "Constructing..." << std::endl;
+   // std::cerr << "Done constructing..." << std::endl;
 
     switch(State::numAgents) {
         case 0: break;
@@ -185,7 +185,7 @@ bool Client::sendStep(const JointAction &jointAction) {
         return true;
     else if(returnMsg == "[false]") return false;
     else {
-        std::cerr << "The server answered with a unintended response: " << returnMsg << std::endl;
+        //std::cerr << "The server answered with a unintended response: " << returnMsg << std::endl;
         return false;
     }
 }
@@ -207,7 +207,7 @@ Color stringToColor(std::string c) {
 
 void Client::saveJointAction() {
     actionPlan_.emplace_back(onGoingJointAction);
-    std::cerr << actionPlan_[0].getData().size();
+    //std::cerr << actionPlan_[0].getData().size();
 }
 
 void Client::resetJointAction() {

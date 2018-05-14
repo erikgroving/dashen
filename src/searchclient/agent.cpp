@@ -49,7 +49,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackboard) :
             color(color), num(num), searchStrategy_(),
-            private_initialState(), ctIdx_(-1), takenTasks_(),
+            private_initialState(), ctIdx_(-1), noFoundGoals_(0), takenTasks_(),
             plan_(), blackboard_(blackboard),
             correctGoals_(0) {
 
@@ -57,7 +57,7 @@ Agent::Agent(Color color, char num, Coord loc, Communication::Blackboard *blackb
 
 Agent::Agent(const SearchClient::Agent &src): color(src.color), num(src.num),
     private_initialState(src.private_initialState), ctIdx_(src.ctIdx_),
-    takenTasks_(src.takenTasks_), plan_(src.plan_),
+    noFoundGoals_(src.noFoundGoals_), takenTasks_(src.takenTasks_), plan_(src.plan_),
     blackboard_(src.blackboard_), correctGoals_(src.correctGoals_)
      {
 
@@ -265,7 +265,7 @@ void Agent::setSharedState(SearchEngine::State *sharedState) {
 }
 
 SearchEngine::Command Agent::nextMove() {
-    std::cerr << "AGENT "  <<  (int)num << std::endl;
+    //std::cerr << "AGENT "  <<  (int)num << std::endl;
 
     for (size_t i = 0; i < takenTasks_.size(); i++) {
         TaskInfo& t = takenTasks_[i];
@@ -300,16 +300,21 @@ SearchEngine::Command Agent::nextMove() {
             }
         }
         // Find the next goal to complete
-        if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
+        if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) || 
+            takenTasks_[ctIdx_].waitingForHelp) {
             if (!determineNextGoal()) {
+                noFoundGoals_++;
                 // no goal. if we are in a dead end, leave
-                if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc)) {
+                if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc) && noFoundGoals_ < 3) {
                     leaveDeadend();
                     return SearchEngine::Command();
                 }
                 else {
                     return SearchEngine::Command(); // no goals so send a NoOp back
                 }
+            }
+            else {
+                noFoundGoals_ = 0;
             }
         }
         std::vector<SearchEngine::State*> ans;
@@ -622,7 +627,7 @@ bool Agent::determineNextGoal() {
     
 std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed) {
     if (takenTasks_[ctIdx_].task.type == CLEAR_BOX) {
-        std::cerr << "Conducting clear box search on box: " << sharedState->getBoxes()[takenTasks_[ctIdx_].task.clearBox.boxToMoveID].letter <<std::endl;
+        //std::cerr << "Conducting clear box search on box: " << sharedState->getBoxes()[takenTasks_[ctIdx_].task.clearBox.boxToMoveID].letter <<std::endl;
         return conductClearBoxSearch(searchFailed);
     }
     else if (takenTasks_[ctIdx_].task.type == CLEAR_SELF) {
@@ -630,8 +635,8 @@ std::vector<SearchEngine::State*> Agent::conductSubgoalSearch(bool *searchFailed
     }
     else if (takenTasks_[ctIdx_].task.type == CLEAR_BOX_AND_SELF) {
         /* Split the task into a CLEAR_BOX then a CLEAR_SELF */
-        std::cerr << "CLEAR_BOX_AND_SELF should not be pushed into takenTasks or"
-                        " set to currentTaskPtr_. It should be split into 2 tasks\n";
+        //std::cerr << "CLEAR_BOX_AND_SELF should not be pushed into takenTasks or"
+        //                " set to currentTaskPtr_. It should be split into 2 tasks\n";
         exit(1);
     }
     else if (takenTasks_[ctIdx_].task.type == GOAL) {
@@ -650,8 +655,8 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
 
     if (!agentNextToBox(sharedState, targBox, this)) {
 
-        std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << 
-            " from " << sharedState->getAgents()[num].loc.x << "," << sharedState->getAgents()[num].loc.y << std::endl;
+        //std::cerr << "Getting to box " << targBox.id << " (" << targBox.loc.x << ", " << targBox.loc.y << ")" << 
+        //    " from " << sharedState->getAgents()[num].loc.x << "," << sharedState->getAgents()[num].loc.y << std::endl;
 
         Strat::StrategyHeuristic<Heur::AgentToBoxAStarHeuristic> strat(this);
         strat.linkBlackboard(blackboard_);
@@ -665,7 +670,7 @@ std::vector<SearchEngine::State*> Agent::conductGoalSearch(bool* searchFailed) {
         ans = searchBox(targBox, strat); //TODO reflect proper strategy
     }
     else {
-        std::cerr << "Agent " << (int)this->num << " will satisfy goal (" << takenTasks_[ctIdx_].task.goal.loc.x << ", " << takenTasks_[ctIdx_].task.goal.loc.y << ") with box " << targBox.id << std::endl;
+        //std::cerr << "Agent " << (int)this->num << " will satisfy goal (" << takenTasks_[ctIdx_].task.goal.loc.x << ", " << takenTasks_[ctIdx_].task.goal.loc.y << ") with box " << targBox.id << std::endl;
         Strat::StrategyHeuristic<Heur::BoxToGoalAStarHeuristic> strat(this);
         strat.linkBlackboard(blackboard_);
         strat.setMaxIterations(1000);

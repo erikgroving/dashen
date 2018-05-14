@@ -148,7 +148,6 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
 /*
     int idx = 0;
     for (auto dist : dists) {
-        std::cerr << "Dist for goal with letter: "<< s.goals[idx].letter<<" " << dist << std::endl;
         idx++;
     }*/
     // Greedy first:
@@ -162,13 +161,10 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
         // If goal is free standing (using isFieldBlockable)
         bool isBlockable = Predicate::isFieldBlockable(&s, g.loc.x, g.loc.y);
         if (isBlockable) {
-            std::cerr << " goalsRemaining size = " << goalsRemaining.size() << std::endl;
             priorities[indexInPriorities] = goalsRemaining.size();
             s.walls[g.loc.y][g.loc.x] = true;
             goalsRemaining.erase(goalsRemaining.begin() + i, goalsRemaining.begin() + i + 1);
             i--;
-            std::cerr << "Goal blockable, id = " << indexInPriorities << std::endl;
-            std::cerr << " goalsRemaining size = " << goalsRemaining.size() << std::endl;
         }
         indexInPriorities++;
     } 

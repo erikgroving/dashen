@@ -30,7 +30,7 @@ int main(int argc,  char **argv) {
     SearchClient::Agent::setSharedState(&initialState);
     auto agents = searchClient.extractAgents();
     
-    std::cerr << "Starting the search..." << std::endl;
+    //std::cerr << "Starting the search..." << std::endl;
     SearchEngine::Master master(initialState, agents);
     master.conductSearch();
 

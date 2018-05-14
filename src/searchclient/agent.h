@@ -157,6 +157,7 @@ private:
     /* Tasks can be Goal, Clear self (out of way), clear box, or clear box and self. */
     /* Clear box and self devolves into two tasks, clear self, and then clear box */
     int ctIdx_; // current task index
+    int noFoundGoals_;
     std::vector<TaskInfo> takenTasks_;
 
     std::vector<SearchEngine::Command> plan_;

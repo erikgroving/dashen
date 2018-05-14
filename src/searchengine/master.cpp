@@ -39,15 +39,15 @@ Master::Master(const Master &m) {
 }
 
 void Master::conductSearch() {
-    std::cerr << "--- Starting conductSearch! ---\n";
+    //std::cerr << "--- Starting conductSearch! ---\n";
 
-    std::cerr << "--- Posting goals for the state onto the blackboard ---\n";
+    //std::cerr << "--- Posting goals for the state onto the blackboard ---\n";
     postBlackBoard();
     assignBoxesToGoals();
 
     int round = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
-        std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
+        //std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         clearCompleteUntakenHelpEntries();
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
@@ -55,12 +55,12 @@ void Master::conductSearch() {
 
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
-        std::cerr << "Joint Action: " << ja.toActionString();
+        //std::cerr << "Joint Action: " << ja.toActionString();
         std::cout << ja.toActionString() << std::endl;
-        std::cerr << std::endl;
-        printMap(&masterState_);
-        printBlackboard(&masterBlackboard_);
-        std::cerr<<std::endl;
+        //std::cerr << std::endl;
+        //printMap(&masterState_);
+        //printBlackboard(&masterBlackboard_);
+        //std::cerr<<std::endl;
     }
 
     std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl;
@@ -247,32 +247,32 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
 void Master::computeGoalPriorities()
 {
     auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
-    std::cerr << "goalPriorities: " << std::endl;
-    for (Goal currentGoal : masterState_.goals) {
-        std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
-        std::cerr << ", letter: " << currentGoal.letter;
-        std::cerr << ", priority: " << currentGoal.priority << std::endl;
+    //std::cerr << "goalPriorities: " << std::endl;
+/*    for (Goal currentGoal : masterState_.goals) {
+        //std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
+        //std::cerr << ", letter: " << currentGoal.letter;
+        //std::cerr << ", priority: " << currentGoal.priority << std::endl;
     }
     for (size_t i = 0; i < goalPriorities.size(); i++) {
-        std::cerr << i << " value: " << goalPriorities[i] << std::endl;
+        //std::cerr << i << " value: " << goalPriorities[i] << std::endl;
     }
-
+*/
 
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
         int goalIndex = -1;
         SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
         static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities[goalIndex]);
         //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
-
+/*
         char letter;
         for (Goal g : masterState_.goals) {
             if (g.loc == goalEntry->getLocation()) {
                 letter = g.letter;
                 break;
             }
-        }
-        unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
-        std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
+        }*/
+        //unsigned int currentPriority = static_cast<Communication::GlobalGoalEntry*>(goalEntry)->getPriority();
+        //std::cerr << "Goal with letter: " << letter <<  " has priority " << currentPriority << std::endl;
     }
 
     SearchEngine::StrictOrdering sO = SearchEngine::StrictOrdering();
@@ -315,6 +315,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
         }
     }
     */
+
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
