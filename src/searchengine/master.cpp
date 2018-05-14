@@ -129,7 +129,7 @@ void Master::clearCompleteUntakenHelpEntries() {
 
         for(auto* entry: masterBlackboard_.getHelpEntries()) {
             Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
-            if (entry_casted->getProblemType() == Communication::HelpEntry::Agent) {
+            if (entry_casted->getBlockingBoxId() == -1) {
                 const int& agentId = entry_casted->getBlockingAgentId();
                 if (SearchEngine::Predicate::isAgentNotOnForbiddenPath(
                         &masterState_, agentId,
@@ -137,7 +137,7 @@ void Master::clearCompleteUntakenHelpEntries() {
                     entry_casted->setProblemType(Communication::HelpEntry::Done);
                 }
             }
-            else if (entry_casted->getProblemType() == Communication::HelpEntry::Box) {
+            else {
                 const int& boxId = entry_casted->getBlockingBoxId();
                 if (SearchEngine::Predicate::isBoxNotOnForbiddenPath(
                         &masterState_, boxId,
@@ -328,19 +328,21 @@ void Master::printBlackboard(Communication::Blackboard* b) {
     }
 
     std::cerr << "\n---------Help Blackboard--------\n";
-    std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\n";
+    std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\t\tTaken?\n";
     auto helpEntries = b->getHelpEntries();
     for (auto* entry : helpEntries) {
         Communication::HelpEntry *entry_casted = static_cast<Communication::HelpEntry*>(entry);
         if (entry_casted->getBlockingBoxId() == -1) {
             std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t" <<
                         entry_casted->getAuthorId() << "\t\t\t" << "AGENT" <<
-                        "\t\t" << entry_casted->getBlockingAgentId() << std::endl;
+                        "\t\t" << entry_casted->getBlockingAgentId() << "\t\t\t" <<  
+                        (entry_casted->getProblemType() == Communication::HelpEntry::TakenCareOf ? "Yes" : "No") << std::endl;
         }
         else if (entry_casted->getBlockingAgentId() == -1) {
             std::cerr << (int)entry_casted->getTimeStep() << "\t\t\t" <<
                         entry_casted->getAuthorId() << "\t\t\t" << "BOX" <<
-                        "\t\t" << entry_casted->getBlockingBoxId() << std::endl;
+                        "\t\t" << entry_casted->getBlockingBoxId() << "\t\t\t" << 
+                        (entry_casted->getProblemType() == Communication::HelpEntry::TakenCareOf ? "Yes" : "No") << std::endl;
         }
     }
 }

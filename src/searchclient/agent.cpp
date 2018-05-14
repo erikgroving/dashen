@@ -127,7 +127,7 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
 
 void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> forbiddenCoords, int idx) {
     Communication::HelpEntry* entry;
-    //if (!takenTasks_[ctIdx_].waitingForHelp) {
+    if (!takenTasks_[ctIdx_].waitingForHelp) {
         if (hEntryToPerform == 'b') {
             if (blackboard_->getHelpEntries().size() > 0) {
                 for(auto* entry: blackboard_->getHelpEntries()) {
@@ -155,7 +155,7 @@ void Agent::askForHelp(Coord agentLoc, char hEntryToPerform, std::vector<Coord> 
             entry->setBlockingBoxId(-1);
             takenTasks_[ctIdx_].hEntryToMonitor.push_back(entry);
         } 
-    //}
+    }
 }
 
 std::vector<SearchEngine::State*> Agent::searchGoal(const Goal &goal, SearchEngine::Strategy& strategy, bool ignoreOthers) {
@@ -292,14 +292,12 @@ SearchEngine::Command Agent::nextMove() {
     
     /* If plan is empty, need to construct a new plan */
     if (plan_.empty()) {
-
-        if (ctIdx_ != -1 && isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task)) {
-            if (takenTasks_[ctIdx_].hEntryToPerform != nullptr) {
-                takenTasks_[ctIdx_].hEntryToPerform->setProblemType(Communication::HelpEntry::ProblemType::Done);
+        for (size_t i = 0; i< takenTasks_.size(); i++) {
+            if (isTaskSatisfied(sharedState, takenTasks_[i].task)) {
+                takenTasks_[i] = takenTasks_.back();
+                takenTasks_.pop_back();
+                ctIdx_ = -1;
             }
-            takenTasks_[ctIdx_] = takenTasks_.back();
-            takenTasks_.pop_back();
-            ctIdx_ = -1;
         }
         // Find the next goal to complete
         if (ctIdx_ == -1 || isTaskSatisfied(sharedState, takenTasks_[ctIdx_].task) ||
@@ -548,7 +546,7 @@ bool Agent::determineNextGoal() {
 
             else if(entry_casted->getProblemType() == Communication::HelpEntry::Box) {
                 Box &box = sharedState->getBoxes()[entry_casted->getBlockingBoxId()];
-                if(box.color == color) {
+                if(box.color == color && Heur::DistanceOracle::fetchDistFromCoord(box.loc, sharedState->getAgents()[num].loc) != (unsigned long) -1) {
                     entry_casted->setProblemType(Communication::HelpEntry::TakenCareOf);
                     TaskStackElement newTask = ClearBoxSelf(entry_casted->getBlockingBoxId(), entry_casted->getForbiddenPath());
                     TaskStackElement clrBox = ClearBox(newTask.clearBoxSelf.boxToMoveID, newTask.clearBoxSelf.forbiddenPath);
