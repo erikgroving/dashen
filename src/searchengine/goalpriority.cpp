@@ -128,12 +128,32 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
     SearchEngine::State s = *state;
 
     std::vector<Goal> goalsRemaining = s.goals;
-    std::vector<unsigned int> priorities = std::vector<unsigned int>(s.goals.size());
+    std::vector<unsigned long> dists;
+    std::vector<unsigned int> priorities = std::vector<unsigned int>();
 
-
+    for (size_t i = 0; i < s.goals.size(); i++) {
+        unsigned long total_dists = 0;
+        for (size_t j = 0; j < height(state); j++) {
+            for (size_t k = 0; k < width(state, j); k++) {
+                Coord currCoord = Coord(k, j);
+                unsigned long dist = Heur::DistanceOracle::fetchDistFromCoord(s.goals[i].loc, currCoord);
+                if (dist != (unsigned long) -1) {
+                    total_dists += dist;
+                }
+            }
+        }
+        priorities.push_back(total_dists);
+    }
+    return priorities;
+/*
+    int idx = 0;
+    for (auto dist : dists) {
+        std::cerr << "Dist for goal with letter: "<< s.goals[idx].letter<<" " << dist << std::endl;
+        idx++;
+    }*/
     // Greedy first:
     // If a box can be placed without hindering anything, it shall be placed first
-
+/*
     size_t indexInPriorities = 0;
     for (size_t i=0; i<goalsRemaining.size(); i++) {
         
@@ -200,7 +220,7 @@ std::vector<unsigned int> SearchEngine::GoalPriorityComputation::computeAllGoalP
     for (Goal& g: state->goals) {
         s.walls[g.loc.y][g.loc.x] = false;
     }
-    return priorities; 
+    return priorities; */
 }
 
 /* Are all the remaining goals still accessible by a box with correct letter ? */
