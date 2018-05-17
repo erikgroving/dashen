@@ -34,9 +34,9 @@ public:
     /* Assigns boxes to all goals */
     void assignBoxesToGoals();
     /* Calls for joint actions from the agents, returns a joint action */
-    SearchClient::JointAction callForActions();
+    SearchClient::JointAction callForActions(std::vector<int>&);
     /* Update the current state to reflect the previous actions */
-    void updateCurrentState(SearchClient::JointAction*);
+    void updateCurrentState(SearchClient::JointAction*, std::vector<int>&);
     /* Sends the solution once a universal goal state is found */
     void sendSolution();
     /* Checks if a sub-action in a joint action plan is valid, used by updateCurrentState */

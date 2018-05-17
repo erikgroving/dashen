@@ -52,7 +52,13 @@ void Master::conductSearch() {
         //std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         clearCompleteUntakenHelpEntries();
         SearchClient::Agent::setSharedState(&masterState_);
-        SearchClient::JointAction ja = callForActions();
+        std::vector<int> randomOrder;
+        for (size_t i = 0; i < agents_.size(); i++) {
+            randomOrder.push_back(i);
+        }
+
+        std::random_shuffle(randomOrder.begin(), randomOrder.end());
+        SearchClient::JointAction ja = callForActions(randomOrder);
         if (allNoOps(ja)) {
             noopCounter++;
             nukeCounter++;
@@ -67,7 +73,8 @@ void Master::conductSearch() {
             noopMove_ = true;
             int randAct;
             Command randomAction;
-            for (size_t i = 0; i < ja.getData().size(); i++) {
+            //for (size_t i = 0; i < ja.getData().size(); i++) {
+            for (const auto& i : randomOrder) {
                 int tries = 0;
                 do {
                     randAct = rand() % Command::possibleActions.size();
@@ -93,7 +100,7 @@ void Master::conductSearch() {
         }
 
         prevMasterState_ = masterState_;
-        updateCurrentState(&ja);
+        updateCurrentState(&ja, randomOrder);
         //std::cerr << "Joint Action: " << ja.toActionString();
         std::cout << ja.toActionString() << std::endl;
         //std::cerr << std::endl;
@@ -104,7 +111,7 @@ void Master::conductSearch() {
 
     std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl;
     // Send the solution
-    //sendSolution();
+    sendSolution();
 }
 
 /* This adds all the goal tiles from the initial state to the blackboard */
@@ -132,15 +139,9 @@ void Master::postBlackBoard() {
 }
 
 /* This function calls for actions from all the agents */
-SearchClient::JointAction Master::callForActions() {
+SearchClient::JointAction Master::callForActions(std::vector<int>& randomOrder) {
     SearchClient::JointAction action = SearchClient::JointAction();
     action.initialize(agents_.size());
-    std::vector<int> randomOrder;
-    for (size_t i = 0; i < agents_.size(); i++) {
-        randomOrder.push_back(i);
-    }
-
-    std::random_shuffle(randomOrder.begin(), randomOrder.end());
     for (auto&i : randomOrder) {
         action.setAction(i, agents_[i].nextMove());
     }
@@ -212,10 +213,10 @@ void Master::clearCompleteUntakenHelpEntries() {
 }
 
 /* This function updates the current state to reflect the previous joint actions */
-void Master::updateCurrentState(SearchClient::JointAction* ja) {
+void Master::updateCurrentState(SearchClient::JointAction* ja, std::vector<int>& order) {
     std::vector<SearchEngine::Command> actions = ja->getData();
     std::vector< std::pair<int, SearchEngine::Command> > agentsWithPlansToBeCleared;
-    for (size_t i = 0; i < actions.size(); i++) {
+    for (const int& i : order) {
         /* Move must be valid in the previous state and the in process state */
         if (isActionValid(&masterState_, actions[i], i) &&
             isActionValid(&prevMasterState_, actions[i], i)) {
