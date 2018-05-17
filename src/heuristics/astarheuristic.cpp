@@ -113,6 +113,10 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
         result += 3;
     }
 
+    if (state->getAction().action() == PULL && state->getParent()->getAction().action() != PULL) {
+        result += 1;
+    }
+
     /* Find the box assigned to the goal */
     Box closestBox = state->getBoxes()[searchGoal.assignedBoxID];
     result += DistanceOracle::fetchDistFromCoord(searchGoal.loc, closestBox.loc);
