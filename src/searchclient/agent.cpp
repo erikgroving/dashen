@@ -483,7 +483,6 @@ Goal Agent::getGoalFromBlackboard() {
 
     Goal &result = SearchEngine::State::goals[goalIndex];
 
-
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);
     takenTasks_.push_back(tInfo);
@@ -958,16 +957,18 @@ void Agent::leaveDeadend() {
 
     bool deadEndIsSolved = true;
     for (Coord& c : deadEndCoords) {
-        int gIdx;
+        int gIdx, bIdx;
         if (goalAt(sharedState, c.x, c.y, &gIdx)) {
             if (!goalHasCorrectBox(sharedState, SearchEngine::State::goals[gIdx])) {
                 deadEndIsSolved = false;
                 break;
             }
         }
-        else if (boxAt(sharedState, c.x, c.y)) {
-            deadEndIsSolved= false;
-            break;
+        else if (boxAt(sharedState, c.x, c.y, &bIdx)) {
+            if (sharedState->getBoxes()[bIdx].color != color) {
+                deadEndIsSolved = false;
+                break;
+            }
         }
     }
 

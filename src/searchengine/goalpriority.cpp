@@ -24,6 +24,38 @@ void SearchEngine::StrictOrdering::calculateStrictOrderings(SearchEngine::State 
     bool goalsUpdated = true;
     while (goalsUpdated) {
         goalsUpdated = false;
+        for (size_t k = 0; k < SearchEngine::State::goals.size(); k++) {
+            Coord x = SearchEngine::State::goals[k].loc;
+            size_t j = x.x;
+            size_t i = x.y;
+            if (!wallAt(&state, j, i) && getSurroundingWalls(state, Coord(j, i)) == 3) {
+                goalsUpdated = true;
+                fakeWalls.push_back(Coord(j, i));
+                SearchEngine::State::walls[i][j] = true;
+                int gIdx = -1;
+                if (goalAt(&state, j, i, &gIdx)) {
+                    fakeWallIds.insert(std::make_pair(Coord(j, i), gIdx));
+                    // Check if there are fake wall goals
+                    Coord north = Coord(j, i - 1);
+                    Coord east = Coord(j + 1, i);
+                    Coord south = Coord(j, i + 1);
+                    Coord west = Coord(j - 1, i);
+                    vector<Coord> dirs = {north, east, south, west};
+                    for (Coord c : dirs) {
+                        if (wallAt(&state, c.x, c.y)) {
+                            if (fakeWallIds.find(c) != fakeWallIds.end()) {
+                                strictOrderings[gIdx].push_back(fakeWallIds[c]);
+                            }
+                        }
+                    }
+                } 
+            }
+        }
+    }
+
+    goalsUpdated = true;
+    while (goalsUpdated) {
+        goalsUpdated = false;
         for (size_t i = 0; i < height(&state); i++) {
             for (size_t j = 0; j < width(&state, i); j++) {
                 if (!wallAt(&state, j, i) && getSurroundingWalls(state, Coord(j, i)) == 3) {
