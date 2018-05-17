@@ -55,6 +55,7 @@ public:
 private:
     std::vector<SearchClient::JointAction> jointActions_;
     std::vector<unsigned int> goalPriorities_;
+    bool noopMove_;
     State masterState_;
     State prevMasterState_;
     std::vector<SearchClient::Agent> agents_;

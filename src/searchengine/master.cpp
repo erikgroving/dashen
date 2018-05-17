@@ -61,8 +61,10 @@ void Master::conductSearch() {
             noopCounter = 0;
             nukeCounter = 0;
         }
-/*
+
+        noopMove_ = false;
         if (noopCounter > 2) {
+            noopMove_ = true;
             int randAct;
             Command randomAction;
             for (size_t i = 0; i < ja.getData().size(); i++) {
@@ -79,7 +81,7 @@ void Master::conductSearch() {
                     ja.setAction(i, randomAction);
                 }
             }
-        }*/
+        }
 
         jointActions_.push_back(ja);
 
@@ -226,7 +228,9 @@ void Master::updateCurrentState(SearchClient::JointAction* ja) {
             ja->setAction(i, SearchEngine::Command());
         }
     }
-    revokeBlackboardEntries(*ja);
+    if (!noopMove_) {
+        revokeBlackboardEntries(*ja);
+    }
     for (size_t i = 0; i < agentsWithPlansToBeCleared.size(); i++) {
         int id = agentsWithPlansToBeCleared[i].first;
         auto cmd = agentsWithPlansToBeCleared[i].second;

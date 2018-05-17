@@ -165,8 +165,10 @@ void Blackboard::clear(Registry registry, short id) {
             break;
 
         case PositionEntry:
-            for(auto ite = positionEntries_[id].begin() + 1; ite != positionEntries_[id].end(); ite++)
-                delete *ite;
+            if (positionEntries_[id].size() > 1) {
+                for(auto ite = positionEntries_[id].begin() + 1; ite != positionEntries_[id].end(); ite++)
+                    delete *ite;
+            }
             if (positionEntries_[id].size() > 1) {
                 positionEntries_[id].resize(1);
             }
@@ -179,8 +181,10 @@ void Blackboard::clear(Registry registry, short id) {
             break;
 
         case BoxPositionEntry:
-            for(auto ite = boxPositionEntries_[id].begin() + 1; ite != boxPositionEntries_[id].end(); ite++)
-                delete *ite;
+            if (boxPositionEntries_.size() > 1) {
+                for(auto ite = boxPositionEntries_[id].begin() + 1; ite != boxPositionEntries_[id].end(); ite++)
+                    delete *ite;
+            }
             if( boxPositionEntries_[id].size() > 1)
                 boxPositionEntries_[id].resize(1);
             break;
