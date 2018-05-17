@@ -1014,3 +1014,14 @@ void Agent::leaveDeadend() {
         extractPlan(stateSol);
     }
 }
+
+void Agent::nukeHelpTasks() {
+    for (size_t i = 0; i < takenTasks_.size(); i++) {
+        if (takenTasks_[i].hEntryToPerform != nullptr) {
+            takenTasks_[i] = takenTasks_.back();
+            takenTasks_.pop_back();
+            i--;
+        }
+    }
+    ctIdx_ = -1;
+}

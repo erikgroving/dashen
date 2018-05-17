@@ -136,6 +136,7 @@ public: // Search methods
 
     Coord findBoxTargetWithBFS(int boxID);
     void leaveDeadend();
+    void nukeHelpTasks();
     bool isTaskSatisfied(SearchEngine::State* state, TaskStackElement& t);
 
 public: // Static public methods

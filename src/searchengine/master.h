@@ -44,6 +44,9 @@ public:
     /* Performs a sub-action on the internal state, used by updateCurrentState*/
     void updateStateWithNewMove(SearchEngine::Command, char);
 
+
+    bool allNoOps(SearchClient::JointAction ja);
+    void nukeHelp();
     void computeGoalPriorities();
     void clearCompleteUntakenHelpEntries();
     void revokeBlackboardEntries(SearchClient::JointAction);

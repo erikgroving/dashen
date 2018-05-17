@@ -46,13 +46,26 @@ void Master::conductSearch() {
     assignBoxesToGoals();
 
     int round = 0;
+    //unsigned int noopCounter = 0;
     while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
         //std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         clearCompleteUntakenHelpEntries();
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
         jointActions_.push_back(ja);
+/*
+        if (allNoOps(ja)) {
+            noopCounter++;
+        }
+        else {
+            noopCounter = 0;
+        }
 
+        if (noopCounter > 10) {
+            nukeHelp();
+            noopCounter = 0;
+        }
+*/
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
         //std::cerr << "Joint Action: " << ja.toActionString();
@@ -96,7 +109,13 @@ void Master::postBlackBoard() {
 SearchClient::JointAction Master::callForActions() {
     SearchClient::JointAction action = SearchClient::JointAction();
     action.initialize(agents_.size());
+    std::vector<int> randomOrder;
     for (size_t i = 0; i < agents_.size(); i++) {
+        randomOrder.push_back(i);
+    }
+
+    std::random_shuffle(randomOrder.begin(), randomOrder.end());
+    for (auto&i : randomOrder) {
         action.setAction(i, agents_[i].nextMove());
     }
 
@@ -361,5 +380,26 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         "\t\t" << entry_casted->getBlockingBoxId() << "\t\t\t" << 
                         (entry_casted->getProblemType() == Communication::HelpEntry::TakenCareOf ? "Yes" : "No") << std::endl;
         }
+    }
+}
+
+bool Master::allNoOps(SearchClient::JointAction ja) {
+    for (auto& cmd : ja.getData()) {
+        if (cmd.action() != NOOP) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void Master::nukeHelp() {
+    if (masterBlackboard_.getHelpEntries().size() > 0) {
+        for(auto* entry: masterBlackboard_.getHelpEntries()) {
+            Communication::HelpEntry* entry_casted = (Communication::HelpEntry*) entry;
+            entry_casted->setProblemType(Communication::HelpEntry::Done);
+        }
+    }
+    for (auto& a : agents_) {
+        a.nukeHelpTasks();
     }
 }
