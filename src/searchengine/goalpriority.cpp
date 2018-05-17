@@ -52,6 +52,14 @@ void SearchEngine::StrictOrdering::calculateStrictOrderings(SearchEngine::State 
             }
         }
     }
+    
+    // Clear all the fake walls that we put in the state
+    for (Coord c : fakeWalls) {
+        SearchEngine::State::walls[c.y][c.x] = false;
+    }
+    fakeWalls = std::vector<Coord>(); // remove the fake walls after calculating the strict orderings
+    fakeWallIds = std::unordered_map<Coord, int, Heur::DistanceOracle::CoordHash>();
+
 
     goalsUpdated = true;
     while (goalsUpdated) {
