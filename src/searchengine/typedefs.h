@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 
-enum Color { NOCOLOR, BLUE, RED, GREEN, CYAN, MAGENTA, ORANGE, PINK, YELLOW};
+enum Color { NOCOLOR = 0, BLUE = 1, RED = 2, GREEN = 3, CYAN = 4, MAGENTA = 5, ORANGE = 6, PINK = 7, YELLOW = 8};
 enum Direction { N, E, S, W, NONE};
 enum Action { MOVE, PUSH, PULL, NOOP };
 enum TaskType { NIL, CLEAR_BOX, CLEAR_SELF, CLEAR_BOX_AND_SELF, GOAL };

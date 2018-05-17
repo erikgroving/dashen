@@ -122,10 +122,30 @@ State Client::initState(std::istream &inputstream) {
     /* Sort agents so agent idx is correct */
     std::sort(agents.begin(), agents.end());
     std::sort(agentsDescription.begin(), agentsDescription.end());
+    
+    // Delete boxes that we can't move and replace with wall
+    std::vector<bool> colors (9, false);
+    for (const auto& a : agents) {
+        colors[a.getColor()] = true;
+    }
+
+    std::vector<Box> prunedBoxes = std::vector<Box>();
+    int pBoxId = 0;
+    for (auto& b : boxes) {
+        if (colors[b.color]) {
+            Box okBox = b;
+            okBox.id = pBoxId++;
+            prunedBoxes.push_back(okBox);
+        }
+        else {
+            State::walls[b.loc.y][b.loc.x] = true;
+        }
+    }
+
     State::numAgents = numAgents;
     State::goals = goals;
     state.setAgents(agentsDescription);
-    state.setBoxes(boxes);
+    state.setBoxes(prunedBoxes);
 
     resetJointAction();
 

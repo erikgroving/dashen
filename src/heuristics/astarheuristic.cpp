@@ -72,6 +72,14 @@ unsigned long BoxToTargetAStarHeuristic::f(const SearchEngine::State* state) con
     Coord target = getReferenceAgent()->getCurrentTask().clearBox.target;
     Coord boxLoc = state->getBoxes()[getReferenceAgent()->getCurrentTask().clearBox.boxToMoveID].loc;
 
+    Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
+
+    if(state->getAction().action() == PULL              &&(
+       SearchEngine::Master::deadends.isDeadend(agentLoc) ||
+       SearchEngine::Master::deadends.isDeadend(boxLoc) )  ) {
+        result += 3;
+    }
+
     result += DistanceOracle::fetchDistFromCoord(target, boxLoc);
     return result;
 }

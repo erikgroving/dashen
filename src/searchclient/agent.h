@@ -55,6 +55,7 @@ public:
     TaskStackElement getCurrentTask() { return takenTasks_[ctIdx_].task; }
 
     int getIndex() const { return num; }
+    Color getColor() const { return color; }
 
     void setBlackboard(Communication::Blackboard *blackboard) { blackboard_ = blackboard; }
     

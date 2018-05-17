@@ -108,9 +108,19 @@ void Agent::identifyBlockingObjects(const std::vector<SearchEngine::State* > &pa
             }
             // We can only help ourselves if we can reach the same colored box in question
             else {
-                ClearBox clearBoxTask = ClearBox(b.id, forbiddenCoords);
-                takenTasks_.push_back(TaskInfo(TaskStackElement(clearBoxTask), nullptr));
-                ctIdx_ = takenTasks_.size() - 1;
+               /* short bId = b.id;
+                // check if a clear goal is set yet for this box!
+                bool add = true;
+                for (const auto&t : takenTasks_) {
+                    if (t.task.type == CLEAR_BOX && t.task.clearBox.boxToMoveID == bId) {
+                        add = false;
+                    }
+                }
+                if (add) {*/
+                    ClearBox clearBoxTask = ClearBox(b.id, forbiddenCoords);
+                    takenTasks_.push_back(TaskInfo(TaskStackElement(clearBoxTask), nullptr));
+                    ctIdx_ = takenTasks_.size() - 1;
+                //}
             }
         }
         else if (agentAt(sharedState, c.x, c.y, &idx)) {
@@ -242,6 +252,7 @@ std::vector<SearchEngine::State *> Agent::searchClearBox(SearchEngine::Strategy 
     // This takes forever if we don't have a way of saying how far box is from a good spot. 
     // BFS for the target and do a move box to target heuristic
     searcher.setGoalStatePredicate([this, boxID](const SearchEngine::State *currentState){
+        //return currentState->getBoxes()[boxID].loc == this->getCurrentTask().clearBox.target;
         return isBoxNotOnForbiddenPath(currentState, boxID, this->takenTasks_[ctIdx_].task.clearBox.forbiddenPath);
     });
 
@@ -326,6 +337,7 @@ SearchEngine::Command Agent::nextMove() {
         ans = conductSubgoalSearch(&searchFailed);
         if(searchFailed) {
             identifyBlockingObjects(ans);
+            //std::rotate(takenTasks_.begin(), takenTasks_.begin() + 1, takenTasks_.end());
             if (SearchEngine::Master::deadends.isDeadend(sharedState->getAgents()[num].loc)) {
                 leaveDeadend();
                 return SearchEngine::Command();
@@ -719,6 +731,22 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
         });
         ans = searchBox(targBox, strat);
     }
+   /* else {
+        Coord target = findBoxTargetWithBFS(targBox.id);
+        if (target.x != -1 ) {
+            takenTasks_[ctIdx_].task.clearBox.target = target;
+            Strat::StrategyHeuristic<Heur::BoxToTargetAStarHeuristic> strat(this);
+            strat.linkBlackboard(blackboard_);
+            strat.setMaxIterations(1000);
+            strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
+                std::string errorDescription;
+                return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
+                                    state->getAction() ,state->getTimeStep(), errorDescription);
+            });
+            ans = searchClearBox(strat);
+        }
+    }*/
+    
     else {
         Strat::StrategyBFS strat;
         strat.linkBlackboard(blackboard_);
@@ -730,6 +758,8 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
         });
         ans = searchClearBox(strat); 
     }
+    
+
     if (ans.size() == 0) {
         *searchFailed = true;
         if(!agentNextToBox(sharedState, targBox, this)) {
@@ -739,6 +769,19 @@ std::vector<SearchEngine::State*> Agent::conductClearBoxSearch(bool* searchFaile
             ans = searchBox(targBox, strat, true);
         }
         else {
+           /* Coord target = findBoxTargetWithBFS(targBox.id);
+            if (target.x != -1 ) {
+                takenTasks_[ctIdx_].task.clearBox.target = target;
+                Strat::StrategyHeuristic<Heur::BoxToTargetAStarHeuristic> strat(this);
+                strat.linkBlackboard(blackboard_);
+                strat.setMaxIterations(1000);
+                strat.setAdditionalCheckPredicate([this](const SearchEngine::State* state) {
+                    std::string errorDescription;
+                    return positionFree(state->getAgents()[num].loc.x, state->getAgents()[num].loc.y, 
+                                        state->getAction() ,state->getTimeStep(), errorDescription);
+                });
+                ans = searchClearBox(strat);
+            }*/
             Strat::StrategyBFS strat;
             strat.linkBlackboard(nullptr);
             strat.setMaxIterations(1000);
@@ -814,6 +857,68 @@ bool Agent::isTaskSatisfied(SearchEngine::State* state, TaskStackElement& t) {
         return false; // Clear box and self tasks are always false because they split into
                         // two different tasks, clear box and then clear self. This should never be run
     }
+}
+
+Coord Agent::findBoxTargetWithBFS(int boxId) {
+    std::queue<Coord> q;
+    std::vector<std::vector<bool>> seen = std::vector<std::vector<bool>> (height(sharedState), std::vector<bool>());
+    for (size_t i = 0; i < height(sharedState); i++) {
+        seen[i] = std::vector<bool>(width(sharedState, i), false);
+    }
+
+    Coord currCoord = sharedState->getAgents()[boxId].loc;
+    q.push(currCoord);
+
+    bool foundATarget = false;
+    while (!q.empty()) {
+        currCoord = q.front();
+        q.pop();
+        std::vector< Coord > coords = {
+            Coord(currCoord.x - 1, currCoord.y), Coord(currCoord.x, currCoord.y + 1),
+            Coord(currCoord.x + 1, currCoord.y), Coord(currCoord.x, currCoord.y - 1)
+        };
+                
+        if (isCoordNotOnForbiddenPath(sharedState, currCoord, takenTasks_[ctIdx_].task.clearBox.forbiddenPath)) {
+            foundATarget = true;
+            break;
+        }
+
+        for (const Coord &c : coords) {
+            if (SearchEngine::Predicate::inBound(sharedState, c.x, c.y) &&
+                !SearchEngine::Predicate::wallAt(sharedState, c.x, c.y) &&
+                !seen[c.y][c.x] ){
+                seen[c.y][c.x] = true;
+                q.push(c);
+            }
+        }
+    }
+    
+    if (!foundATarget) {
+        return Coord();
+    }
+
+    // Go as deep as possible
+  /*  if (SearchEngine::Master::deadends.isDeadend(currCoord)) {
+        bool gotDeeper = true;
+        while (gotDeeper) {
+            gotDeeper = false;
+            std::vector< Coord > coords = {
+                Coord(currCoord.x - 1, currCoord.y), Coord(currCoord.x, currCoord.y + 1),
+                Coord(currCoord.x + 1, currCoord.y), Coord(currCoord.x, currCoord.y - 1)
+            };
+
+            for (const auto& c : coords) {
+                if (SearchEngine::Predicate::inBound(sharedState, c.x, c.y) &&
+                    !SearchEngine::Predicate::wallAt(sharedState, c.x, c.y) &&
+                    !seen[c.y][c.x]){
+                    currCoord = c;
+                    gotDeeper = true;
+                    seen[c.y][c.x] = true;
+                }
+            }
+        }        
+    }*/
+    return currCoord;   
 }
 
 void Agent::leaveDeadend() {
