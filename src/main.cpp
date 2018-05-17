@@ -16,7 +16,7 @@
 
 int main(int argc,  char **argv) {
 
-    std::cerr << "DASHEN Artificial Intelligence Tool for 02285- Artificial Intelligence and Multi-Agent System " << std::endl;
+    //std::cerr << "DASHEN Artificial Intelligence Tool for 02285- Artificial Intelligence and Multi-Agent System " << std::endl;
 
 
     SearchClient::Client searchClient;

@@ -109,9 +109,9 @@ void Master::conductSearch() {
         //std::cerr<<std::endl;
     }
 
-    std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl;
+    //std::cerr << "Sending solution. Length = " << jointActions_.size() << std::endl;
     // Send the solution
-    sendSolution();
+    //sendSolution();
 }
 
 /* This adds all the goal tiles from the initial state to the blackboard */
