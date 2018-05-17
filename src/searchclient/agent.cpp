@@ -31,6 +31,7 @@ using namespace SearchEngine::Predicate;
 
 SearchEngine::State *Agent::sharedState;
 unsigned int Agent::sharedTime = 0;
+std::vector<Goal> Agent::takenGoals = std::vector<Goal>();
 
 template<typename Out>
 void split(const std::string &s, char delim, Out result) {
@@ -390,6 +391,34 @@ bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const Sea
         }
     }
 
+    // Would satisfying this goal break map into separate regions
+    for (Goal& g : takenGoals) {
+        State::walls[g.loc.y][g.loc.x] = true;
+    }
+
+    Region reg(sharedState);
+    size_t numRegBefore = reg.numRegions_;
+    State::walls[entryGoal.loc.y][entryGoal.loc.x] = true;
+    reg = Region(sharedState);
+    size_t numRegAfter = reg.numRegions_;
+    State::walls[entryGoal.loc.y][entryGoal.loc.x] = false;
+
+    for (Goal& g : takenGoals) {
+        State::walls[g.loc.y][g.loc.x] = false;
+    }
+
+    if (numRegBefore != numRegAfter) {
+        for (Goal&g : State::goals) {
+            if (g.loc != entryGoal.loc) {
+                if (!reg.isInSameRegion(g.loc, sharedState->getBoxes()[g.assignedBoxID].loc)) {
+                   // std::cerr << "Goal " << entryGoal.letter << " would split goal " << 
+                   // g.letter << " from its goal\n";
+                    return false;
+                }
+            }
+        }
+    }
+  //  std::cerr << "Taking goal " << entryGoal.letter << std::endl;
     return true;
 }
     
@@ -482,7 +511,7 @@ Goal Agent::getGoalFromBlackboard() {
     SearchEngine::Predicate::goalAt(sharedState, selectedEntry->getLocation().x, selectedEntry->getLocation().y, &goalIndex);
 
     Goal &result = SearchEngine::State::goals[goalIndex];
-
+    takenGoals.push_back(result);
     TaskStackElement task = TaskStackElement(result);
     TaskInfo tInfo = TaskInfo(task, nullptr);
     takenTasks_.push_back(tInfo);

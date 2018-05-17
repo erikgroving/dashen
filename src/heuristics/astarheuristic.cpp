@@ -114,7 +114,7 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
     }
 
     if (state->getAction().action() == PULL && state->getParent()->getAction().action() != PULL) {
-        result += 1;
+        result += 3;
     }
 
     /* Find the box assigned to the goal */

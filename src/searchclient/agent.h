@@ -146,6 +146,7 @@ public: // Static public methods
     static void setSharedState(SearchEngine::State *sharedState);
     static void setSharedTime(unsigned int timeStep);
     static unsigned int sharedTime;
+    static std::vector<Goal> takenGoals;
     static SearchEngine::State *sharedState;
 
 private:
