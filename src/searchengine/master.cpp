@@ -45,27 +45,51 @@ void Master::conductSearch() {
     postBlackBoard();
     assignBoxesToGoals();
 
-    int round = 0;
-    //unsigned int noopCounter = 0;
-    while (!SearchEngine::Predicate::isGoalState(&masterState_) && round < 3000) {
+    //int round = 0;
+    unsigned int noopCounter = 0;
+    unsigned int nukeCounter = 0;
+    while (!SearchEngine::Predicate::isGoalState(&masterState_)) {
         //std::cerr << "\n------------ ROUND " << round++ << " ------------\n\n";
         clearCompleteUntakenHelpEntries();
         SearchClient::Agent::setSharedState(&masterState_);
         SearchClient::JointAction ja = callForActions();
-        jointActions_.push_back(ja);
-/*
         if (allNoOps(ja)) {
             noopCounter++;
+            nukeCounter++;
         }
         else {
             noopCounter = 0;
+            nukeCounter = 0;
+        }
+/*
+        if (noopCounter > 2) {
+            int randAct;
+            Command randomAction;
+            for (size_t i = 0; i < ja.getData().size(); i++) {
+                int tries = 0;
+                do {
+                    randAct = rand() % Command::possibleActions.size();
+                    randomAction = Command::possibleActions[randAct];
+                    tries++;
+                } while (!isActionValid(&masterState_, randomAction, i) && tries < 50);
+                if (tries == 50) {
+                    ja.setAction(i, SearchEngine::Command());
+                }
+                else {
+                    ja.setAction(i, randomAction);
+                }
+            }
+        }*/
+
+        jointActions_.push_back(ja);
+
+
+
+        if (nukeCounter > 2) {
+            nukeHelp();
+            nukeCounter = 0;
         }
 
-        if (noopCounter > 10) {
-            nukeHelp();
-            noopCounter = 0;
-        }
-*/
         prevMasterState_ = masterState_;
         updateCurrentState(&ja);
         //std::cerr << "Joint Action: " << ja.toActionString();
@@ -350,7 +374,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
         }
     }
     */
-
+/*
     std::cerr << "\n---------Box Blackboard--------\n";
     std::cerr << "Timestep\t\tPosition\t\tBox\t\tLetter\n";
     for (size_t boxID = 0; boxID < masterState_.getBoxes().size(); boxID++) {
@@ -362,7 +386,7 @@ void Master::printBlackboard(Communication::Blackboard* b) {
                         ")\t\t\t" << entry_casted->getBoxId() << "\t\t" << masterState_.getBoxes()[entry_casted->getBoxId()].letter << std::endl;
         }
     }
-
+*/
     std::cerr << "\n---------Help Blackboard--------\n";
     std::cerr << "Timestep\t\tRequestor\t\tType\t\tBlocking ID\t\tTaken?\n";
     auto helpEntries = b->getHelpEntries();

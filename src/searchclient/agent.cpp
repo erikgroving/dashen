@@ -418,7 +418,6 @@ bool Agent::isEntryDoable(const Communication::BlackboardEntry *entry, const Sea
             }
         }
     }
-  //  std::cerr << "Taking goal " << entryGoal.letter << std::endl;
     return true;
 }
     
