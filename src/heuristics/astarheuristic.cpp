@@ -106,15 +106,18 @@ unsigned long BoxToGoalAStarHeuristic::f(const SearchEngine::State* state) const
     Coord boxLoc = state->getBoxes()[searchGoal.assignedBoxID].loc;
     Coord agentLoc = state->getAgents()[getReferenceAgent()->getIndex()].loc;
 
+    Coord parentAgent = state->getParent()->getAgents()[getReferenceAgent()->getIndex()].loc;
+
     if(SearchEngine::Master::deadends.isDeadend(searchGoal.loc) &&
        state->getAction().action() == PULL              &&
        SearchEngine::Master::deadends.isDeadend(agentLoc) &&
+       !SearchEngine::Master::deadends.isDeadend(parentAgent) &&
        SearchEngine::Master::deadends.isDeadend(boxLoc)   ) {
-        result += 3;
+        result += 5;
     }
 
     if (state->getAction().action() == PULL && state->getParent()->getAction().action() != PULL) {
-        result += 3;
+        result += 2;
     }
 
     /* Find the box assigned to the goal */
