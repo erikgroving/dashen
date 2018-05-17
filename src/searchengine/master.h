@@ -7,6 +7,15 @@
 #include <vector>
 
 namespace SearchEngine {
+
+struct SortPrio{
+    int idx;
+    unsigned int priority;
+    bool operator<(const SortPrio &src) {
+        return priority < src.priority;
+    }
+};
+
 class Master {
 
 public: // Constructors
@@ -42,6 +51,7 @@ public:
 
 private:
     std::vector<SearchClient::JointAction> jointActions_;
+    std::vector<unsigned int> goalPriorities_;
     State masterState_;
     State prevMasterState_;
     std::vector<SearchClient::Agent> agents_;

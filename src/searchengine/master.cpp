@@ -106,7 +106,23 @@ SearchClient::JointAction Master::callForActions() {
 void Master::assignBoxesToGoals() {
     SearchClient::Agent::setSharedState(&masterState_);
     Box closestBox;
-    for (Goal& g : SearchEngine::State::goals) {
+
+    std::vector<SortPrio> prios;
+
+    for (size_t i = 0; i < SearchEngine::State::goals.size(); i++) {
+        SortPrio tmp;
+        tmp.idx = i;
+        tmp.priority = goalPriorities_[i];
+        prios.push_back(tmp);
+    }
+
+    std::sort(prios.begin(), prios.end());
+
+
+
+
+    for (SortPrio t : prios) {
+        Goal& g = State::goals[t.idx];
         unsigned long minDist = ULONG_MAX;
         for (const Box &b : masterState_.getBoxes()) {
             if (!State::takenBoxes[b.id] && g.letter == b.letter) {
@@ -246,7 +262,7 @@ void Master::updateStateWithNewMove(SearchEngine::Command cmd, char AgentID) {
 
 void Master::computeGoalPriorities()
 {
-    auto goalPriorities = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
+    goalPriorities_ = SearchEngine::GoalPriorityComputation::computeAllGoalPriorities(&masterState_);
     //std::cerr << "goalPriorities: " << std::endl;
 /*    for (Goal currentGoal : masterState_.goals) {
         //std::cerr << currentGoal.loc.x << " " << currentGoal.loc.y;
@@ -261,7 +277,7 @@ void Master::computeGoalPriorities()
     for(Communication::BlackboardEntry *goalEntry: masterBlackboard_.getGoalEntries()) {
         int goalIndex = -1;
         SearchEngine::Predicate::goalAt(&masterState_, goalEntry->getLocation().x, goalEntry->getLocation().y, &goalIndex);
-        static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities[goalIndex]);
+        static_cast<Communication::GlobalGoalEntry*>(goalEntry)->setPriority(goalPriorities_[goalIndex]);
         //goalEntry->setPriority(SearchEngine::GoalPriorityComputation::computeGoalPriority(&masterState_, SearchEngine::State::goals[goalIndex]) );
 /*
         char letter;
