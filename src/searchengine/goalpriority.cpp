@@ -16,113 +16,58 @@ void SearchEngine::StrictOrdering::calculateStrictOrderings(SearchEngine::State 
     std::vector<Coord> fakeWalls; // remove the fake walls after calculating the strict orderings
     std::unordered_map<Coord, int, Heur::DistanceOracle::CoordHash> fakeWallIds = 
         std::unordered_map<Coord, int, Heur::DistanceOracle::CoordHash>();
+    
+    std::vector<std::vector<bool>> seen = std::vector<std::vector<bool>> (height(&state), std::vector<bool>());
+    for (size_t i = 0; i < height(&state); i++) {
+        seen[i] = std::vector<bool>(width(&state, i), false);
+    }
 
     for (size_t i = 0; i < SearchEngine::State::goals.size(); i++) {
         strictOrderings.push_back(std::vector<int>());
     }
 
-    bool goalsUpdated = true;
-    while (goalsUpdated) {
-        goalsUpdated = false;
-        for (size_t k = 0; k < SearchEngine::State::goals.size(); k++) {
-            Coord x = SearchEngine::State::goals[k].loc;
-            size_t j = x.x;
-            size_t i = x.y;
+    std::vector<Coord> deadendEnds = std::vector<Coord>();
+    for (size_t i = 0; i < SearchEngine::Predicate::height(&state); i++) {
+        for (size_t j = 0; j < SearchEngine::Predicate::width(&state, i); j++) {
             if (!wallAt(&state, j, i) && getSurroundingWalls(state, Coord(j, i)) == 3) {
-                goalsUpdated = true;
-                fakeWalls.push_back(Coord(j, i));
-                SearchEngine::State::walls[i][j] = true;
-                int gIdx = -1;
-                if (goalAt(&state, j, i, &gIdx)) {
-                    fakeWallIds.insert(std::make_pair(Coord(j, i), gIdx));
-                    // Check if there are fake wall goals
-                    Coord north = Coord(j, i - 1);
-                    Coord east = Coord(j + 1, i);
-                    Coord south = Coord(j, i + 1);
-                    Coord west = Coord(j - 1, i);
-                    vector<Coord> dirs = {north, east, south, west};
-                    for (Coord c : dirs) {
-                        if (wallAt(&state, c.x, c.y)) {
-                            if (fakeWallIds.find(c) != fakeWallIds.end()) {
-                                strictOrderings[gIdx].push_back(fakeWallIds[c]);
-                            }
-                        }
-                    }
-                } 
+                deadendEnds.push_back(Coord(j, i));
             }
         }
     }
-    
-    // Clear all the fake walls that we put in the state
-    for (Coord c : fakeWalls) {
-        SearchEngine::State::walls[c.y][c.x] = false;
-    }
-    fakeWalls = std::vector<Coord>(); // remove the fake walls after calculating the strict orderings
-    fakeWallIds = std::unordered_map<Coord, int, Heur::DistanceOracle::CoordHash>();
 
-
-    goalsUpdated = true;
-    while (goalsUpdated) {
-        goalsUpdated = false;
-        for (size_t i = 0; i < height(&state); i++) {
-            for (size_t j = 0; j < width(&state, i); j++) {
-                if (!wallAt(&state, j, i) && getSurroundingWalls(state, Coord(j, i)) == 3) {
-                    goalsUpdated = true;
-                    fakeWalls.push_back(Coord(j, i));
-                    SearchEngine::State::walls[i][j] = true;
-                    
-                    int gIdx = -1;
-                    if (goalAt(&state, j, i, &gIdx)) {
-                        fakeWallIds.insert(std::make_pair(Coord(j, i), gIdx));
-                        // Check if there are fake wall goals
-                        Coord north = Coord(j, i - 1);
-                        Coord east = Coord(j + 1, i);
-                        Coord south = Coord(j, i + 1);
-                        Coord west = Coord(j - 1, i);
-                        vector<Coord> dirs = {north, east, south, west};
-                        for (Coord c : dirs) {
-                            if (wallAt(&state, c.x, c.y)) {
-                                if (fakeWallIds.find(c) != fakeWallIds.end()) {
-                                    strictOrderings[gIdx].push_back(fakeWallIds[c]);
-                                }
-                            }
-                        }
-                    } 
-                    // Insert walls until we hit a goal or no more 3 wall (Trim them)
-                    bool insertedFakeWall; 
-                    Coord currCoord = Coord(j, i);
-                    do {
-                        insertedFakeWall = false;
-                        // Check surrounding coordinates to see if there is a new 3 waller 
-                        Coord north = Coord(currCoord.x, currCoord.y - 1);
-                        Coord east = Coord(currCoord.x + 1, currCoord.y);
-                        Coord south = Coord(currCoord.x, currCoord.y + 1);
-                        Coord west = Coord(currCoord.x - 1, currCoord.y);
-                        vector<Coord> dirs = {north, east, south, west};
-                        for (Coord c : dirs) {
-                            if (!wallAt(&state, c.x, c.y) && getSurroundingWalls(state, c) == 3) {
-                                if (!goalAt(&state, c.x, c.y)) {
-                                    if (fakeWallIds.find(currCoord) != fakeWallIds.end()) {
-                                        fakeWallIds.insert(std::make_pair(c, fakeWallIds[currCoord]));
-                                    }
-                                    insertedFakeWall = true;
-                                    fakeWalls.push_back(c);
-                                    SearchEngine::State::walls[c.y][c.x] = true;
-                                    currCoord = c;
-                                    break;
-                                }
-                            }
-                        }
-                    } while(insertedFakeWall);
+    for (const Coord& c : deadendEnds) {
+        std::queue<Coord> q = std::queue<Coord>();
+        q.push(c);
+        int prevGoalID = -1;
+        while (!q.empty()) {
+            Coord currCoord = q.front();
+            seen[currCoord.y][currCoord.x] = true;
+            q.pop();
+            int gIdx;
+            if (goalAt(&state, currCoord.x, currCoord.y, &gIdx)) {
+                if (prevGoalID != -1) {
+                    strictOrderings[gIdx].push_back(prevGoalID);
+                }
+                prevGoalID = gIdx;
+            }
+            
+            Coord north = Coord(currCoord.x, currCoord.y - 1);
+            Coord east = Coord(currCoord.x + 1, currCoord.y);
+            Coord south = Coord(currCoord.x, currCoord.y + 1);
+            Coord west = Coord(currCoord.x - 1, currCoord.y);
+            vector<Coord> dirs = {north, east, south, west};
+            for (Coord cc : dirs) {
+                if (inBound(&state, cc.x, cc.y) &&
+                    getSurroundingWalls(state, cc) >= 2 &&
+                    !seen[cc.y][cc.x]) {
+                    seen[cc.y][cc.x] = true;
+                    q.push(cc);
                 }
             }
-        }
-    }
 
-    // Clear all the fake walls that we put in the state
-    for (Coord c : fakeWalls) {
-        SearchEngine::State::walls[c.y][c.x] = false;
-    }
+
+        }
+	}
 
     return;
 }

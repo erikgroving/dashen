@@ -118,15 +118,23 @@ typedef struct ClearBoxSelf {
 
 typedef struct ClearBox {
     int boxToMoveID;
+    int origGoalBoxID;
     Coord target;
     std::vector<Coord> forbiddenPath;
     ClearBox(){ target = Coord(); forbiddenPath = std::vector<Coord>();}
     ClearBox(const ClearBox& src): 
         boxToMoveID(src.boxToMoveID),
+        origGoalBoxID(src.origGoalBoxID),
         target(src.target),
         forbiddenPath(src.forbiddenPath) {}
+    ClearBox(int bID, int ogBid, std::vector<Coord> path) {
+        boxToMoveID = bID;
+        origGoalBoxID = ogBid;
+        forbiddenPath = path;
+    }
     ClearBox(int bID, std::vector<Coord> path) {
         boxToMoveID = bID;
+        origGoalBoxID = -1;
         forbiddenPath = path;
     }
 
